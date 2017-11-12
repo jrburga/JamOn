@@ -1,4 +1,5 @@
 from common.core import BaseWidget
+from game import Game
 
 class MainWidget(BaseWidget):
 	def __init__(self):
@@ -22,3 +23,6 @@ class MainWidget(BaseWidget):
 
 	def on_update(self):
 		pass
+
+if __name__ == '__main__':
+	pass
