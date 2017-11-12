@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
 
-from game import Scene
+from scene import Scene, GameObject
 
-menu = Scene()
+scene = Scene()
