@@ -2,6 +2,7 @@ from common.core import BaseWidget
 
 class MainWidget(BaseWidget):
 	def __init__(self):
+		super(MainWidget, self).__init__()
 		pass
 
 	def on_key_down(self, keycode, modifiers):

@@ -1,14 +1,8 @@
-import traceback
-from kivy.app import App
-
-from jamon.main import widget
-
-class MainApp(App):
-	def build(self):
-		return widget()
+from jamon.common.core import run
+from jamon.main import MainWidget
 
 if __name__ == '__main__':
-	MainApp().run()
+	run(MainWidget)
 
 
 
