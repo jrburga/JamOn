@@ -1,5 +1,4 @@
-from jamon.common.core import run
-from jamon.main import MainWidget
+from jamon.main import MainWidget, run
 
 if __name__ == '__main__':
 	run(MainWidget)
