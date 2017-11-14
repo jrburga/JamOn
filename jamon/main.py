@@ -25,24 +25,24 @@ class MainWidget(BaseWidget):
 		self.canvas.add(scene._transform)
 
 	def on_key_down(self, keycode, modifiers):
-		self.scene.add_event('on_key_down', 
+		self.scene.trigger_event('on_key_down', 
 								  keycode=keycode, 
 								  modifiers=modifiers)
 
 	def on_key_up(self, keycode):
-		self.scene.add_event('on_key_up',
+		self.scene.trigger_event('on_key_up',
 								 keycode=keycode)
 		
 	def on_touch_down(self, touch):
-		self.scene.add_event('on_touch_down',
+		self.scene.trigger_event('on_touch_down',
 								  touch=touch)
 
 	def on_touch_up(self, touch):
-		self.scene.add_event('on_touch_up',
+		self.scene.trigger_event('on_touch_up',
 								  touch=touch)
 
 	def on_touch_move(self, touch):
-		self.scene.add_event('on_touch_move',
+		self.scene.trigger_event('on_touch_move',
 								  touch=touch)
 
 	def on_update(self):
