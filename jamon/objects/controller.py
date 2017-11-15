@@ -3,9 +3,9 @@ from ..game import GameObject
 from collections import defaultdict
 
 class Controller(GameObject):
-	def __init__(self):
+	def __init__(self, keys):
 		super(Controller, self).__init__()
-		self.keys = defaultdict(lambda : False)
+		self.keys = {key : False for key in keys}
 
 	def get_pressed(self):
 		return [i for i in self.inputs if self.inputs[i] == True]
@@ -19,6 +19,6 @@ class Keyboard(Controller):
 
 	def on_key_down(self, event):
 		self.keys[event.keycode[0]] = True
-		
+
 	def on_key_up(self, event):
 		self.keys[event.keycode[0]] = False

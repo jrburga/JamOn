@@ -11,5 +11,7 @@ class Player(GameObject):
 		self.track = Track
 		self.controller = Keyboard
 
+		self.time = 0
+
 	def on_update(self):
 		pass
