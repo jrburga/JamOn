@@ -1,16 +1,16 @@
-import sys
-sys.path.append('..')
 
-from game import Scene, GameObject
-from graphics.graphic import *
+from ..game import Scene, GameObject
+from ..components.graphics import *
 # from kivy.graphics import Ellipse
-from common.gfxutil import CEllipse, Color
+from ..common.gfxutil import CEllipse, Color
+
+from ..objects.controller import Keyboard
 
 scene = Scene()
 
 def print_event(scene, event):
 	print 'event was triggered'
-	print scene, event
+	print scene, event.keycode
 
 def on_click(go, event):
 	print go, event
@@ -30,29 +30,32 @@ class Button(GameObject):
 	def on_click(self, event):
 		print event.touch.pos
 
-scene.add_event_listener('on_key_down', print_event)
+# scene.add_event_listener('on_key_down', print_event)
 
 circle = GameObject()
-circle.position = (100, 100)
-circle.rotation = 90
-circle.add_graphic(CircleGraphic(100, (1, 1, 1)))
+sprite = CircleSprite(100, (1, 0, 0))
+sprite.center = (0, 0)
+circle.add_graphic(sprite)
 
 circle2 = GameObject()
 circle2.scale = 0.5
-circle2.add_graphic(Color(rgb=(1, 0, 0)))
-circle2.add_graphic(CEllipse())
+sprite = CircleSprite(100, (0, 0, 1))
+sprite.center = (0, 0)
+circle2.add_graphic(sprite)
 
 circle3 = GameObject()
 circle3.scale = 0.5
-circle3.add_graphic(Color(rgb=(0, 1, 0)))
-circle3.add_graphic(CEllipse())
+sprite = CircleSprite(100, (0, 1, 0))
+sprite.center = (0, 0)
+circle3.add_graphic(sprite)
 
 
 circle.add_game_object(circle2)
 circle2.add_game_object(circle3)
 
-button = Button(CircleGraphic(100, (1, 1, 1)))
+# button = Button(CircleGraphic(100, (1, 1, 1)))
 
-
+circle.position = (100, 100)
 scene.add_game_object(circle)
-scene.add_game_object(button)
+scene.add_game_object(Keyboard())
+# scene.add_game_object(button)

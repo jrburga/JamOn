@@ -1,8 +1,8 @@
 from common.mixer import Mixer
 
-from kivy.graphics.instructions import InstructionGroup
-from kivy.graphics import Scale, Rotate, Translate
-
+from kivy.clock import Clock as kivyClock
+from kivy.core.window import Window
+from components.graphics import Graphics, AnimGroup
 from collections import deque, defaultdict
 
 class Event(object):
@@ -26,25 +26,13 @@ class Game(object):
 	def scene(self):
 		return self._scene
 
-class Transform(InstructionGroup):
-	def __init__(self):
-		super(Transform, self).__init__()
-		
-		self.rotation = Rotate()
-		self.position = Translate()
-		self.scale = Scale()
-
-		self.add(self.position)
-		self.add(self.rotation)
-		self.add(self.scale)
-
 class GameObject(object):
 	'''
 	Game Objects can contain each other 
 	(like HTML divs, or something)
 	'''
 	def __init__(self):
-		self._transform = Transform()
+		self._graphics = Graphics()
 		self._mixer = Mixer()
 		self._parent = None
 		self._game_objects = set()
@@ -52,38 +40,41 @@ class GameObject(object):
 
 	@property
 	def position(self):
-		return self._transform.position
+		return self._graphics.position
 
 	@position.setter
 	def position(self, new_pos):
-		self._transform.position.x = new_pos[0]
-		self._transform.position.y = new_pos[1]
+		self._graphics.position.x = new_pos[0]
+		self._graphics.position.y = new_pos[1]
 
 	@property
 	def rotation(self):
-		return self._transform.rotation
+		return self._graphics.rotation
 
 	@rotation.setter
 	def rotation(self, new_rotation):
-		self._transform.rotation.angle = new_rotation
+		self._graphics.rotation.angle = new_rotation
 
 	@property
 	def scale(self):
-		return self._transform.scale
+		return self._graphics.scale
 
 	@scale.setter
 	def scale(self, new_scale):
-		self._transform.scale.x = new_scale
-		self._transform.scale.y = new_scale
+		self._graphics.scale.x = new_scale
+		self._graphics.scale.y = new_scale
 
 	def add_graphic(self, graphic):
-		self._transform.add(graphic)
+		self._graphics.add(graphic)
+
+	def add_generator(self, generator):
+		self._mixer.add(generator)
 
 	def add_game_object(self, game_object):
 		assert game_object._parent == None, 'game object already has parent'
 		game_object._parent = self
 		self._game_objects.add(game_object)
-		self._transform.add(game_object._transform)
+		self._graphics.add(game_object._graphics)
 		self._mixer.add(game_object._mixer)
 
 	def remove_game_object(self, game_object):
@@ -101,6 +92,9 @@ class GameObject(object):
 		self._parent.trigger_event(event_type, **kwargs)
 
 	def _handle_event(self, event):
+		if hasattr(self, event.type):
+			getattr(self, event.type)(event)
+
 		for callback in self._event_listeners[event.type]:
 			callback(self, event)
 
@@ -109,6 +103,8 @@ class GameObject(object):
 
 	def _on_update(self):
 		self.on_update()
+		dt = kivyClock.frametime
+		self._graphics.on_update(dt)
 		for go in self._game_objects:
 			go._on_update()
 
@@ -127,7 +123,7 @@ class Scene(GameObject):
 		while self._events:
 			self._handle_event(self._events.pop())
 		super(Scene, self)._on_update()
-
+		
 	def on_update(self):
 		pass
 

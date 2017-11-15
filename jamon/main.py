@@ -1,9 +1,7 @@
 from common.core import *
 from common.audio import Audio
-from kivy.uix.button import Button
 
 from game import Game
-
 from scenes import menu
 
 class MainWidget(BaseWidget):
@@ -12,17 +10,14 @@ class MainWidget(BaseWidget):
 		self.audio = Audio(2)
 
 		self.scene = menu.scene
-
 		self.set_scene(self.scene)
-
-
 
 	def set_scene(self, scene):
 		if self.scene:
-			self.canvas.remove(self.scene._transform)
+			self.canvas.remove(self.scene._graphics)
 		self.scene = scene
 		self.audio.set_generator(scene._mixer)
-		self.canvas.add(scene._transform)
+		self.canvas.add(scene._graphics)
 
 	def on_key_down(self, keycode, modifiers):
 		self.scene.trigger_event('on_key_down', 
@@ -48,7 +43,3 @@ class MainWidget(BaseWidget):
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
-
-
-if __name__ == '__main__':
-	run(MainWidget)
