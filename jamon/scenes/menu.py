@@ -49,10 +49,6 @@ sprite = CircleSprite(100, (0, 1, 0))
 sprite.center = (0, 0)
 circle3.add_graphic(sprite)
 
-
-circle.add_game_object(circle2)
-circle2.add_game_object(circle3)
-
 button = Button(RectSprite((100, 100), (1, 1, 1)))
 print button.position.x
 
