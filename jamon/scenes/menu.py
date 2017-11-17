@@ -43,12 +43,9 @@ sprite.center = (0, 0)
 inner.add_graphic(sprite)
 circle.add_game_object(inner)
 
-circle.position = (100, 100)
+circle.position = (200, 200)
 
-circle2 = GameObject()
-sprite = CircleSprite(10, (0, 1, 0))
-sprite.center = (0, 0)
-circle2.add_graphic(sprite)
+button = Button(RectSprite((100, 100), (1, 1, 1)))
 
 scene.add_game_object(circle)
-scene.add_game_object(circle2)
+scene.add_game_object(button)

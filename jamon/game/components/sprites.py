@@ -2,28 +2,30 @@ from graphics import *
 from kivy.core.window import Window
 
 gem_texture = Ellipse()
-track_width = 100
+track_width = 500
+lane_width = 50
 now_bar_width = 10
 track_size = (track_width, Window.height)
+lane_size = (lane_width, Window.height)
 now_bar_size = (track_width, now_bar_width)
 
 track_color = (.75, .75, .75)
 now_bar_color = (0, 0, 0)
+lane_color = (1, 1, 1)
 # gem_texture = Image('path/to/image.png').texture
 
 class GemSprite(Sprite):
 	def __init__(self, color):
 		super(GemSprite, self).__init__(gem_texture, color)
-
-	def on_update(self, dt):
-		return super(GemSprite, self).on_update(dt) and !self.dead
-
-	def kill(self):
-		self.dead = True
+		self.center = (0, 0)
 
 class TrackSprite(RectSprite):
 	def __init__(self):
 		super(TrackSprite, self).__init__(track_size, track_color)
+
+class LaneSprite(RectSprite):
+	def __init__(self):
+		super(LaneSprite, self).__init__(lane_size, lane_color)
 
 class NowBarSprite(RectSprite):
 	def __init__(self):

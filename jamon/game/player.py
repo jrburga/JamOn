@@ -8,7 +8,7 @@ class Player(GameObject):
 	def __init__(self):
 		super(Player, self).__init__()
 		self.instrument = Instrument
-		self.track = Track
+		self.track = Track()
 		self.controller = Keyboard
 
 		self.time = 0

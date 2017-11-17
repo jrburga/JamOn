@@ -1,6 +1,21 @@
 from kivy.graphics.instructions import InstructionGroup
+from kivy.graphics import PushMatrix, PopMatrix
+from kivy.graphics import Scale, Rotate, Translate
 from kivy.graphics import Ellipse, Rectangle, Color
 from kivy.core.image import Image
+
+class Transform(InstructionGroup):
+	def __init__(self, graphics):
+		super(Transform, self).__init__()
+		self.position = Translate()
+		self.rotation = Rotate()
+		self.scale = Scale()
+		self.add(PushMatrix())
+		self.add(self.position)
+		self.add(self.rotation)
+		self.add(self.scale)
+		self.add(graphics)
+		self.add(PopMatrix())
 
 class Graphics(InstructionGroup):
 	def __init__(self):

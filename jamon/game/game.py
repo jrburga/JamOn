@@ -1,24 +1,8 @@
 from common.mixer import Mixer
-from components.graphics import Graphics
+from components.graphics import Graphics, Transform
 
 from kivy.clock import Clock as kivyClock
-from kivy.graphics.instructions import InstructionGroup
-from kivy.graphics import PushMatrix, PopMatrix
-from kivy.graphics import Scale, Rotate, Translate
 from collections import deque, defaultdict
-
-class Transform(InstructionGroup):
-	def __init__(self, graphics):
-		super(Transform, self).__init__()
-		self.position = Translate()
-		self.rotation = Rotate()
-		self.scale = Scale()
-		self.add(PushMatrix())
-		self.add(self.position)
-		self.add(self.rotation)
-		self.add(self.scale)
-		self.add(graphics)
-		self.add(PopMatrix())
 
 
 class Event(object):
@@ -56,7 +40,6 @@ class GameObject(object):
 		self._parent = None
 		self._game_objects = set()
 		self._event_listeners = defaultdict(lambda: [])
-
 
 	@property
 	def position(self):
