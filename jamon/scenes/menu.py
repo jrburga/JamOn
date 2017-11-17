@@ -37,23 +37,18 @@ sprite = CircleSprite(100, (1, 0, 0))
 sprite.center = (0, 0)
 circle.add_graphic(sprite)
 
+inner = GameObject()
+sprite = CircleSprite(50, (0, 1, 0))
+sprite.center = (0, 0)
+inner.add_graphic(sprite)
+circle.add_game_object(inner)
+
+circle.position = (100, 100)
+
 circle2 = GameObject()
-circle2.scale = 0.5
-sprite = CircleSprite(100, (0, 0, 1))
+sprite = CircleSprite(10, (0, 1, 0))
 sprite.center = (0, 0)
 circle2.add_graphic(sprite)
 
-circle3 = GameObject()
-circle3.scale = 0.5
-sprite = CircleSprite(100, (0, 1, 0))
-sprite.center = (0, 0)
-circle3.add_graphic(sprite)
-
-button = Button(RectSprite((100, 100), (1, 1, 1)))
-print button.position.x
-
-circle.position = (50, 50)
-button.sprite.center = (0, 0)
-# scene.add_game_object(circle)
-scene.add_game_object(button)
-# scene.add_game_object(Keyboard())
+scene.add_game_object(circle)
+scene.add_game_object(circle2)

@@ -1,22 +1,19 @@
 from kivy.graphics.instructions import InstructionGroup
-from kivy.graphics import Ellipse, Rectangle, Color, Scale, Rotate, Translate
+from kivy.graphics import Ellipse, Rectangle, Color
 from kivy.core.image import Image
 
 class Graphics(InstructionGroup):
 	def __init__(self):
 		super(Graphics, self).__init__()
-		self.rotation = Rotate()
-		self.position = Translate()
-		self.scale = Scale()
 		self._objects = set()
-
-		self.add(self.position)
-		self.add(self.rotation)
-		self.add(self.scale)
 
 	def add(self, sprite):
 		super(Graphics, self).add(sprite)
 		self._objects.add(sprite)
+
+	def remove(self, sprite):
+		super(Graphics, self).remove(sprite)
+		self._objects.remove(sprite)
 
 	def on_update(self, dt):
 		kill_list = set()
