@@ -2,7 +2,7 @@
 from jamon.game.game import Scene, GameObject
 from jamon.game.components.graphics import *
 
-from jamon.game.controller import Keyboard
+from jamon.game.player import Player
 
 scene = Scene('menu', start=True)
 

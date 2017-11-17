@@ -78,6 +78,10 @@ class GameObject(object):
 	def remove_generator(self, generator):
 		self._mixer.remove(generator)
 
+	def add(self, *game_objects):
+		for go in game_objects:
+			self.add_game_object(go)
+
 	def add_game_object(self, game_object):
 		# self.add_widget(game_object)
 		assert game_object._parent == None, 'game object already has parent'

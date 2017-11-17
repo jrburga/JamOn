@@ -1,8 +1,6 @@
 from jamon.game.game import Scene, GameObject
-from jamon.game.track import Gem
+from jamon.game.player import Player
 
 scene = Scene('practice')
 
-gem = Gem((1, 0, 0))
-
-scene.add_game_object(gem)
+scene.add_game_object(Player())
