@@ -1,7 +1,7 @@
 from game.common.core import *
 from game.common.audio import Audio
 
-from . import scenes
+from scenes import scenes
 
 class MainWidget(BaseWidget):
 	def __init__(self):
