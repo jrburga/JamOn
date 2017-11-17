@@ -1,17 +1,31 @@
-from common.core import BaseWidget
-from common.audio import Audio
+from game.common.core import *
+from game.common.audio import Audio
 
-from scene import Scene
+from scenes import scenes
 
 class MainWidget(BaseWidget):
 	def __init__(self):
 		super(MainWidget, self).__init__()
 		self.audio = Audio(2)
-		self.scene = Scene()
 
-		self.audio.set_generator(self.scene.mixer)
-		self.canvas.add(self.scene.graphics)
-		
+		self.scenes = {scene.name: scene for scene in scenes}
+		self.scene = None
+		for scene in scenes:
+			if scene.is_start():
+				self.set_scene(scene)
+				break
+		else:
+			self.set_scene[scenes[0]]
+
+	def set_scene(self, scene):
+		print 'changing scene'
+		if self.scene:
+			print 'removing graphics'
+			self.canvas.remove(self.scene._graphics)
+		self.scene = scene
+		self.audio.set_generator(scene._mixer)
+		self.canvas.add(scene._graphics)
+
 	def on_key_down(self, keycode, modifiers):
 		self.scene.trigger_event('on_key_down', 
 								  keycode=keycode, 
@@ -34,9 +48,7 @@ class MainWidget(BaseWidget):
 								  touch=touch)
 
 	def on_update(self):
-		self.scene.on_update()
+		self.scene._on_update()
 		self.audio.on_update()
-
-
-if __name__ == '__main__':
-	pass
+		if self.scene.change_scene():
+			self.set_scene(self.scenes[self.scene.next_scene()])

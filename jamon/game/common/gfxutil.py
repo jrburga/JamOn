@@ -36,6 +36,8 @@ class CEllipse(Ellipse):
         super(CEllipse, self).__init__(**kwargs)
         if kwargs.has_key('cpos'):
             self.cpos = kwargs['cpos']
+        else:
+            self.cpos = (0, 0)
 
         if kwargs.has_key('csize'):
             self.csize = kwargs['csize']
