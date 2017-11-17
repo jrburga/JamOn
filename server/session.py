@@ -2,6 +2,7 @@ import socket
 import sys
 from thread import *
 import numpy as np
+import json
 
 LOCAL_HOST  = '127.0.0.1'
 PORT        = 21385
@@ -103,12 +104,16 @@ class Host(ServerObject):
 
 
     def send_to_guests(self, msg):
+
+        if isinstance(msg, basestring):
+            for band_member in self.band_members:
+                band_member.conn.send(msg)
+            return
+        msg_json = json.dumps(msg)
         for band_member in self.band_members:
-            band_member.conn.send(msg)
+            band_member.conn.send(msg_json)
 
-        raise NotImplementedError
-
-    def msg_received(self, data, sender):
+    def msg_received(self, msg, sender):
         """
         data (str): The data in the message
         sender (BandMember): The sender of the message
@@ -116,8 +121,13 @@ class Host(ServerObject):
         # Make sure to check and see if this is the first message 
         # from the new member. If so, fill in their info in the band_member
         # dict
-        if data.strip() == "Band Formed":
-            self.stop_searching()
+        try:
+            msg_data = json.loads(msg)
+            # TODO: Act on the message
+        except Exception as e:
+            # Data is a string
+            if data.strip() == "Band Formed":
+                self.stop_searching()
 
 
 class Guest(ServerObject):
