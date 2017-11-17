@@ -18,9 +18,7 @@ class MainWidget(BaseWidget):
 			self.set_scene[scenes[0]]
 
 	def set_scene(self, scene):
-		print 'changing scene'
 		if self.scene:
-			print 'removing graphics'
 			self.canvas.remove(self.scene._graphics)
 		self.scene = scene
 		self.audio.set_generator(scene._mixer)
