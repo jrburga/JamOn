@@ -45,6 +45,10 @@ class Track(GameObject):
 			gems += lane.gems
 		return gems
 
+	def lock_in(self):
+		for lane in self.lanes:
+			lane.lock_in()
+
 	def t2y_conversion(self, time):
 		return self.sprite.height-self.t2y
 
@@ -87,6 +91,7 @@ class Lane(GameObject):
 		self.active_gem = None
 		self.current_gems = []
 		self.old_gems = []
+		self.locked_gems = []
 		# kind of redundant since all game_objets
 		# owned by a lane will be gems
 		# but maybe not since _game_objects is a set()
@@ -101,6 +106,16 @@ class Lane(GameObject):
 	@property
 	def track(self):
 		return self._parent
+
+	def lock_in(self):
+		# clearing it is definitely buggy. 
+		# Fix for later
+		
+		self.locked_gems = self.current_gems+self.old_gems
+		self.old_gems = []
+		self.current_gems = []
+		for gem in self.locked_gems:
+			gem.sprite.color.s = 1.0
 
 	def on_hit(self):
 		pass
@@ -127,6 +142,14 @@ class Lane(GameObject):
 		self.active_gem.sprite.color.s = 0.3
 		self.active_gem = None
 
+	def remove_old_gems(self):
+		to_remove = []
+		for gem in self.old_gems:
+			if gem.y-gem.get_height() > self.track.now_bar.position[1]:
+				to_remove.append(gem)
+		for gem in to_remove:
+			self.old_gems.remove(gem)
+			self.remove(gem)
 
 	def set_now(self, time):
 		self.now = time
@@ -139,13 +162,7 @@ class Lane(GameObject):
 	def on_update(self):
 		if self.active_gem is not None and not self.track.drum:
 			self.active_gem.update_length(self.track.now_bar.position[1])
-		to_remove = []
-		for gem in self.old_gems:
-			if gem.y-gem.get_height() > self.track.now_bar.position[1]:
-				to_remove.append(gem)
-		for gem in to_remove:
-			self.old_gems.remove(gem)
-			self.remove(gem)
+		self.remove_old_gems()
 			
 
 

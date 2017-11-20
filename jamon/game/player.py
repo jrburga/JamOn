@@ -70,6 +70,7 @@ class Player(Keyboard):
 		# for gem in self.track.gems:
 		# 	continue
 		self.composing = False
+		self.track.lock_in()
 		self.trigger_event('on_lock_in')
 
 

@@ -67,9 +67,9 @@ class Session(GameObject):
 
 	def next_player(self):
 		self.players[self.current_player].composing = False
-		self.current_player = ((self.current_player+1)
-								%self.num_players)
-		self.players[self.current_player].composing = True
+		self.current_player += 1
+		if self.current_player < self.num_players:
+			self.players[self.current_player].composing = True
 
 	def on_lock_in(self, event):
 		print 'locked in'
