@@ -11,7 +11,11 @@ class Track(GameObject):
 		self.now_bar = NowBarSprite()
 		w, h = self.sprite.size
 
-		div = w/num_lanes
+		spb = 60./tempo
+		beats = bars*4
+		seconds = spb*beats
+
+		self.t2y = h/seconds
 		self.position = ((Window.width-w)/2, 0)
 
 		for i, lane in self.lanes:
@@ -37,7 +41,7 @@ class Track(GameObject):
 	def on_update(self):
 		x, _ = self.now_bar.position
 		y = self.now
-		self.now_bar.position = (x, y)
+		self.now_bar.position = (x, self.now*t2y)
 
 
 class Lane(GameObject):
