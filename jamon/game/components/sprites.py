@@ -8,17 +8,16 @@ now_bar_width = 5
 track_size = (track_width, Window.height)
 lane_size = (lane_width, Window.height)
 now_bar_size = (track_width, now_bar_width)
+gem_size = (lane_width, now_bar_width)
 
 track_color = (.85, .85, .85)
 now_bar_color = (.13, .54, .13)
 lane_color = (1, 1, 1)
 # gem_texture = Image('path/to/image.png').texture
 
-class GemSprite(Sprite):
+class GemSprite(RectSprite):
 	def __init__(self, color):
-		super(GemSprite, self).__init__(gem_texture, color)
-		self.texture.size = (lane_width, now_bar_width)
-
+		super(GemSprite, self).__init__(gem_size, color)
 
 class TrackSprite(RectSprite):
 	def __init__(self):

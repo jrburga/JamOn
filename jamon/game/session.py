@@ -42,6 +42,10 @@ class Session(GameObject):
 								%self.num_players)
 		self.players[self.current_player].composing = True
 
+	def on_lock_in(self, event):
+		print 'locked in'
+		self.next_player()
+
 	def on_update(self):
 		for player in self.players:
 			player.set_now(kivyClock.time()%self.seconds)

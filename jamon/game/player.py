@@ -30,6 +30,8 @@ class Player(Keyboard):
 		if num == 0:
 			self.composing = True
 
+		self.num = num
+
 		self.add(self.track)
 
 	def key_down(self, lane_num):
@@ -43,7 +45,6 @@ class Player(Keyboard):
 	def key_up(self, lane_num):
 		if self.composing:
 			if lane_num == num_lanes:
-				self.lock_in_sequence()
 				return
 			self.track.on_release(lane_num)
 			self.instrument.note_off(lane_num)
@@ -60,9 +61,13 @@ class Player(Keyboard):
 
 	def lock_in_sequence(self):
 		# set note_sequence
-		for gem in self.track.gems:
+		# print 'locking sequence', self.num
+		# for gem in self.track.gems:
+		# 	continue
+		self.composing = False
+		for lane_num in range(num_lanes):
 			pass
-		self.session.next_player()
+		self.trigger_event('on_lock_in')
 
 
 
