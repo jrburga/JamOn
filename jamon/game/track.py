@@ -47,8 +47,8 @@ class Track(GameObject):
 
 	def on_update(self):
 		x, _ = self.now_bar.position
-		y = self.now%self.seconds
-		self.now_bar.position = (x, self.h-self.now*self.t2y)
+		y = self.h-self.t2y*(self.now%self.seconds)
+		self.now_bar.position = (x, y)
 
 
 class Lane(GameObject):
