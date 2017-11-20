@@ -9,16 +9,17 @@ class Track(GameObject):
 		self.now = 0
 		self.sprite = TrackSprite()
 		self.now_bar = NowBarSprite()
-		w, h = self.sprite.size
+		self.w, self.h = self.sprite.size
+		# w, h = self.sprite.size
 
 		spb = 60./tempo
 		beats = bars*4
 		seconds = spb*beats
 
-		self.t2y = h/seconds
-		self.position = ((Window.width-w)/2, 0)
+		self.t2y = self.h/seconds
+		self.position = ((Window.width-self.w)/2, 0)
 
-		for i, lane in self.lanes:
+		# for i, lane in self.lanes:
 
 		self.tempo = tempo
 		self.bars = bars
@@ -41,7 +42,7 @@ class Track(GameObject):
 	def on_update(self):
 		x, _ = self.now_bar.position
 		y = self.now
-		self.now_bar.position = (x, self.now*t2y)
+		self.now_bar.position = (x, self.now*self.t2y)
 
 
 class Lane(GameObject):
