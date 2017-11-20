@@ -4,13 +4,13 @@ from kivy.core.window import Window
 gem_texture = Ellipse()
 track_width = 500
 lane_width = 50
-now_bar_width = 10
+now_bar_width = 5
 track_size = (track_width, Window.height)
 lane_size = (lane_width, Window.height)
 now_bar_size = (track_width, now_bar_width)
 
 track_color = (.85, .85, .85)
-now_bar_color = (0, 0, 0)
+now_bar_color = (.13, .54, .13)
 lane_color = (1, 1, 1)
 # gem_texture = Image('path/to/image.png').texture
 
