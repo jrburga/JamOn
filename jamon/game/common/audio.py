@@ -112,7 +112,7 @@ class Audio(object):
         # First, try loading config params from configuration file.
         try:
             config = ConfigParser()
-            config.read(('../common/config.cfg', 'config.cfg'))
+            config.read(('jamon/game/common/config.cfg', 'config.cfg'))
 
             items = config.items('audio')
 
