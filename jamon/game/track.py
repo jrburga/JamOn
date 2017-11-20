@@ -21,7 +21,7 @@ class Track(GameObject):
 		self.add(*self.lanes)
 		self.add_graphic(self.now_bar)
 
-	def time2y(self, time):
+	# def time2y(self, time):
 
 		
 	def on_press(self, lane_num):
