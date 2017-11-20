@@ -72,7 +72,7 @@ class Metronome(object):
         pitch = self.pitch
         if ((tick)/480)%4 == 0:
             pitch = 61
-        self.synth.noteon(self.channel, pitch, 100)
+        self.synth.noteon(self.channel, pitch, 60)
 
         # post the note off for half a beat later:
         self.off_cmd = self.sched.post_at_tick(tick + self.beat_len/2, self._noteoff, pitch)
