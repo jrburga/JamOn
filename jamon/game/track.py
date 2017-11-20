@@ -81,8 +81,6 @@ class Lane(GameObject):
 	def on_press(self, time):
 		self.sprite.color.rgb = (1, 0, 0)
 		gem = Gem((1, 0, 0))
-		gem.scale.x = 0.5
-		gem.scale.y = .2
 		self.add(gem)
 
 	def on_release(self, time):

@@ -1,7 +1,7 @@
 from graphics import *
 from kivy.core.window import Window
 
-gem_texture = Ellipse()
+gem_texture = Rectangle()
 track_width = 500
 lane_width = 50
 now_bar_width = 5
@@ -17,6 +17,8 @@ lane_color = (1, 1, 1)
 class GemSprite(Sprite):
 	def __init__(self, color):
 		super(GemSprite, self).__init__(gem_texture, color)
+		self.texture.size = (lane_width, now_bar_width)
+
 
 class TrackSprite(RectSprite):
 	def __init__(self):
