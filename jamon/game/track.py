@@ -1,5 +1,4 @@
 from game import GameObject
-from kivy.core.window import Window
 from components.sprites import GemSprite, LaneSprite, TrackSprite, NowBarSprite
 
 class Track(GameObject):
@@ -17,13 +16,12 @@ class Track(GameObject):
 		self.seconds = spb*beats
 
 		self.t2y = self.h/self.seconds
-		self.position = ((Window.width-self.w)/2, 0)
+		# self.scale.x = 0.5
+		# self.position = ((Window.width-self.w)/2, 0)
 
 		i2lane = self.w/num_lanes
-
 		for i, lane in enumerate(self.lanes):
 			lane.position.x = i*i2lane+7
-
 
 		self.tempo = tempo
 		self.bars = bars
@@ -35,8 +33,6 @@ class Track(GameObject):
 		self.add_graphic(self.now_bar)
 
 	# def time2y(self, time):
-
-		
 	def on_press(self, lane_num):
 		self.lanes[lane_num].on_press(self.now)
 
@@ -68,10 +64,11 @@ class Lane(GameObject):
 		pass
 
 	def on_press(self, time):
-		self.sprite.color = (1, 0, 0)
+		print 'lane press'
+		self.sprite.color.rgb = (1, 0, 0)
 
 	def on_release(self, time):
-		self.sprite.color = (1, 1, 1)
+		self.sprite.color.rgb = (1, 1, 1)
 
 class Gem(GameObject):
 	def __init__(self, color, time=0, length=0):

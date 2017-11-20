@@ -5,16 +5,19 @@ from instrument import Instrument
 from track import Track
 
 num_lanes = 8
-default_keys = ['a', 's', 'd', 'f', 'j', 'k', 'l', ';']
+default_keys = [
+	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'], 
+	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
+]
 
-assert(len(default_keys) == num_lanes)
+# assert([len(dk) == num_lanes for dk in default_keys])
 
-default_keys = [ord(k) for k in default_keys]
+default_keys = [[ord(k) for k in dk] for dk in default_keys]
 
 class Player(Keyboard):
-	def __init__(self, bars, tempo):
+	def __init__(self, bars, tempo, num=0):
 		super(Player, self).__init__()
-		self.keys = default_keys
+		self.keys = default_keys[num]
 		self.instrument = Instrument()
 
 		self.track = Track(num_lanes, bars, tempo)
@@ -38,4 +41,7 @@ class Player(Keyboard):
 	@property
 	def session(self):
 		return self._parent
+
+	def lock_in(self):
+		pass
 

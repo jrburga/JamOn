@@ -1,6 +1,7 @@
 from game import GameObject
 from player import Player
 from kivy.clock import Clock as kivyClock
+from kivy.core.window import Window
 
 
 # default music settings
@@ -15,8 +16,14 @@ class Session(GameObject):
 		self.bars = bars
 		self.divs = divs
 		self.time = 0
-		self.players = [Player(bars, tempo)]
-		self.player_index = 0
+		self.players = [Player(bars, tempo), Player(bars, tempo, num=1)]
+		i2player = Window.width/len(self.players)
+		scale = 1./len(self.players)
+		for i, player in enumerate(self.players):
+			player.position.x = i2player*i+80
+			player.scale.x = scale
+			continue
+		self.current_player = 0
 
 		self.add(*self.players)
 
