@@ -19,7 +19,7 @@ class Clock(object):
         super(Clock, self).__init__()
         self.paused = True
         self.offset = 0
-        self.start()
+        # self.start()
 
     def is_paused(self):
         return self.paused

@@ -54,7 +54,8 @@ class Player(Keyboard):
 		self.instrument.note_off(lane_num)
 
 	def set_now(self, time):
-		self.track.now = time
+		self.track.set_now(time)
+		self.time = time
 
 	def on_update(self):
 		pass

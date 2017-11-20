@@ -69,10 +69,13 @@ class Metronome(object):
 
     def _noteon(self, tick, ignore):
         # play the note right now:
-        self.synth.noteon(self.channel, self.pitch, 100)
+        pitch = self.pitch
+        if ((tick)/480)%4 == 0:
+            pitch = 61
+        self.synth.noteon(self.channel, pitch, 100)
 
         # post the note off for half a beat later:
-        self.off_cmd = self.sched.post_at_tick(tick + self.beat_len/2, self._noteoff, self.pitch)
+        self.off_cmd = self.sched.post_at_tick(tick + self.beat_len/2, self._noteoff, pitch)
 
         # schedule the next noteon for one beat later
         next_beat = tick + self.beat_len

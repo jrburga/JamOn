@@ -22,7 +22,7 @@ class Session(GameObject):
 		beats = bars*4
 		self.seconds = spb*beats
 		self.clock = Clock()
-		self.temp_map = SimpleTempoMap()
+		self.temp_map = SimpleTempoMap(bpm=tempo)
 		self.sched = Scheduler(self.clock, self.temp_map)
 		self.players = [Player(bars, tempo), Player(bars, tempo, num=1, inst='drums')]
 		self.IM = InstrumentManager(self.sched)
@@ -40,9 +40,11 @@ class Session(GameObject):
 		self.add(*self.players)
 		self.add(self.IM)
 
-		self.clock.start()
+		self.clock.offset = self.seconds-spb
+		print self.clock.offset
+		# self.clock.start()
 		self.IM.metro.start()
-		self.paused = False
+		self.paused = True
 
 	def on_key_down(self, event):
 		if event.keycode[1] == 'enter':
