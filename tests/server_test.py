@@ -12,7 +12,8 @@ class TestServerFunctionality(unittest.TestCase):
 # Hacky way of testing with my current setup via scripts:
 
 host = Host()
-
-# testing loop
 host.find_other_players()
+
+while True:
+    pass
 

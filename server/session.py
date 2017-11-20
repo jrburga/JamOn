@@ -55,16 +55,22 @@ class Host(ServerObject):
         
         self.sock.listen(self.num_connections)
         self.band_formed = False
-        self.band_members = {}
-        # {"addr[0]+':'+addr[1]":BandMember}
+        self.band_members = {}      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
 
     def find_other_players(self):
         """
-        Called when the user clicks "HOST" and would like to wait
-        for other players to join the lobby
-        NOTE: Must be killed by calling self.stop_searching()
+        Called when the user clicks 'HOST JAM SESH' and would
+        like to wait for other players to join the lobby
+        Calls _find_other_players_loop in another thread
         """
         print "Looking for other members..."
+        start_new_thread(self._find_other_players_loop, ())
+
+        # Band is officially formed now! Make sure to initialize all band_members
+    def _find_other_players_loop(self):
+        """
+        NOTE: Must be killed by calling self.stop_searching()
+        """
         while not self.band_formed:
             #wait to accept a connection - blocking call
             conn, addr = self.sock.accept()
@@ -78,8 +84,6 @@ class Host(ServerObject):
 
         print "Band formed!"
         print "There are " + str(len(self.band_members.keys()) + 1) + " band members (including the host)"
-
-        # Band is officially formed now! Make sure to initialize all band_members
 
     def stop_searching(self):
         self.band_formed = True
@@ -126,7 +130,7 @@ class Host(ServerObject):
             # TODO: Act on the message
         except Exception as e:
             # Data is a string
-            if data.strip() == "Band Formed":
+            if msg.strip() == "Band Formed":
                 self.stop_searching()
 
 
