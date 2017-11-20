@@ -35,6 +35,13 @@ class Track(GameObject):
 		self.add(*self.lanes)
 		self.add_graphic(self.now_bar)
 
+	@property
+	def gems(self):
+		gems = []
+		for lane in self.lanes:
+			gems += lane.gems
+		return gems
+
 	def t2y_conversion(self, time):
 		return self.sprite.height-self.t2y
 

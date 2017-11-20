@@ -20,6 +20,8 @@ class Player(Keyboard):
 		self.keys = default_keys[num]
 		self.instrument = Instrument(inst)
 
+		self.note_sequence = []
+
 		self.track = Track(num_lanes, bars, tempo)
 
 		self.add(self.track)
@@ -43,5 +45,6 @@ class Player(Keyboard):
 		return self._parent
 
 	def lock_in(self):
+		# set note_sequence
 		pass
 

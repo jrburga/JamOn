@@ -16,6 +16,9 @@ class Session(GameObject):
 		self.tempo = tempo
 		self.bars = bars
 		self.divs = divs
+		spb = 60./tempo
+		beats = bars*4
+		self.seconds = spb*beats
 		self.time = 0
 		self.players = [Player(bars, tempo), Player(bars, tempo, num=1)]
 		self.IM = InstrumentManager()
@@ -34,4 +37,4 @@ class Session(GameObject):
 
 	def on_update(self):
 		for player in self.players:
-			player.set_now(kivyClock.time())
+			player.set_now(kivyClock.time()%self.seconds)
