@@ -52,10 +52,16 @@ class Track(GameObject):
 	def on_release(self, lane_num):
 		self.lanes[lane_num].on_release(self.now)
 
+	def time2y(self, t):
+		return self.h-self.t2y*(t%self.seconds)
+
 	def on_update(self):
 		x, _ = self.now_bar.position
-		y = self.h-self.t2y*(self.now%self.seconds)
+		y = self.time2y(self.now)
 		self.now_bar.position = (x, y)
+
+		for lane in self.lanes:
+			lane.on_update()
 
 
 class Lane(GameObject):
@@ -64,7 +70,8 @@ class Lane(GameObject):
 		self.sprite = LaneSprite()
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
-		self.gems = [] 
+		self.active_gem = None
+		self.gems = []
 		# kind of redundant since all game_objets
 		# owned by a lane will be gems
 		# but maybe not since _game_objects is a set()
@@ -87,24 +94,47 @@ class Lane(GameObject):
 
 	def on_press(self, time):
 		self.sprite.color.rgb = (1, 0, 0)
-		gem = Gem((1, 0, 0))
+		gem = Gem((0, 1, 0), time)
 		self.add(gem)
+		gem.set_pos()
+		self.active_gem = gem
+
 
 	def on_release(self, time):
 		self.sprite.color.rgb = (1, 1, 1)
+		self.active_gem = None
+
+	def on_update(self):
+		if self.active_gem is not None:
+			self.active_gem.update_length(self.track.now_bar.position[1])
 
 class Gem(GameObject):
 	def __init__(self, color, time=0, length=0):
 		super(Gem, self).__init__()
+		self.time = time
 		self.sprite = GemSprite(color)
+		self.posistion = (100,100)
 		self.add_graphic(self.sprite)
+		self.y = 0
+
 
 	@property
 	def lane(self):
 		return self._parent
+
+	def set_pos(self):
+		self.y = self.lane.track.time2y(self.time)
+		self.position = (0, self.y)
+		print self.position.y
 
 	def on_hit(self, *args):
 		pass
 
 	def on_miss(self, *args):
 		pass
+
+	def update_length(self, y):
+		print self
+		size_x, size_y = self.sprite.texture.size
+		self.sprite.texture.size = (size_x, self.y-y)
+		self.position.y = y
