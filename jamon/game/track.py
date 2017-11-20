@@ -10,7 +10,11 @@ class Track(GameObject):
 		self.sprite = TrackSprite()
 		self.now_bar = NowBarSprite()
 		w, h = self.sprite.size
+
+		div = w/num_lanes
 		self.position = ((Window.width-w)/2, 0)
+
+		for i, lane in self.lanes:
 
 		self.tempo = tempo
 		self.bars = bars
@@ -41,6 +45,9 @@ class Lane(GameObject):
 		super(Lane, self).__init__()
 		self.sprite = LaneSprite()
 		self.gems = []
+		w, h = self.sprite.size
+		for gem in self.gems:
+			gem.sprite.size = (w, h)
 		self.add(*self.gems)
 		self.add_graphic(self.sprite)
 
