@@ -69,9 +69,9 @@ class Metronome(object):
 
     def _noteon(self, tick, ignore):
         # play the note right now:
-        pitch = self.pitch
+        pitch = 61
         if ((tick)/480)%4 == 0:
-            pitch = 61
+            pitch = 60
         self.synth.noteon(self.channel, pitch, 60)
 
         # post the note off for half a beat later:
