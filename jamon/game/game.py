@@ -90,6 +90,10 @@ class GameObject(object):
 		self._graphics.add(game_object._transform)
 		self._mixer.add(game_object._mixer)
 
+	def remove(self, *game_objects):
+		for go in game_objects:
+			self.remove_game_object(go)
+
 	def remove_game_object(self, game_object):
 		# pass
 		if game_object._parent != self: return

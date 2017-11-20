@@ -25,7 +25,7 @@ class Session(GameObject):
 		for i, player in enumerate(self.players):
 			player.position.x = i2player*i+80
 			player.scale.x = scale
-			self.IM.add_instrument(player.instrument)
+			self.IM.add(player.instrument)
 			continue
 		self.current_player = 0
 

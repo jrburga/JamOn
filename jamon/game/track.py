@@ -32,6 +32,9 @@ class Track(GameObject):
 		self.add(*self.lanes)
 		self.add_graphic(self.now_bar)
 
+	def t2y_conversion(self, time):
+		return self.sprite.height-self.t2y
+
 	# def time2y(self, time):
 	def on_press(self, lane_num):
 		self.lanes[lane_num].on_press(self.now)
@@ -64,8 +67,8 @@ class Lane(GameObject):
 		pass
 
 	def on_press(self, time):
-		print 'lane press'
 		self.sprite.color.rgb = (1, 0, 0)
+		self.add()
 
 	def on_release(self, time):
 		self.sprite.color.rgb = (1, 1, 1)
