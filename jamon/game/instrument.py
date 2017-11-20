@@ -19,7 +19,8 @@ class InstrumentManager(GameObject):
 		self.instruments.append(ins)
 		ins.manager = self
 		ins.channel = self.inst_count
-		self.synth.program(self.inst_count, ins.patch, ins.notes)
+		print ()
+		self.synth.program(self.inst_count, *ins.patch)
 
 	def noteon(self, *args):
 		self.synth.noteon(*args)
