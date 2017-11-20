@@ -14,12 +14,18 @@ class Track(GameObject):
 
 		spb = 60./tempo
 		beats = bars*4
-		seconds = spb*beats
+		self.seconds = spb*beats
 
-		self.t2y = self.h/seconds
+		
+
+		self.t2y = self.h/self.seconds
 		self.position = ((Window.width-self.w)/2, 0)
 
-		# for i, lane in self.lanes:
+		i2lane = self.w/num_lanes
+
+		for i, lane in enumerate(self.lanes):
+			lane.position.x = i*i2lane+7
+
 
 		self.tempo = tempo
 		self.bars = bars
@@ -41,8 +47,8 @@ class Track(GameObject):
 
 	def on_update(self):
 		x, _ = self.now_bar.position
-		y = self.now
-		self.now_bar.position = (x, self.now*self.t2y)
+		y = self.now%self.seconds
+		self.now_bar.position = (x, self.h-self.now*self.t2y)
 
 
 class Lane(GameObject):

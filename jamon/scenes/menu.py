@@ -4,7 +4,7 @@ from jamon.game.components.graphics import *
 
 from jamon.game.player import Player
 
-scene = Scene('menu', start=True)
+scene = Scene('menu')
 
 def print_event(scene, event):
 	print 'event was triggered'
