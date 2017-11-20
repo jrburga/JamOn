@@ -57,9 +57,16 @@ class Lane(GameObject):
 		self.sprite = LaneSprite()
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
-		self.gems = []
+		self.gems = [] 
+		# kind of redundant since all game_objets
+		# owned by a lane will be gems
+		# but maybe not since _game_objects is a set()
 		w, h = self.sprite.size
 		self.add_graphic(self.sprite)
+
+	# @property
+	# def gems(self):
+	# 	return self._game_objects
 
 	@property
 	def track(self):
