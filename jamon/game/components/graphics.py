@@ -54,6 +54,10 @@ class Sprite(InstructionGroup):
 	def size(self):
 		return self.texture.size
 
+	@size.setter
+	def size(self, new_size):
+		self.texture.size = new_size
+
 	@property
 	def position(self):
 		return self.texture.pos

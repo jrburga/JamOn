@@ -1,6 +1,9 @@
 from game import GameObject
 from components.sprites import GemSprite, LaneSprite, TrackSprite, NowBarSprite
 
+# Should really fix this graphically and not here.
+OFFSET = 7
+
 class Track(GameObject):
 	def __init__(self, num_lanes, bars, tempo):
 		super(Track, self).__init__()
@@ -21,7 +24,7 @@ class Track(GameObject):
 
 		i2lane = self.w/num_lanes
 		for i, lane in enumerate(self.lanes):
-			lane.position.x = i*i2lane+7
+			lane.position.x = i*i2lane+OFFSET
 
 		self.tempo = tempo
 		self.bars = bars
@@ -52,6 +55,8 @@ class Lane(GameObject):
 	def __init__(self):
 		super(Lane, self).__init__()
 		self.sprite = LaneSprite()
+		cx, cy = self.sprite.center
+		# self.sprite.center = (cx)
 		self.gems = []
 		w, h = self.sprite.size
 		self.add_graphic(self.sprite)
@@ -68,7 +73,10 @@ class Lane(GameObject):
 
 	def on_press(self, time):
 		self.sprite.color.rgb = (1, 0, 0)
-		self.add()
+		gem = Gem((1, 0, 0))
+		gem.scale.x = 0.5
+		gem.scale.y = .2
+		self.add(gem)
 
 	def on_release(self, time):
 		self.sprite.color.rgb = (1, 1, 1)
