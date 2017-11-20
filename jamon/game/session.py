@@ -1,5 +1,6 @@
 from game import GameObject
 from player import Player
+from instrument import InstrumentManager	
 from kivy.clock import Clock as kivyClock
 from kivy.core.window import Window
 
@@ -17,15 +18,19 @@ class Session(GameObject):
 		self.divs = divs
 		self.time = 0
 		self.players = [Player(bars, tempo), Player(bars, tempo, num=1)]
+		self.IM = InstrumentManager()
+
 		i2player = Window.width/len(self.players)
 		scale = 1./len(self.players)
 		for i, player in enumerate(self.players):
 			player.position.x = i2player*i+80
 			player.scale.x = scale
+			self.IM.add_instrument(player.instrument)
 			continue
 		self.current_player = 0
 
 		self.add(*self.players)
+		self.add(self.IM)
 
 	def on_update(self):
 		for player in self.players:

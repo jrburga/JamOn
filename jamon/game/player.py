@@ -15,14 +15,14 @@ default_keys = [
 default_keys = [[ord(k) for k in dk] for dk in default_keys]
 
 class Player(Keyboard):
-	def __init__(self, bars, tempo, num=0):
+	def __init__(self, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
 		self.keys = default_keys[num]
-		self.instrument = Instrument()
+		self.instrument = Instrument(inst)
 
 		self.track = Track(num_lanes, bars, tempo)
 
-		self.add(self.instrument, self.track)
+		self.add(self.track)
 
 	def key_down(self, lane_num):
 		self.track.on_press(lane_num)
