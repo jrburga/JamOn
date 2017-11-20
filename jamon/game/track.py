@@ -12,6 +12,7 @@ class Track(GameObject):
 		self.sprite = TrackSprite()
 		self.now_bar = NowBarSprite()
 		self.w, self.h = self.sprite.size
+		self.last_y = 0
 
 		self.drum = percussive
 		# w, h = self.sprite.size
@@ -64,8 +65,11 @@ class Track(GameObject):
 		x, _ = self.now_bar.position
 		y = self.time2y(self.now)
 		self.now_bar.position = (x, y)
-
+		new_phrase = self.last_y < y
+		self.last_y = y
 		for lane in self.lanes:
+			if new_phrase:
+				lane.new_phrase()
 			lane.on_update()
 
 
@@ -76,7 +80,8 @@ class Lane(GameObject):
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
-		# self.gems = []
+		self.current_gems = []
+		self.old_gems = []
 		# kind of redundant since all game_objets
 		# owned by a lane will be gems
 		# but maybe not since _game_objects is a set()
@@ -105,16 +110,33 @@ class Lane(GameObject):
 		self.add(gem)
 		gem.set_pos()
 		self.active_gem = gem
+		self.current_gems.append(gem)
 
 
 	def on_release(self, time):
+		if self.active_gem is None:
+			return
 		self.active_gem.length = time-self.active_gem.time
 		print self.active_gem.length
+		self.active_gem.sprite.color.s = 0.3
 		self.active_gem = None
 
+	def new_phrase(self):
+		self.old_gems = self.current_gems
+		self.current_gems = []
+		self.on_release(8)
 	def on_update(self):
 		if self.active_gem is not None and not self.track.drum:
 			self.active_gem.update_length(self.track.now_bar.position[1])
+		to_remove = []
+		for gem in self.old_gems:
+			if gem.y-gem.get_height() > self.track.now_bar.position[1]:
+				to_remove.append(gem)
+		for gem in to_remove:
+			self.old_gems.remove(gem)
+			self.remove(gem)
+			
+
 
 class Gem(GameObject):
 	def __init__(self, color, time=0, length=0):
@@ -141,6 +163,9 @@ class Gem(GameObject):
 
 	def on_miss(self, *args):
 		pass
+
+	def get_height(self):
+		return self.sprite.texture.size[1]
 
 	def update_length(self, y):
 		size_x, size_y = self.sprite.texture.size
