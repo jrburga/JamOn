@@ -60,6 +60,11 @@ class Track(GameObject):
 	def y2time(self, y):
 		return (y+self.h)/(self.t2y*(t%self.seconds))
 
+	def set_now(self, time):
+		for lane in self.lanes:
+			lane.set_now(time)
+		self.now = time
+
 	def on_update(self):
 		x, _ = self.now_bar.position
 		y = self.time2y(self.now)
@@ -80,6 +85,7 @@ class Lane(GameObject):
 		# kind of redundant since all game_objets
 		# owned by a lane will be gems
 		# but maybe not since _game_objects is a set()
+		self.now = 0
 		w, h = self.sprite.size
 		self.add_graphic(self.sprite)
 
@@ -112,9 +118,15 @@ class Lane(GameObject):
 		print self.active_gem.length
 		self.active_gem = None
 
+	def set_now(self, time):
+		self.now = time
+
 	def on_update(self):
 		if self.active_gem is not None and not self.track.drum:
 			self.active_gem.update_length(self.track.now_bar.position[1])
+
+
+		
 
 class Gem(GameObject):
 	def __init__(self, color, time=0, length=0):
