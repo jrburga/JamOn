@@ -99,7 +99,7 @@ class GameObject(object):
 		if game_object._parent != self: return
 		game_object._parent = None
 		self._game_objects.remove(game_object)
-		self._transform.remove(game_object._transform)
+		self._graphics.remove(game_object._transform)
 		self._mixer.remove(game_object._mixer)
 
 	def add_event_listener(self, event, callback):
