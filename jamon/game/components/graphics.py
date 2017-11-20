@@ -4,6 +4,8 @@ from kivy.graphics import Scale, Rotate, Translate
 from kivy.graphics import Ellipse, Rectangle, Color
 from kivy.core.image import Image
 
+from jamon.game.common.gfxutil import KFAnim
+
 class Transform(InstructionGroup):
 	def __init__(self, graphics):
 		super(Transform, self).__init__()

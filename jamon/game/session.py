@@ -4,6 +4,8 @@ from instrument import InstrumentManager
 from kivy.clock import Clock as kivyClock
 from kivy.core.window import Window
 
+from common.clock import Clock, Scheduler, SimpleTempoMap
+
 
 # default music settings
 tempo = 120
@@ -19,9 +21,11 @@ class Session(GameObject):
 		spb = 60./tempo
 		beats = bars*4
 		self.seconds = spb*beats
-		self.time = 0
-		self.players = [Player(bars, tempo), Player(bars, tempo, num=1)]
-		self.IM = InstrumentManager()
+		self.clock = Clock()
+		self.temp_map = SimpleTempoMap()
+		self.sched = Scheduler(self.clock, self.temp_map)
+		self.players = [Player(bars, tempo), Player(bars, tempo, num=1, inst='drums')]
+		self.IM = InstrumentManager(self.sched)
 
 		i2player = Window.width/len(self.players)
 		scale = 1./len(self.players)
@@ -36,6 +40,29 @@ class Session(GameObject):
 		self.add(*self.players)
 		self.add(self.IM)
 
+		self.clock.start()
+		self.IM.metro.start()
+		self.paused = False
+
+	def on_key_down(self, event):
+		if event.keycode[1] == 'enter':
+			self.toggle() 
+
+	def toggle(self):
+		if self.paused:
+			self.paused = False
+			self.start()
+		else:
+			self.paused = True
+			self.stop()
+
+	def stop(self):
+		self.clock.stop()
+
+	def start(self):
+		self.clock.start()
+		
+
 	def next_player(self):
 		self.players[self.current_player].composing = False
 		self.current_player = ((self.current_player+1)
@@ -47,5 +74,6 @@ class Session(GameObject):
 		self.next_player()
 
 	def on_update(self):
+		self.sched.on_update()
 		for player in self.players:
-			player.set_now(kivyClock.time()%self.seconds)
+			player.set_now(self.clock.get_time()%self.seconds)

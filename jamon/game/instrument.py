@@ -1,13 +1,16 @@
 from game import GameObject
 from common.synth import Synth
+from common.metro import Metronome
 
 class InstrumentManager(GameObject):
 
-	def __init__(self):
+	def __init__(self, sched):
 		super(InstrumentManager, self).__init__()
 		self.synth = Synth("data/FluidR3_GM.sf2")
 		self.add_generator(self.synth)
-		self.inst_count = 0
+
+		self.metro = Metronome(sched, self.synth)
+		self.inst_count = 1
 
 		self.instruments = []
 
@@ -19,7 +22,6 @@ class InstrumentManager(GameObject):
 		self.instruments.append(ins)
 		ins.manager = self
 		ins.channel = self.inst_count
-		print ()
 		self.synth.program(self.inst_count, *ins.patch)
 
 	def noteon(self, *args):
@@ -31,7 +33,8 @@ class InstrumentManager(GameObject):
 
 
 INSTRUMENTS = {
-			'piano': ( (0,0), [60, 62, 64, 65, 67, 69, 71, 72] )
+			'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72] ),
+			'drums': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
 		}
 
 class Instrument(object):

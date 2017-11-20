@@ -24,7 +24,8 @@ class Player(Keyboard):
 
 		self.note_sequence = []
 
-		self.track = Track(num_lanes, bars, tempo)
+		perc = True if inst=='drums' else False
+		self.track = Track(num_lanes, bars, tempo, percussive=perc)
 
 		self.composing = False
 		if num == 0:
@@ -35,19 +36,22 @@ class Player(Keyboard):
 		self.add(self.track)
 
 	def key_down(self, lane_num):
-		if self.composing:
-			if lane_num == num_lanes:
+		if lane_num == num_lanes:
+			if self.composing:
 				self.lock_in_sequence()
-				return
+			return
+
+		if self.composing:
 			self.track.on_press(lane_num)
-			self.instrument.note_on(lane_num)
+		self.instrument.note_on(lane_num)
 
 	def key_up(self, lane_num):
+		if lane_num == num_lanes:
+			return
+
 		if self.composing:
-			if lane_num == num_lanes:
-				return
 			self.track.on_release(lane_num)
-			self.instrument.note_off(lane_num)
+		self.instrument.note_off(lane_num)
 
 	def set_now(self, time):
 		self.track.now = time
@@ -65,8 +69,6 @@ class Player(Keyboard):
 		# for gem in self.track.gems:
 		# 	continue
 		self.composing = False
-		for lane_num in range(num_lanes):
-			pass
 		self.trigger_event('on_lock_in')
 
 
