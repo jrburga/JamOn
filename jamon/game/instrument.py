@@ -51,7 +51,7 @@ class Instrument(object):
 		self.manager.noteon(self.channel, pitch, self.vel)
 
 
-	def note_off(self, note):
+	def note_off(self, lane):
 		assert 0 <= lane < len(self.notes)
 		if self.manager is None:
 			print "instrument not added to manager"
