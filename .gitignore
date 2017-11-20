@@ -1,2 +1,4 @@
 *.pyc
 *.pyo
+jamon/game/common/config.cfg
+data/
