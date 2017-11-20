@@ -16,8 +16,6 @@ class Track(GameObject):
 		beats = bars*4
 		self.seconds = spb*beats
 
-		
-
 		self.t2y = self.h/self.seconds
 		self.position = ((Window.width-self.w)/2, 0)
 
@@ -57,9 +55,6 @@ class Lane(GameObject):
 		self.sprite = LaneSprite()
 		self.gems = []
 		w, h = self.sprite.size
-		for gem in self.gems:
-			gem.sprite.size = (w, h)
-		self.add(*self.gems)
 		self.add_graphic(self.sprite)
 
 	@property
@@ -73,10 +68,10 @@ class Lane(GameObject):
 		pass
 
 	def on_press(self, time):
-		pass
+		self.sprite.color = (1, 0, 0)
 
 	def on_release(self, time):
-		pass
+		self.sprite.color = (1, 1, 1)
 
 class Gem(GameObject):
 	def __init__(self, color, time=0, length=0):
@@ -89,4 +84,7 @@ class Gem(GameObject):
 		return self._parent
 
 	def on_hit(self, *args):
+		pass
+
+	def on_miss(self, *args):
 		pass
