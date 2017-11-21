@@ -7,55 +7,36 @@ from jamon.game.controller import Keyboard
 
 scene = Scene('main_menu', start=True)
 
-BUTTON_WIDTH = Window.width / 3.0
-BUTTON_HEIGHT = Window.height / 4.0
-PERCENT_WINDOW_BUTTONS = .666
+BUTTON_WIDTH = Window.width * 0.4
+BUTTON_HEIGHT = Window.height / 3.5
+PERCENT_WINDOW_BUTTONS = .70
 
+AREA_WIDTH = Window.width
+AREA_HEIGHT = Window.height * PERCENT_WINDOW_BUTTONS
 
-header = GameObject()
-# TODO add Jam On Label
+# Centers of the 2x2 Buttons:
+left_x_center = AREA_WIDTH * 1./3 - BUTTON_WIDTH / 6.0
+right_x_center = AREA_WIDTH * 2./3 + BUTTON_WIDTH / 6.0
 
-host_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.3, 0.7))
-host_game_rect.center = (Window.width / 3.5, Window.height / 3.5)
+bottom_y_center = AREA_HEIGHT * 2./5 - 3./10 * BUTTON_HEIGHT
+top_y_center = AREA_HEIGHT * 4./5 - 1./10 * BUTTON_HEIGHT
 
+# TODO add callbacks, labels for the button, header label
+
+# header = GameObject()
+
+host_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.3, 0.7)) # Add labels, label="Host Game"
+host_game_rect.center = (left_x_center, top_y_center)
 host_game_button = Button(host_game_rect)
-# TODO add callback for the button
-
 
 join_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.7, 0.2, 0.3))
-join_game_rect.center = (2.7 * Window.width / 3.5, Window.height / 3.5)
-
+join_game_rect.center = (right_x_center, top_y_center)
 join_game_button = Button(join_game_rect)
-# TODO add callback for the button
 
+change_username_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.7, 0.3))
+change_username_rect.center = (left_x_center, bottom_y_center)
+change_username_button = Button(change_username_rect)
 
-
-
-
-# circle = GameObject()
-# sprite = CircleSprite(100, (1, 0, 0))
-# sprite.center = (0, 0)
-# circle.add_graphic(sprite)
-
-# circle2 = GameObject()
-# circle2.scale = 0.5
-# sprite = CircleSprite(100, (0, 0, 1))
-# sprite.center = (0, 0)
-# circle2.add_graphic(sprite)
-
-# circle3 = GameObject()
-# circle3.scale = 0.5
-# sprite = CircleSprite(100, (0, 1, 0))
-# sprite.center = (0, 0)
-# circle3.add_graphic(sprite)
-
-# circle.add_game_object(circle2)
-# circle2.add_game_object(circle3)
-
-
-# circle.position = (50, 50)
-# button.sprite.center = (0, 0)
-# scene.add_game_object(circle)
 scene.add_game_object(host_game_button)
 scene.add_game_object(join_game_button)
-# scene.add_game_object(Keyboard())
+scene.add_game_object(change_username_button)
