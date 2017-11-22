@@ -18,13 +18,11 @@ class MainWidget(BaseWidget):
 			self.set_scene[scenes[0]]
 
 	def set_scene(self, scene):
-		print 'changing scene'
 		if self.scene:
-			print 'removing graphics'
-			self.canvas.remove(self.scene._graphics)
+			self.canvas.remove(self.scene._transform)
 		self.scene = scene
 		self.audio.set_generator(scene._mixer)
-		self.canvas.add(scene._graphics)
+		self.canvas.add(scene._transform)
 
 	def on_key_down(self, keycode, modifiers):
 		self.scene.trigger_event('on_key_down', 

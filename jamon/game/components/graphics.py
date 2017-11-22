@@ -1,22 +1,36 @@
 from kivy.graphics.instructions import InstructionGroup
-from kivy.graphics import Ellipse, Rectangle, Color, Scale, Rotate, Translate
+from kivy.graphics import PushMatrix, PopMatrix
+from kivy.graphics import Scale, Rotate, Translate
+from kivy.graphics import Ellipse, Rectangle, Color
 from kivy.core.image import Image
+
+from jamon.game.common.gfxutil import KFAnim
+
+class Transform(InstructionGroup):
+	def __init__(self, graphics):
+		super(Transform, self).__init__()
+		self.position = Translate()
+		self.rotation = Rotate()
+		self.scale = Scale()
+		self.add(PushMatrix())
+		self.add(self.position)
+		self.add(self.rotation)
+		self.add(self.scale)
+		self.add(graphics)
+		self.add(PopMatrix())
 
 class Graphics(InstructionGroup):
 	def __init__(self):
 		super(Graphics, self).__init__()
-		self.rotation = Rotate()
-		self.position = Translate()
-		self.scale = Scale()
 		self._objects = set()
-
-		self.add(self.position)
-		self.add(self.rotation)
-		self.add(self.scale)
 
 	def add(self, sprite):
 		super(Graphics, self).add(sprite)
 		self._objects.add(sprite)
+
+	def remove(self, sprite):
+		super(Graphics, self).remove(sprite)
+		self._objects.remove(sprite)
 
 	def on_update(self, dt):
 		kill_list = set()
@@ -34,13 +48,17 @@ class Sprite(InstructionGroup):
 		super(Sprite, self).__init__()
 		self.color = Color(rgb=color)
 		self.texture = texture
-
+		# self.center = 
 		self.add(self.color)
 		self.add(self.texture)
 
 	@property
 	def size(self):
 		return self.texture.size
+
+	@size.setter
+	def size(self, new_size):
+		self.texture.size = new_size
 
 	@property
 	def position(self):
@@ -58,6 +76,7 @@ class Sprite(InstructionGroup):
 
 	@center.setter
 	def center(self, new_center):
+		print "center set"
 		cx, cy = new_center
 		self.position = (cx - self.size[0]/2, cy - self.size[1]/2)
 
@@ -80,5 +99,5 @@ class CircleSprite(Sprite):
 
 class RectSprite(Sprite):
 	def __init__(self, size, color):
-		super(RectSprite, self).__init__(Rectangle(), color)
-		self.texture.size = size
+		super(RectSprite, self).__init__(Rectangle(size=size), color)
+
