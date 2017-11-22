@@ -9,6 +9,7 @@ class MainWidget(BaseWidget):
 		self.audio = Audio(2)
 
 		self.scenes = scenes
+		print self.scenes
 		self.scene = None
 
 		start_scene = 'practice'
@@ -16,7 +17,7 @@ class MainWidget(BaseWidget):
 		if start_scene:
 			self.load_new_scene(start_scene, **kwargs)
 		else:
-			self.load_new_scene(scenes.keys()[0])
+			self.load_new_scene(scenes.keys()[0], **kwargs)
 
 	def unload_current_scene(self):
 		if self.scene == None: return
@@ -28,8 +29,7 @@ class MainWidget(BaseWidget):
 
 	def load_new_scene(self, scene_name, **kwargs):
 		self.unload_current_scene()
-		self.scene = self.scenes[scene_name](**kwargs)
-		self.scene.base_widget = self
+		self.scene = self.scenes[scene_name](base_widget=self, **kwargs)
 		self.audio.set_generator(self.scene._mixer)
 		self.canvas.add(self.scene._transform)
 		for widget in self.scene.widgets:
@@ -60,6 +60,7 @@ class MainWidget(BaseWidget):
 								  touch=touch)
 
 	def on_scene_change(self, event):
+		print event.type, event
 		self.load_new_scene(event.scene_name)
 	
 	def on_server_request(self, event):

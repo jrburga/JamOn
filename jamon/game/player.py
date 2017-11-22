@@ -6,12 +6,10 @@ from track import Track
 
 num_lanes = 8
 default_keys = [
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'], 
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'],
-	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
+	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r', ' '], 
+	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r', ' '],
+	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p', ' ']
 ]
-
-lock_in = [32] # spacebar
 
 # assert([len(dk) == num_lanes for dk in default_keys])
 
@@ -20,7 +18,7 @@ default_keys = [[ord(k) for k in dk] for dk in default_keys]
 class Player(Keyboard):
 	def __init__(self, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
-		self.keys = default_keys[num]+lock_in
+		self.keys = default_keys[0]
 		self.instrument = Instrument(inst)
 
 		self.note_sequence = []

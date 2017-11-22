@@ -10,6 +10,9 @@ class Event(object):
 		self.type = event_type
 		self.__dict__.update(kwargs)
 
+	def __repr__(self):
+		return "<", self.type, ">"
+
 class Game(object):
 	def __init__(self):
 		self._scenes = {}
@@ -151,19 +154,15 @@ class GameObject(object):
 class Scene(GameObject):
 	name = None
 	scene_events = ['on_scene_change', 'on_server_request']
-	def __init__(self, base_widget=None):
+	def __init__(self, **kwargs):
 		super(Scene, self).__init__()
-		self.base_widget = base_widget
+		self.base_widget = kwargs['base_widget']
 		self._events = deque()
-		self._new_scene = None
 
 	def _add_widget(self, widget):
 		return
 		assert self.base_widget, 'Scene needs base widget to attach widget'
 		self.base_widget.add_widget(widget)
-
-	def change_scene(self):
-		return True if self._new_scene else False
 
 	def next_scene(self):
 		new_scene = self._new_scene
@@ -179,15 +178,10 @@ class Scene(GameObject):
 			if self.base_widget:
 				getattr(self.base_widget, event.type)(event)
 
-
 	def _on_update(self):
 		while self._events:
 			self._handle_event(self._events.pop())
 		super(Scene, self)._on_update()
 
-	def on_scene_change(self, event):
-		self._new_scene = event.scene_name
-		self._change_scene = True
-		
 	def on_update(self):
 		pass
