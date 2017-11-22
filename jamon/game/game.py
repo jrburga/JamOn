@@ -149,6 +149,7 @@ class GameObject(object):
 		pass
 
 class Scene(GameObject):
+	scene_events = ['on_scene_change', 'on_server_request']
 	def __init__(self, name, base_widget=None):
 		super(Scene, self).__init__()
 		self.name = name
@@ -171,6 +172,13 @@ class Scene(GameObject):
 
 	def trigger_event(self, event_type, **kwargs):
 		self._events.append(Event(event_type, **kwargs))
+
+	def _handle_event(self, event):
+		super(Scene, self)._handle_event(event)
+		if event.type in self.scene_events:
+			if self.base_widget:
+				getattr(self.base_widget, event.type)(event)
+
 
 	def _on_update(self):
 		while self._events:

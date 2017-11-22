@@ -17,10 +17,11 @@ class MainWidget(BaseWidget):
 				self.load_new_scene(scene)
 				break
 		else:
-			self.load_new_scene[scenes[0]]
+			self.load_new_scene(scenes[0])
 
 	def unload_current_scene(self):
 		if self.scene == None: return
+		self.scene.base_widget = None
 		self.canvas.remove(self.scene._transform)
 		self.audio.set_generator(None)
 		for widget in self.scene.widgets:
@@ -29,6 +30,7 @@ class MainWidget(BaseWidget):
 	def load_new_scene(self, scene):
 		self.unload_current_scene()
 		self.scene = scene
+		self.scene.base_widget = self
 		self.audio.set_generator(scene._mixer)
 		self.canvas.add(scene._transform)
 		print 'loading scene', scene.widgets
@@ -59,8 +61,11 @@ class MainWidget(BaseWidget):
 		self.scene.trigger_event('on_touch_move',
 								  touch=touch)
 
+	def on_scene_change(self, event):
+		self.load_new_scene(self.scenes[event.scene_name])
+	
+	def on_server_request(self, event):
+		print event.server_type
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
-		if self.scene.change_scene():
-			self.load_new_scene(self.scenes[self.scene.next_scene()])

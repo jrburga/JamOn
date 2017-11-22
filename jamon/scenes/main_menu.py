@@ -7,6 +7,9 @@ from jamon.game.controller import Keyboard
 
 scene = Scene('main_menu')
 
+def on_click(go):
+	go.trigger_event('on_server_request', kwarg=1)
+
 BUTTON_WIDTH = Window.width * 0.4
 BUTTON_HEIGHT = Window.height / 3.5
 PERCENT_WINDOW_BUTTONS = .70
@@ -27,6 +30,7 @@ top_y_center = AREA_HEIGHT * 4./5 - 6./10 * BUTTON_HEIGHT
 
 # host_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.3, 0.7)) # Add labels, label="Host Game"
 host_game_button = Button()
+host_game_button.bind(on_click)
 host_game_button.position = (left_x_center, top_y_center)
 
 # join_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.7, 0.2, 0.3))

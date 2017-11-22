@@ -9,13 +9,14 @@ class Button(GameObject):
 		self.widget = _Button(**kwargs)
 		self.widget.bind(on_press=self._on_press)
 		self.add_widget(self.widget)
+		self.callbacks = []
+
+	def bind(self, callback):
+		self.callbacks.append(callback)
 
 	def _on_press(self, instance):
-		self.on_press()
-
-	def on_press(self):
-		print 'go callback'
-		# self.trigger_event()
+		for callback in self.callbacks:
+			callback(self)
 
 	@property
 	def text(self):
