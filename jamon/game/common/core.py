@@ -94,7 +94,6 @@ def run(widget):
             return widget()
 
     try:
-        Window.fullscreen = True
         MainApp().run()
     except:
         traceback.print_exc()

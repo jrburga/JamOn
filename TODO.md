@@ -6,3 +6,4 @@
 * Improved graphics
 * More instrument packs / different scales
 
+* make game objects accept widgets

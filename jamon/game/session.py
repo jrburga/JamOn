@@ -24,7 +24,7 @@ class Session(GameObject):
 		self.clock = Clock()
 		self.temp_map = SimpleTempoMap(bpm=tempo)
 		self.sched = Scheduler(self.clock, self.temp_map)
-		self.players = [Player(bars, tempo), Player(bars, tempo, num=1, inst='drums')]
+		self.players = [Player(bars, tempo), Player(bars, tempo, num=1), Player(bars, tempo, num=2, inst='drums')]
 		self.IM = InstrumentManager(self.sched)
 
 		i2player = Window.width/len(self.players)

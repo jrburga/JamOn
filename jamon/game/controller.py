@@ -38,3 +38,7 @@ class Keyboard(Controller):
 
 	def key_up(self, key_index):
 		pass
+
+class Network(Controller):
+	def __init__(self):
+		super(Controller, self).__init__([])

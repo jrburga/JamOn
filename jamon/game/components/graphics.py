@@ -88,15 +88,12 @@ class Sprite(InstructionGroup):
 
 class EllipseSprite(Sprite):
 	def __init__(self, size, color):
-		super(EllipseSprite, self).__init__(Ellipse(), color)
-		self.texture.csize = size
+		super(EllipseSprite, self).__init__(Ellipse(size=size), color)
 
 class CircleSprite(Sprite):
 	def __init__(self, radius, color):
-		super(CircleSprite, self).__init__(Ellipse(), color)
-		self.texture.size = (radius, radius)
+		super(CircleSprite, self).__init__(Ellipse(size=(radius/2, radius/2)), color)
 
 class RectSprite(Sprite):
 	def __init__(self, size, color):
-		super(RectSprite, self).__init__(Rectangle(), color)
-		self.texture.size = size
+		super(RectSprite, self).__init__(Rectangle(size=size), color)
