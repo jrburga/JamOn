@@ -1,11 +1,11 @@
 from jamon.game.game import Scene, GameObject
+from jamon.game.widgets import *
 from jamon.game.components.graphics import *
-from jamon.scenes.scene_util import *
 from kivy.core.window import Window
 
 from jamon.game.controller import Keyboard
 
-scene = Scene('main_menu', start=True)
+scene = Scene('main_menu')
 
 BUTTON_WIDTH = Window.width * 0.4
 BUTTON_HEIGHT = Window.height / 3.5
@@ -25,16 +25,16 @@ top_y_center = AREA_HEIGHT * 4./5 - 6./10 * BUTTON_HEIGHT
 
 # header = GameObject()
 
-host_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.3, 0.7)) # Add labels, label="Host Game"
-host_game_button = Button(host_game_rect)
+# host_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.3, 0.7)) # Add labels, label="Host Game"
+host_game_button = Button()
 host_game_button.position = (left_x_center, top_y_center)
 
-join_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.7, 0.2, 0.3))
-join_game_button = Button(join_game_rect)
+# join_game_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.7, 0.2, 0.3))
+join_game_button = Button()
 join_game_button.position = (right_x_center, top_y_center)
 
-change_username_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.7, 0.3))
-change_username_button = Button(change_username_rect)
+# change_username_rect = RectSprite((BUTTON_WIDTH, BUTTON_HEIGHT), (0.2, 0.7, 0.3))
+change_username_button = Button()
 change_username_button.position = (left_x_center, bottom_y_center)
 
 scene.add_game_object(host_game_button)
