@@ -10,19 +10,30 @@ class MainWidget(BaseWidget):
 
 		self.scenes = {scene.name: scene for scene in scenes}
 		self.scene = None
+
+		start_scene = 'main_menu'
 		for scene in scenes:
-			if scene.is_start():
-				self.set_scene(scene)
+			if scene.name == start_scene:
+				self.load_new_scene(scene)
 				break
 		else:
-			self.set_scene[scenes[0]]
+			self.load_new_scene[scenes[0]]
 
-	def set_scene(self, scene):
-		if self.scene:
-			self.canvas.remove(self.scene._transform)
+	def unload_current_scene(self):
+		if self.scene == None: return
+		self.canvas.remove(self.scene._transform)
+		self.audio.set_generator(None)
+		for widget in self.scene.widgets:
+			self.remove_widget(widget)
+
+	def load_new_scene(self, scene):
+		self.unload_current_scene()
 		self.scene = scene
 		self.audio.set_generator(scene._mixer)
 		self.canvas.add(scene._transform)
+		print 'loading scene', scene.widgets
+		for widget in self.scene.widgets:
+			self.add_widget(widget)
 
 	def on_key_down(self, keycode, modifiers):
 		self.scene.trigger_event('on_key_down', 
@@ -34,14 +45,17 @@ class MainWidget(BaseWidget):
 								 keycode=keycode)
 		
 	def on_touch_down(self, touch):
+		super(MainWidget, self).on_touch_down(touch)
 		self.scene.trigger_event('on_touch_down',
 								  touch=touch)
 
 	def on_touch_up(self, touch):
+		super(MainWidget, self).on_touch_up(touch)
 		self.scene.trigger_event('on_touch_up',
 								  touch=touch)
 
 	def on_touch_move(self, touch):
+		super(MainWidget, self).on_touch_move(touch)
 		self.scene.trigger_event('on_touch_move',
 								  touch=touch)
 
@@ -49,4 +63,4 @@ class MainWidget(BaseWidget):
 		self.scene._on_update()
 		self.audio.on_update()
 		if self.scene.change_scene():
-			self.set_scene(self.scenes[self.scene.next_scene()])
+			self.load_new_scene(self.scenes[self.scene.next_scene()])

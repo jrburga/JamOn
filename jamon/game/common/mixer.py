@@ -15,7 +15,7 @@ class Mixer(object):
     def __init__(self):
         super(Mixer, self).__init__()
         self.generators = []
-        self.gain = 0.25;
+        self.gain = 1.0;
 
     def add(self, gen) :
         if gen not in self.generators:

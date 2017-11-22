@@ -7,6 +7,7 @@ from track import Track
 num_lanes = 8
 default_keys = [
 	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'], 
+	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'],
 	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
 ]
 

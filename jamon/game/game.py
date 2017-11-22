@@ -39,7 +39,23 @@ class GameObject(object):
 		self._mixer = Mixer()
 		self._parent = None
 		self._game_objects = set()
+		self._widgets = set()
 		self._event_listeners = defaultdict(lambda: [])
+
+	def _add_widget(self, widget):
+		assert self._parent, 'Game Object needs scene to attach widget'
+		self._parent._add_widget(widget)
+
+	@property
+	def widgets(self):
+		widgets = self._widgets.copy()
+		for go in self._game_objects:
+			widgets.update(go.widgets)
+		return widgets
+		
+	def add_widget(self, widget):
+		self._widgets.add(widget)
+		# self._add_widget(widget)
 
 	@property
 	def position(self):
@@ -48,6 +64,8 @@ class GameObject(object):
 	@position.setter
 	def position(self, new_pos):
 		self._transform.position.xy = new_pos
+		for widget in self._widgets:
+			widget.pos = new_pos
 
 	@property
 	def rotation(self):
@@ -131,15 +149,17 @@ class GameObject(object):
 		pass
 
 class Scene(GameObject):
-	def __init__(self, name, start=False):
+	def __init__(self, name, base_widget=None):
 		super(Scene, self).__init__()
 		self.name = name
-		self._start = start
+		self.base_widget = base_widget
 		self._events = deque()
 		self._new_scene = None
 
-	def is_start(self):
-		return self._start
+	def _add_widget(self, widget):
+		return
+		assert self.base_widget, 'Scene needs base widget to attach widget'
+		self.base_widget.add_widget(widget)
 
 	def change_scene(self):
 		return True if self._new_scene else False

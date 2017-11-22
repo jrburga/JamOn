@@ -163,12 +163,7 @@ class Lane(GameObject):
 		if self.active_gem is not None and not self.track.drum:
 			self.active_gem.update_length(self.track.now_bar.position[1])
 		self.remove_old_gems()
-			
-
-
-
 		
-
 class Gem(GameObject):
 	def __init__(self, color, time=0, length=0):
 		super(Gem, self).__init__()
@@ -178,8 +173,7 @@ class Gem(GameObject):
 		self.posistion = (100,100)
 		self.add_graphic(self.sprite)
 		self.y = 0
-
-
+		
 	@property
 	def lane(self):
 		return self._parent
