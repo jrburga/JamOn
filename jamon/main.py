@@ -1,6 +1,6 @@
 from game.common.core import *
 from game.common.audio import Audio
-
+from server.server_parties import *
 from scenes import scenes
 import numpy as np
 
@@ -9,18 +9,16 @@ class MainWidget(BaseWidget):
 		super(MainWidget, self).__init__()
 		self.audio = Audio(2)
 
-		self.scenes = {scene.name: scene for scene in scenes}
+		self.scenes = scenes
 		self.scene = None
 
-		self.game_state = GameState()
-		
 		start_scene = 'main_menu'
-		for scene in scenes:
-			if scene.name == start_scene:
-				self.load_new_scene(scene)
-				break
+		kwargs = {}
+		self.game_state = GameState()
+		if start_scene:
+			self.load_new_scene(start_scene, **kwargs)
 		else:
-			self.load_new_scene(scenes[0])
+			self.load_new_scene(scenes.keys()[0])
 
 	def unload_current_scene(self):
 		if self.scene == None: return
@@ -30,13 +28,11 @@ class MainWidget(BaseWidget):
 		for widget in self.scene.widgets:
 			self.remove_widget(widget)
 
-	def load_new_scene(self, scene):
+	def load_new_scene(self, scene_name, **kwargs):
 		self.unload_current_scene()
-		self.scene = scene
-		self.scene.base_widget = self
-		self.audio.set_generator(scene._mixer)
-		self.canvas.add(scene._transform)
-		print 'loading scene', scene.widgets
+		self.scene = self.scenes[scene_name](base_widget=self, **kwargs)
+		self.audio.set_generator(self.scene._mixer)
+		self.canvas.add(self.scene._transform)
 		for widget in self.scene.widgets:
 			self.add_widget(widget)
 
@@ -65,16 +61,15 @@ class MainWidget(BaseWidget):
 								  touch=touch)
 
 	def on_scene_change(self, event):
-		self.load_new_scene(self.scenes[event.scene_name])
+		self.load_new_scene(event.scene_name)
 	
 	def on_server_request(self, event):
 		print event.server_type
-
+		print "here"
 		if event.server_type == "host_game":
 			self.game_state.server_object = Host()
 		elif event.server_type == "join_game":
 			self.game_state.server_object = Host()
-
 
 	def on_update(self):
 		self.scene._on_update()

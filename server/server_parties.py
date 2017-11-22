@@ -140,9 +140,22 @@ class Guest(ServerObject):
     def __init__(self):
         super(Guest, self).__init__()
         self.is_guest = True
-
-    def connect_to_host(self, host_ip):
+        self.host_ip = 'localhost' #Default, but obviously not logical
+    
+    def set_host_ip(self, host_ip):
+        self.host_ip = host_ip
+        
+    def connect_to_host(self):
         print "trying to connect to host. jk, this isn't implemented yet"
+        server_address = (self.host_ip, PORT)
+        print 'server address & port:', server_address
+        self.sock.connect(server_address)
+
+    def disconnect_from_host(self):
+        print "Disconnecting from host"
+        self.sock.close()
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
 
 class BandMember(object):
     """

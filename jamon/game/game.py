@@ -124,7 +124,6 @@ class GameObject(object):
 		self._event_listeners[event].append(callback)
 
 	def trigger_event(self, event_type, **kwargs):
-		print event_type
 		assert self._parent != None, 'Game Object needs to be attached to a scene.\nEvent Lost to the void'
 		self._parent.trigger_event(event_type, **kwargs)
 
@@ -149,12 +148,12 @@ class GameObject(object):
 		pass
 
 class Scene(GameObject):
+	name = None
 	scene_events = ['on_scene_change', 'on_server_request']
-	def __init__(self, name, base_widget=None):
+	def __init__(self, base_widget=None):
 		super(Scene, self).__init__()
-		self.name = name
 		self.base_widget = base_widget
-		self._events = deque()
+		self._events = []
 		self._new_scene = None
 
 	def _add_widget(self, widget):
@@ -181,8 +180,10 @@ class Scene(GameObject):
 
 
 	def _on_update(self):
+
 		while self._events:
-			self._handle_event(self._events.pop())
+			print [event.type for event in self._events]
+			self._handle_event(self._events.pop(0))
 		super(Scene, self)._on_update()
 
 	def on_scene_change(self, event):
