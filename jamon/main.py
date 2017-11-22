@@ -2,6 +2,7 @@ from game.common.core import *
 from game.common.audio import Audio
 
 from scenes import scenes
+import numpy as np
 
 class MainWidget(BaseWidget):
 	def __init__(self):
@@ -11,6 +12,8 @@ class MainWidget(BaseWidget):
 		self.scenes = {scene.name: scene for scene in scenes}
 		self.scene = None
 
+		self.game_state = GameState()
+		
 		start_scene = 'main_menu'
 		for scene in scenes:
 			if scene.name == start_scene:
@@ -66,6 +69,28 @@ class MainWidget(BaseWidget):
 	
 	def on_server_request(self, event):
 		print event.server_type
+
+		if event.server_type == "host_game":
+			self.game_state.server_object = Host()
+		elif event.server_type == "join_game":
+			self.game_state.server_object = Host()
+
+
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
+
+
+class GameState(object):
+	def __init__(self):
+		self.username = "Guest_" + str(np.random.randint(1000000))
+		self.server_object = None    # Will be a server object of the subclass Host or Guest
+        
+
+
+
+
+
+
+
+

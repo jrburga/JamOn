@@ -26,6 +26,9 @@ class ServerObject(object):
 
         self.bind_to_port()
 
+    def get_ip_address(self):
+        return socket.gethostbyname(socket.gethostname())
+
     def bind_to_port(self):
         """Simple function to bind to the port
         """
@@ -52,7 +55,7 @@ class ServerObject(object):
 class Host(ServerObject):
     def __init__(self, num_connections=NUM_CONNS):
         super(Host, self).__init__(num_connections)
-        
+        self.is_host = True
         self.sock.listen(self.num_connections)
         self.band_formed = False
         self.band_members = {}      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
@@ -108,7 +111,6 @@ class Host(ServerObject):
 
 
     def send_to_guests(self, msg):
-
         if isinstance(msg, basestring):
             for band_member in self.band_members:
                 band_member.conn.send(msg)
@@ -137,6 +139,10 @@ class Host(ServerObject):
 class Guest(ServerObject):
     def __init__(self):
         super(Guest, self).__init__()
+        self.is_guest = True
+
+    def connect_to_host(self, host_ip):
+        print "trying to connect to host. jk, this isn't implemented yet"
 
 class BandMember(object):
     """
