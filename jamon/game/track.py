@@ -19,9 +19,9 @@ class Track(GameObject):
 		self.drum = percussive
 		# w, h = self.sprite.size
 
-		spb = 60./tempo
+		self.spb = 60./tempo
 		beats = bars*4
-		self.seconds = spb*beats
+		self.seconds = self.spb*beats
 
 		# Add quantizer instance for quantization
 		self.quant = Quantizer(self.seconds, 16)
@@ -155,7 +155,10 @@ class Lane(GameObject):
 		print self.active_gem.time, self.active_gem.length
 		self.active_gem.sprite.color.s = 0.3
 		# Quantize gem
-		self.track.quant.quantize_gem(self.active_gem)
+		if self.track.drum:
+			self.track.quant.quantize_drum_gem(self.active_gem)
+		else:
+			self.track.quant.quantize_gem(self.active_gem)
 		self.active_gem = None
 
 	def remove_old_gems(self):
@@ -176,7 +179,20 @@ class Lane(GameObject):
 			self.remove(gem)
 		self.old_gems = self.current_gems
 		self.current_gems = []
-		self.on_release(self.track.seconds)
+
+		# Release active gem, unless the gem was started recently, in which case the player 
+		# probably hit it too early while trying to make it start in the first measure.
+		if self.active_gem is not None:
+			start_thresh = 0.5 #beats
+			if self.track.seconds - self.active_gem.time < start_thresh * self.track.spb:
+				# Note was made too recently to be released at the end. Change start time to 0
+				self.active_gem.time = 0
+				self.active_gem.set_pos()
+				self.current_gems.append(self.active_gem)
+				self.old_gems.remove(self.active_gem)
+			else:
+				# Release the note
+				self.on_release(self.track.seconds)
 
 	def on_update(self):
 		if self.active_gem is not None and not self.track.drum:
@@ -215,7 +231,6 @@ class Gem(GameObject):
 		bot_y = self.lane.track.time2y(self.time + self.length)
 		size_x, size_y = self.sprite.texture.size
 		self.sprite.texture.size = (size_x, top_y - bot_y)
-		print 'size:', self.sprite.texture.size
 		self.position = (0, bot_y)
 
 	def get_height(self):

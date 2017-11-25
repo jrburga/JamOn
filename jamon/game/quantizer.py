@@ -34,6 +34,13 @@ class Quantizer:
 		gem.length = new_length
 		gem.set_pos_and_size()
 
+	# Same thing as quantize_gem() but for drum gems (no length)
+	def quantize_drum_gem(self, gem):
+		new_start = self.quantize_note(gem.time)
+		gem.time = new_start
+		gem.set_pos()
+
+
 
 ## Test the class ##
 if __name__ == '__main__':
