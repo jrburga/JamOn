@@ -1,5 +1,6 @@
 from game import GameObject
 from components.sprites import *
+from quantizer import Quantizer
 
 # Should really fix this graphically and not here.
 OFFSET = 7
@@ -14,12 +15,16 @@ class Track(GameObject):
 		self.w, self.h = self.sprite.size
 		self.last_y = 0
 
+
 		self.drum = percussive
 		# w, h = self.sprite.size
 
 		spb = 60./tempo
 		beats = bars*4
 		self.seconds = spb*beats
+
+		# Add quantizer instance for quantization
+		self.quant = Quantizer(self.seconds, 16)
 
 		self.t2y = self.h/self.seconds
 		# self.scale.x = 0.5
@@ -68,7 +73,7 @@ class Track(GameObject):
 		self.lanes[lane_num].on_release(self.now)
 
 	def time2y(self, t):
-		return self.h-self.t2y*(t%self.seconds)
+		return self.h-self.t2y*(t)
 
 	def y2time(self, y):
 		return (y+self.h)/(self.t2y*(t%self.seconds))
@@ -106,6 +111,7 @@ class Lane(GameObject):
 		self.now = 0
 		w, h = self.sprite.size
 		self.add_graphic(self.sprite)
+
 
 	@property
 	def gems(self):
@@ -146,8 +152,10 @@ class Lane(GameObject):
 		if self.active_gem is None:
 			return
 		self.active_gem.length = time-self.active_gem.time
-		print self.active_gem.length
+		print self.active_gem.time, self.active_gem.length
 		self.active_gem.sprite.color.s = 0.3
+		# Quantize gem
+		self.track.quant.quantize_gem(self.active_gem)
 		self.active_gem = None
 
 	def remove_old_gems(self):
@@ -163,9 +171,12 @@ class Lane(GameObject):
 		self.now = time
 
 	def new_phrase(self):
+		#Remove any old gems that haven't been removed yet
+		for gem in self.old_gems:
+			self.remove(gem)
 		self.old_gems = self.current_gems
 		self.current_gems = []
-		self.on_release(8)
+		self.on_release(self.track.seconds)
 
 	def on_update(self):
 		if self.active_gem is not None and not self.track.drum:
@@ -196,6 +207,16 @@ class Gem(GameObject):
 
 	def on_miss(self, *args):
 		pass
+
+	# Function called to render gem based on it's
+	# self.time and self.length parameters.
+	def set_pos_and_size(self):
+		top_y = self.lane.track.time2y(self.time)
+		bot_y = self.lane.track.time2y(self.time + self.length)
+		size_x, size_y = self.sprite.texture.size
+		self.sprite.texture.size = (size_x, top_y - bot_y)
+		print 'size:', self.sprite.texture.size
+		self.position = (0, bot_y)
 
 	def get_height(self):
 		return self.sprite.texture.size[1]
