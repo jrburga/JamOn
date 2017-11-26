@@ -62,10 +62,6 @@ class Track(GameObject):
 	def player(self):
 		return self._parent
 
-	def lock_in(self):
-		for lane in self.lanes:
-			lane.lock_in()
-
 	def t2y_conversion(self, time):
 		return self.sprite.height-self.t2y
 
@@ -88,15 +84,24 @@ class Track(GameObject):
 		self.now = time
 
 	def on_update(self):
+		# Don't show bar and don't update if not composing
+		if not self.player.composing:
+			self.now_bar.color.a = 0
+			return
+
+		# Display the bar
+		self.now_bar.color.a = 1
+
 		x, _ = self.now_bar.position
 		y = self.time2y(self.now)
 		self.now_bar.position = (x, y)
 		new_phrase = self.last_y < y
 		self.last_y = y
+
 		for lane in self.lanes:
 			if new_phrase:
 				lane.new_phrase()
-			lane.on_update()
+			lane.on_lane_update()
 
 		if new_phrase:
 			notes_entered = False
@@ -113,8 +118,11 @@ class Track(GameObject):
 
 
 class Lane(GameObject):
+	COUNT = 0
 	def __init__(self):
 		super(Lane, self).__init__()
+		self.count = Lane.COUNT
+		Lane.COUNT += 1
 		self.sprite = LaneSprite()
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
@@ -139,6 +147,8 @@ class Lane(GameObject):
 		# Updated at end of every phrase
 		self.stage = 0
 
+		self.posted_note = False
+
 
 	@property
 	def gems(self):
@@ -148,16 +158,6 @@ class Lane(GameObject):
 	def track(self):
 		return self._parent
 
-	def lock_in(self):
-		# clearing it is definitely buggy. 
-		# Fix for later
-		
-		self.locked_gems = self.current_gems+self.old_gems
-		self.old_gems = []
-		self.current_gems = []
-		for gem in self.locked_gems:
-			gem.sprite.color.s = 1.0
-
 	def on_hit(self):
 		pass
 
@@ -166,6 +166,13 @@ class Lane(GameObject):
 
 	def on_press(self, time):
 		time_quant = self.track.quant.quantize_note(time)
+
+		# Note will appear on start of next round
+		if time_quant == self.track.seconds:
+			print 'posting note'
+			self.posted_note = True
+			self.active_gem = None
+			return
 
 		# check if current gem is already there
 		for gem in self.current_gems:
@@ -181,8 +188,8 @@ class Lane(GameObject):
 				#Save gem for beatmatching possiblity
 				self.poss_gem = gem
 				break
-
-		gem = Gem(0, time)
+		print 'new gem with time', time_quant
+		gem = Gem(0, time_quant)
 		self.add(gem)
 		gem.set_pos()
 		self.active_gem = gem
@@ -194,14 +201,15 @@ class Lane(GameObject):
 			return
 		self.active_gem.on_release(time)
 		# Check if beat matched:
-		if self.poss_gem is not None and self.active_gem.length == self.poss_gem.length:
-			print 'matched!'
-			self.active_gem.matched(self.poss_gem.stage)
-			# Check if gem is in final stage (locked in)
-			if self.active_gem.stage == 2:
-				if (self.active_gem.time, self.active_gem.length) not in self.locked_times:
-					self.locked_times.append( (self.active_gem.time, self.active_gem.length) )
-				print 'Gem locked in'
+		if self.poss_gem is not None:
+			if self.track.drum or self.active_gem.length == self.poss_gem.length:
+				print 'matched!'
+				self.active_gem.matched(self.poss_gem.stage)
+				# Check if gem is in final stage (locked in)
+				if self.active_gem.stage == 2:
+					if (self.active_gem.time, self.active_gem.length) not in self.locked_times:
+						self.locked_times.append( (self.active_gem.time, self.active_gem.length) )
+					print 'Gem locked in'
 		self.poss_gem = None
 		self.active_gem = None
 
@@ -209,6 +217,7 @@ class Lane(GameObject):
 		to_remove = []
 		for gem in self.old_gems:
 			if gem.y-gem.get_height() > self.track.now_bar.position[1]:
+				print 'removing gem'
 				to_remove.append(gem)
 		for gem in to_remove:
 			self.old_gems.remove(gem)
@@ -229,17 +238,19 @@ class Lane(GameObject):
 		# Release active gem, unless the gem was started recently, in which case the player 
 		# probably hit it too early while trying to make it start in the first measure.
 		if self.active_gem is not None:
-			start_thresh = 0.25 #beats
-			if self.track.seconds - self.active_gem.time < start_thresh * self.track.spb:
-				# Note was made too recently to be released at the end. Change start time to 0
-				self.active_gem.time = 0
-				self.active_gem.set_pos()
-				self.current_gems.append(self.active_gem)
-				self.old_gems.remove(self.active_gem)
-				num_curr += 1
-			else:
-				# Release the note
-				self.on_release(self.track.seconds)
+			# start_thresh = 0.25 #beats
+			# if self.track.seconds - self.active_gem.time < start_thresh * self.track.spb:
+			# 	# Note was made too recently to be released at the end. Change start time to 0
+			# 	self.active_gem.time = 0
+			# 	self.active_gem.set_pos()
+			# 	self.current_gems.append(self.active_gem)
+			# 	self.old_gems.remove(self.active_gem)
+			# 	num_curr += 1
+			# else:
+
+			# Release the note
+			self.on_release(self.track.seconds)
+		
 
 		# print "CURRENT GEMS:", num_curr
 		# print "LOCKED TIMES:", len(self.locked_times)
@@ -258,7 +269,12 @@ class Lane(GameObject):
 		self.prev_num_locked = len(self.locked_times)
 		self.locked_times = []
 
-	def on_update(self):
+		if self.posted_note:
+			# Post note at beginning of loop
+			self.posted_note = False
+			self.on_press(0)
+
+	def on_lane_update(self):
 		if self.active_gem is not None and not self.track.drum:
 			self.active_gem.update_length(self.track.now_bar.position[1])
 		self.remove_old_gems()
@@ -284,7 +300,7 @@ class Gem(GameObject):
 
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
-		self.position = (0, self.y)
+		self.position = (0, self.y-self.sprite.size[1])
 		# print self.position.y
 
 	def on_hit(self, *args):
@@ -308,8 +324,12 @@ class Gem(GameObject):
 	def matched(self, prev_stage):
 		self.stage = min(2, prev_stage + 1)
 		color = self.color_stages[self.stage]
-		print 'stage:', self.stage
-		self.add_graphic(GradientGemSprite(self.sprite.size, color))
+		# Dispay gradient if not drum note
+		if not self.lane.track.drum:
+			self.add_graphic(GradientGemSprite(self.sprite.size, color))
+		else:
+			#Just change color
+			self.add_graphic(GemSprite(color))
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
