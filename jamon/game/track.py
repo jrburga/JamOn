@@ -188,7 +188,6 @@ class Lane(GameObject):
 				#Save gem for beatmatching possiblity
 				self.poss_gem = gem
 				break
-		print 'new gem with time', time_quant
 		gem = Gem(0, time_quant)
 		self.add(gem)
 		gem.set_pos()
@@ -206,7 +205,7 @@ class Lane(GameObject):
 				print 'matched!'
 				self.active_gem.matched(self.poss_gem.stage)
 				# Check if gem is in final stage (locked in)
-				if self.active_gem.stage == 2:
+				if self.active_gem.stage >= 1:
 					if (self.active_gem.time, self.active_gem.length) not in self.locked_times:
 						self.locked_times.append( (self.active_gem.time, self.active_gem.length) )
 					print 'Gem locked in'
@@ -235,39 +234,36 @@ class Lane(GameObject):
 		self.old_gems = self.current_gems
 		self.current_gems = []
 
-		# Release active gem, unless the gem was started recently, in which case the player 
-		# probably hit it too early while trying to make it start in the first measure.
+		# Release active gem
 		if self.active_gem is not None:
-			# start_thresh = 0.25 #beats
-			# if self.track.seconds - self.active_gem.time < start_thresh * self.track.spb:
-			# 	# Note was made too recently to be released at the end. Change start time to 0
-			# 	self.active_gem.time = 0
-			# 	self.active_gem.set_pos()
-			# 	self.current_gems.append(self.active_gem)
-			# 	self.old_gems.remove(self.active_gem)
-			# 	num_curr += 1
-			# else:
-
-			# Release the note
 			self.on_release(self.track.seconds)
 		
 
-		# print "CURRENT GEMS:", num_curr
-		# print "LOCKED TIMES:", len(self.locked_times)
-		# print "PREV LOCKED:", self.prev_num_locked
+		print "CURRENT GEMS:", num_curr
+		print "LOCKED TIMES:", len(self.locked_times)
+		print "PREV LOCKED:", self.prev_num_locked
 		# Figure new stage
 		if self.stage == 0:
 			if num_curr > 0:
 				self.stage = 1
 		elif self.stage == 1:
-			if num_curr == len(self.locked_times):
+			if num_curr == 0:
+				self.stage = 0
+			elif num_curr == len(self.locked_times):
 				self.stage = 2
 		elif self.stage == 2:
-			if num_curr == len(self.locked_times) == self.prev_num_locked:
+			if num_curr == 0:
+				self.stage = 0
+			elif num_curr == len(self.locked_times) == self.prev_num_locked:
 				self.stage = 3
+			else:
+				self.stage = 2
+
+		print 'new stage:', self.stage
 
 		self.prev_num_locked = len(self.locked_times)
 		self.locked_times = []
+
 
 		if self.posted_note:
 			# Post note at beginning of loop
