@@ -24,7 +24,7 @@ class Track(GameObject):
 		self.seconds = self.spb*beats
 
 		# Add quantizer instance for quantization
-		self.quant = Quantizer(self.seconds, 16)
+		self.quant = Quantizer(self.seconds, 32)
 
 		self.t2y = self.h/self.seconds
 		# self.scale.x = 0.5
@@ -139,8 +139,14 @@ class Lane(GameObject):
 
 	def on_press(self, time):
 		# check if gem is already there
-		for gem in self.gems:
-			print gem
+		time_quant = self.track.quant.quantize_note(time)
+		print 'num current gems:', len(self.current_gems)
+		for gem in self.current_gems:
+			# Don't make a new gem if there is already a gem within
+			# the same beat grid (dictated from Quantizer)
+			if time_quant == gem.time:
+				print 'gem overlap'
+				return
 		gem = Gem((0, 1, 0), time)
 		self.add(gem)
 		gem.set_pos()
@@ -183,7 +189,7 @@ class Lane(GameObject):
 		# Release active gem, unless the gem was started recently, in which case the player 
 		# probably hit it too early while trying to make it start in the first measure.
 		if self.active_gem is not None:
-			start_thresh = 0.5 #beats
+			start_thresh = 0.25 #beats
 			if self.track.seconds - self.active_gem.time < start_thresh * self.track.spb:
 				# Note was made too recently to be released at the end. Change start time to 0
 				self.active_gem.time = 0

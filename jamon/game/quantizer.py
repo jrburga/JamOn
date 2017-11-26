@@ -30,6 +30,11 @@ class Quantizer:
 		new_start = self.quantize_note(gem.time)
 		new_end = self.quantize_note(gem.time + gem.length)
 		new_length = new_end - new_start
+
+		# if note was hit too fast, snap note to smallest beat grid size
+		if new_length == 0:
+			new_length = self.spn
+			
 		gem.time = new_start
 		gem.length = new_length
 		gem.set_pos_and_size()
