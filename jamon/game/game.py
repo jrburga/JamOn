@@ -178,7 +178,6 @@ class Scene(GameObject):
 			if self.base_widget:
 				getattr(self.base_widget, event.type)(event)
 
-
 	def _on_update(self):
 
 		while self._events:

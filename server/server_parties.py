@@ -4,10 +4,12 @@ from thread import *
 import numpy as np
 import json
 
-LOCAL_HOST  = '127.0.0.1'
+HOST        = '0.0.0.0'
 PORT        = 21385
 NUM_CONNS   = 4
+NUM_PINGPONGS = 4
 
+MSG_SIZE = 2**20
 
 #TODO: Support "dev mode" and "prod mode":
     # "dev mode" will have everything point to localhost
@@ -20,7 +22,7 @@ NUM_CONNS   = 4
 class ServerObject(object):
     def __init__(self, num_connections):
         self.port = PORT
-        self.host = LOCAL_HOST
+        self.host = HOST
         self.num_connections = num_connections
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -76,14 +78,15 @@ class Host(ServerObject):
         """
         while not self.band_formed:
             #wait to accept a connection - blocking call
+            print "waiting to accept"
             conn, addr = self.sock.accept()
+            print "accepted!"
             if not self.band_formed:
                 band_member = BandMember(conn, addr, False)
                 self.band_members[band_member.addr_str] = band_member
                 print 'Connected with ' + addr[0] + ':' + str(addr[1])
-            
-            #start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function.
-            start_new_thread(self.guest_listen, (band_member,))
+                #start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function.
+                start_new_thread(self.guest_listen, (band_member,))
 
         print "Band formed!"
         print "There are " + str(len(self.band_members.keys()) + 1) + " band members (including the host)"
@@ -94,21 +97,39 @@ class Host(ServerObject):
                       socket.SOCK_STREAM).connect( (self.host, self.port)) 
                       # ^dummy socket to kill the accept() statement
 
-    # Loop to listen to guests
+    # def play_ping_pong(self, band_member):
+    #     for i in range(NUM_PINGPONGS):
+    #         #ping
+
+
+    #         #wait for pong
+
+    #         #save
+    #     #synthesize & save results
+    #     pass
+
+
     def guest_listen(self, band_member):
+        """
+        Loop to listen to guests -- should be called in another thread
+        """
+        # Ping pong for time synchronization
+        # self.play_ping_pong(band_member)
+
         # TODO Send band_member_info to client
-        band_member.conn.send('Welcome to the server. My band member info is: TODO')
+        band_member.conn.send('Initial Band Member Info')
 
         # Infinite loop so that we constantly listen
         while True:
             # Receiving from client
-            data = band_member.conn.recv(1024)
+            data = band_member.conn.recv(MSG_SIZE)
+            print "Message Received from", band_member
+            print data
             self.msg_received(data, band_member)
 
         # came out of loop
         band_member.conn.close()
-        print "Searching stopped successfully"
-
+        print "Stopped listening to," band_member
 
     def send_to_guests(self, msg):
         if isinstance(msg, basestring):
@@ -141,21 +162,56 @@ class Guest(ServerObject):
         super(Guest, self).__init__()
         self.is_guest = True
         self.host_ip = 'localhost' #Default, but obviously not logical
-    
+        self.host_member = None
+
     def set_host_ip(self, host_ip):
         self.host_ip = host_ip
-        
-    def connect_to_host(self):
-        print "trying to connect to host. jk, this isn't implemented yet"
-        server_address = (self.host_ip, PORT)
-        print 'server address & port:', server_address
-        self.sock.connect(server_address)
+
+    def connect_to_host(self, timeout=30):
+        try:
+            server_address = (self.host_ip, PORT)
+            print 'server address & port:', server_address
+            self.sock.connect(server_address, timeout=timeout)
+        except Exception as e:
+            raise e
+
+        # if success, do (1) make host_member, (2) start the listen loop
+        self.host_member = BandMember(None, self.host_ip, True)
+
+        start_new_thread(self.host_listen, ())
+
+    def host_listen(self):
+        """
+        Loop to listen to host -- should be called in another thread
+        """
+        # TODO Send band_member_info to client
+        self.sock.send('Initial Band Member Info: From Guest')
+
+        # Infinite loop so that we constantly listen
+        while True:
+            # Receiving from client
+            data = self.sock.recv(MSG_SIZE)
+            print "Message Received from", band_member
+            print data
+            self.msg_received(data, band_member)
+
+        # came out of loop
+        band_member.conn.close()
+        print "Stopped listening to," band_member
 
     def disconnect_from_host(self):
         print "Disconnecting from host"
         self.sock.close()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+    def send_to_band(self, msg, host_only=False):
+        """
+        Sends to the host with "send_to_band":True
+        """
+        send_dict = {"send_to_band":not host_only}
+        send_dict.update(msg)
+        msg_str = json.dumps(send_dict)
+        self.sock.send(msg_str)
 
 class BandMember(object):
     """

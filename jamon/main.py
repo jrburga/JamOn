@@ -64,17 +64,14 @@ class MainWidget(BaseWidget):
 		self.load_new_scene(event.scene_name)
 	
 	def on_server_request(self, event):
-		print event.server_type
-		print "here"
 		if event.server_type == "host_game":
 			self.game_state.server_object = Host()
 		elif event.server_type == "join_game":
-			self.game_state.server_object = Host()
+			self.game_state.server_object = Guest()
 
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
-
 
 class GameState(object):
 	def __init__(self):
