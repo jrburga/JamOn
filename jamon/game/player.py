@@ -18,7 +18,7 @@ default_keys = [[ord(k) for k in dk] for dk in default_keys]
 class Player(Keyboard):
 	def __init__(self, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
-		self.keys = default_keys[0]
+		self.keys = default_keys[num]
 		self.instrument = Instrument(inst)
 
 		self.note_sequence = []
