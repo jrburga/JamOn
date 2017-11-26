@@ -5,14 +5,18 @@ from scenes import scenes
 import numpy as np
 
 class MainWidget(BaseWidget):
-	def __init__(self):
+	def __init__(self, argv):
 		super(MainWidget, self).__init__()
+
 		self.audio = Audio(2)
 
 		self.scenes = scenes
 		self.scene = None
 
 		start_scene = 'main_menu'
+		if len(argv) > 1:
+			print 'starting in scene ' + argv[1]
+			start_scene = argv[1]
 		kwargs = {}
 		self.game_state = GameState()
 		if start_scene:

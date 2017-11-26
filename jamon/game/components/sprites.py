@@ -9,6 +9,7 @@ track_size = (track_width, Window.height)
 lane_size = (lane_width, Window.height)
 now_bar_size = (track_width, now_bar_width)
 gem_size = (lane_width, now_bar_width)
+bar_line_size = (track_width, 2)
 
 track_color = (.85, .85, .85)
 now_bar_color = (.13, .54, .13)
@@ -18,6 +19,12 @@ lane_color = (1, 1, 1)
 class GemSprite(RectSprite):
 	def __init__(self, color):
 		super(GemSprite, self).__init__(gem_size, color)
+
+class GradientGemSprite(GradientRectSprite):
+	def __init__(self, size, color_1):
+		r, g, b = color_1
+		color_2 = (r*.75, g*.75, b*.75)
+		super(GradientGemSprite, self).__init__( (int(size[0]),int(size[1])), color_1, color_2, dir='vertical')
 
 class TrackSprite(RectSprite):
 	def __init__(self):
@@ -31,4 +38,10 @@ class LaneSprite(RectSprite):
 class NowBarSprite(RectSprite):
 	def __init__(self):
 		super(NowBarSprite, self).__init__(now_bar_size, now_bar_color)
+
+class BarLineSprite(RectSprite):
+	def __init__(self, ind):
+		color = (.5, .5, .5) if ind % 4 == 0 else track_color
+		super(BarLineSprite, self).__init__(bar_line_size, color)
+
 

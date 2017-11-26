@@ -65,7 +65,7 @@ class Player(Keyboard):
 
 	def lock_in_sequence(self):
 		self.composing = False
-		self.track.lock_in()
+		# self.track.lock_in()
 		self.trigger_event('on_lock_in')
 
 
