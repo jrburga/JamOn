@@ -84,19 +84,19 @@ class Track(GameObject):
 		self.now = time
 
 	def on_update(self):
-		# Don't show bar and don't update if not composing
-		if not self.player.composing:
-			self.now_bar.color.a = 0
-			return
+		
 
 		# Display the bar
-		self.now_bar.color.a = 1
+		self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
 
 		x, _ = self.now_bar.position
 		y = self.time2y(self.now)
 		self.now_bar.position = (x, y)
 		new_phrase = self.last_y < y
 		self.last_y = y
+
+		if not self.player.composing:
+			return
 
 		for lane in self.lanes:
 			if new_phrase:
@@ -256,6 +256,7 @@ class Lane(GameObject):
 				self.stage = 0
 			elif num_curr == len(self.locked_times) == self.prev_num_locked:
 				self.stage = 3
+				return
 			else:
 				self.stage = 2
 
