@@ -58,6 +58,10 @@ class Track(GameObject):
 			gems += lane.gems
 		return gems
 
+	@property
+	def player(self):
+		return self._parent
+
 	def lock_in(self):
 		for lane in self.lanes:
 			lane.lock_in()
@@ -94,6 +98,19 @@ class Track(GameObject):
 				lane.new_phrase()
 			lane.on_update()
 
+		if new_phrase:
+			notes_entered = False
+			all_locked = True
+			for lane in self.lanes:
+				stage = lane.stage
+				notes_entered = notes_entered or stage > 0
+				if stage > 0:
+					all_locked = all_locked and stage == 3
+
+			if notes_entered and all_locked:
+				print "TRACK LOCKED IN"
+				self.player.lock_in_sequence()
+
 
 class Lane(GameObject):
 	def __init__(self):
@@ -102,15 +119,25 @@ class Lane(GameObject):
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
+		self.poss_gem = None
 		self.current_gems = []
 		self.old_gems = []
-		self.locked_gems = []
+		self.locked_times = []
+		self.prev_num_locked = 0
 		# kind of redundant since all game_objets
 		# owned by a lane will be gems
 		# but maybe not since _game_objects is a set()
 		self.now = 0
 		w, h = self.sprite.size
 		self.add_graphic(self.sprite)
+
+		# Represents how locked in the lane is
+		# 0 - no notes
+		# 1 - still inserting notes
+		# 2 - all noted locked in but repeating one more time
+		# 3 - lane locked
+		# Updated at end of every phrase
+		self.stage = 0
 
 
 	@property
@@ -138,16 +165,24 @@ class Lane(GameObject):
 		pass
 
 	def on_press(self, time):
-		# check if gem is already there
 		time_quant = self.track.quant.quantize_note(time)
-		print 'num current gems:', len(self.current_gems)
+
+		# check if current gem is already there
 		for gem in self.current_gems:
 			# Don't make a new gem if there is already a gem within
 			# the same beat grid (dictated from Quantizer)
 			if time_quant == gem.time:
 				print 'gem overlap'
 				return
-		gem = Gem((0, 1, 0), time)
+
+		# check if old gem is already there
+		for gem in self.old_gems:
+			if time_quant == gem.time:
+				#Save gem for beatmatching possiblity
+				self.poss_gem = gem
+				break
+
+		gem = Gem(0, time)
 		self.add(gem)
 		gem.set_pos()
 		self.active_gem = gem
@@ -158,6 +193,16 @@ class Lane(GameObject):
 		if self.active_gem is None:
 			return
 		self.active_gem.on_release(time)
+		# Check if beat matched:
+		if self.poss_gem is not None and self.active_gem.length == self.poss_gem.length:
+			print 'matched!'
+			self.active_gem.matched(self.poss_gem.stage)
+			# Check if gem is in final stage (locked in)
+			if self.active_gem.stage == 2:
+				if (self.active_gem.time, self.active_gem.length) not in self.locked_times:
+					self.locked_times.append( (self.active_gem.time, self.active_gem.length) )
+				print 'Gem locked in'
+		self.poss_gem = None
 		self.active_gem = None
 
 	def remove_old_gems(self):
@@ -174,6 +219,8 @@ class Lane(GameObject):
 
 	def new_phrase(self):
 		#Remove any old gems that haven't been removed yet
+		
+		num_curr = len(self.current_gems)
 		for gem in self.old_gems:
 			self.remove(gem)
 		self.old_gems = self.current_gems
@@ -189,9 +236,27 @@ class Lane(GameObject):
 				self.active_gem.set_pos()
 				self.current_gems.append(self.active_gem)
 				self.old_gems.remove(self.active_gem)
+				num_curr += 1
 			else:
 				# Release the note
 				self.on_release(self.track.seconds)
+
+		# print "CURRENT GEMS:", num_curr
+		# print "LOCKED TIMES:", len(self.locked_times)
+		# print "PREV LOCKED:", self.prev_num_locked
+		# Figure new stage
+		if self.stage == 0:
+			if num_curr > 0:
+				self.stage = 1
+		elif self.stage == 1:
+			if num_curr == len(self.locked_times):
+				self.stage = 2
+		elif self.stage == 2:
+			if num_curr == len(self.locked_times) == self.prev_num_locked:
+				self.stage = 3
+
+		self.prev_num_locked = len(self.locked_times)
+		self.locked_times = []
 
 	def on_update(self):
 		if self.active_gem is not None and not self.track.drum:
@@ -199,15 +264,19 @@ class Lane(GameObject):
 		self.remove_old_gems()
 		
 class Gem(GameObject):
-	def __init__(self, color, time=0, length=0):
+	def __init__(self, stage=0, time=0, length=0):
 		super(Gem, self).__init__()
 		self.time = time
 		self.length = length
+		self.stage = stage
+		self.color_stages = ((.8, .3, .4), (.5, .55, .4), (.2, .8, .4))
+		color = self.color_stages[stage]
 		self.sprite = GemSprite(color)
 		self.posistion = (100,100)
 		self.add_graphic(self.sprite)
-		self.color = color
 		self.y = 0
+
+		
 		
 	@property
 	def lane(self):
@@ -226,7 +295,6 @@ class Gem(GameObject):
 
 	def on_release(self, time):
 		self.length = time-self.time
-		self.sprite.color.s = 0.3
 		# Quantize gem
 		if self.lane.track.drum:
 			self.lane.track.quant.quantize_drum_gem(self)
@@ -234,7 +302,14 @@ class Gem(GameObject):
 			self.lane.track.quant.quantize_gem(self)
 
 		# Draw gradient gem
-		self.add_graphic(GradientGemSprite(self.sprite.size, self.color))
+		self.add_graphic(GradientGemSprite(self.sprite.size, self.color_stages[0]))
+
+	# Called when the gem has been matched -- increase stage count and change color
+	def matched(self, prev_stage):
+		self.stage = min(2, prev_stage + 1)
+		color = self.color_stages[self.stage]
+		print 'stage:', self.stage
+		self.add_graphic(GradientGemSprite(self.sprite.size, color))
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
