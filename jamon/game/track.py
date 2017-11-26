@@ -157,14 +157,7 @@ class Lane(GameObject):
 	def on_release(self, time):
 		if self.active_gem is None:
 			return
-		self.active_gem.length = time-self.active_gem.time
-		print self.active_gem.time, self.active_gem.length
-		self.active_gem.sprite.color.s = 0.3
-		# Quantize gem
-		if self.track.drum:
-			self.track.quant.quantize_drum_gem(self.active_gem)
-		else:
-			self.track.quant.quantize_gem(self.active_gem)
+		self.active_gem.on_release(time)
 		self.active_gem = None
 
 	def remove_old_gems(self):
@@ -213,6 +206,7 @@ class Gem(GameObject):
 		self.sprite = GemSprite(color)
 		self.posistion = (100,100)
 		self.add_graphic(self.sprite)
+		self.color = color
 		self.y = 0
 		
 	@property
@@ -229,6 +223,18 @@ class Gem(GameObject):
 
 	def on_miss(self, *args):
 		pass
+
+	def on_release(self, time):
+		self.length = time-self.time
+		self.sprite.color.s = 0.3
+		# Quantize gem
+		if self.lane.track.drum:
+			self.lane.track.quant.quantize_drum_gem(self)
+		else:
+			self.lane.track.quant.quantize_gem(self)
+
+		# Draw gradient gem
+		self.add_graphic(GradientGemSprite(self.sprite.size, self.color))
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.

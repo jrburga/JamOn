@@ -1,6 +1,4 @@
 
-
-
 # The class for all your quantization needs!
 class Quantizer:
 
@@ -34,7 +32,7 @@ class Quantizer:
 		# if note was hit too fast, snap note to smallest beat grid size
 		if new_length == 0:
 			new_length = self.spn
-			
+
 		gem.time = new_start
 		gem.length = new_length
 		gem.set_pos_and_size()
