@@ -181,7 +181,6 @@ class Gem(GameObject):
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
 		self.position = (0, self.y)
-		# print self.position.y
 
 	def on_hit(self, *args):
 		pass

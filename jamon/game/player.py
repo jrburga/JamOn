@@ -64,10 +64,6 @@ class Player(Keyboard):
 		return self._parent
 
 	def lock_in_sequence(self):
-		# set note_sequence
-		# print 'locking sequence', self.num
-		# for gem in self.track.gems:
-		# 	continue
 		self.composing = False
 		self.track.lock_in()
 		self.trigger_event('on_lock_in')

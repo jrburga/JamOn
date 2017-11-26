@@ -10,9 +10,6 @@ class Event(object):
 		self.type = event_type
 		self.__dict__.update(kwargs)
 
-	def __repr__(self):
-		return "<", self.type, ">"
-
 class Game(object):
 	def __init__(self):
 		self._scenes = {}
@@ -127,7 +124,6 @@ class GameObject(object):
 		self._event_listeners[event].append(callback)
 
 	def trigger_event(self, event_type, **kwargs):
-		print event_type
 		assert self._parent != None, 'Game Object needs to be attached to a scene.\nEvent Lost to the void'
 		self._parent.trigger_event(event_type, **kwargs)
 
@@ -158,7 +154,7 @@ class Scene(GameObject):
 		super(Scene, self).__init__()
 		self.base_widget = kwargs['base_widget']
 		self._events = deque()
-
+		self._events = []
 	def _add_widget(self, widget):
 		return
 		assert self.base_widget, 'Scene needs base widget to attach widget'
@@ -179,8 +175,9 @@ class Scene(GameObject):
 				getattr(self.base_widget, event.type)(event)
 
 	def _on_update(self):
+
 		while self._events:
-			self._handle_event(self._events.pop())
+			self._handle_event(self._events.pop(0))
 		super(Scene, self)._on_update()
 
 	def on_update(self):

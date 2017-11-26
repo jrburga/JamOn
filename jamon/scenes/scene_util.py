@@ -3,6 +3,8 @@ from jamon.game.components.graphics import *
 
 from jamon.game.controller import Keyboard
 
+# For now, this code is useless and just kept around in case we want to use it later
+
 def print_event(scene, event):
 	print 'event was triggered'
 	print scene, event.keycode
