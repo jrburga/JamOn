@@ -10,6 +10,7 @@ class JoinGame(Scene):
 		self.guest = self.base_widget.game_state.server_object
 		print kwargs
 		self.display()
+		self.attempting_connection = False
 
 	def display(self):
 		"""
@@ -20,33 +21,35 @@ class JoinGame(Scene):
 						   font_size='20sp', markup=True, halign='center', valign='top',
 						   pos=(Window.width * 0.5, Window.height * 0.4),
               			   text_size=(Window.width, Window.height))
-		self.failure_label = Label(text = "", valign='top', font_size='20sp', halign='center'
+		self.failure_label = Label(text = "", valign='top', font_size='20sp', halign='center',
 			                pos=(Window.width * 0.5, Window.height * 0.8),
 			                text_size=(Window.width, Window.height))
 
-		self.text_box = TextBox(pos=(Window.width * 0.5, Window.height * 0.4), multiline=False,
-								on_text_validate=self.attempt_connection)
+		self.text_box = TextBox(pos=(Window.width * 0.25, Window.height * 0.4), multiline=False,
+								on_text_validate=self.attempt_connection, size=(Window.width * 0.5, Window.height * 0.1))
 		
 		# self.text_box = TextBox()
 
 		self.add_game_object(self.text_box)
 		self.add_game_object(self.failure_label)
 		self.add_game_object(self.ip_label)
+		
 
 
-	def attempt_connection(self):
+	def attempt_connection(self, *args):
 		"""
 		For attempting to connect
 		"""
+		if self.attempting_connection:
+			print "Already attemping to connect. Chill out dude."
+			return 
+		print "Attempting to connect to", self.text_box.text
+		
 		self.attempting_connection = True
 		# (1) Confirm IP address is a valid IP
-		try:
-			socket.inet_aton(addr)
-		except:
-			self.failure_label.text = "Not a valid IP, please try again"
-			self.attempting_connection = False
-			return
+		# tr 
 
+		print "at least checked the ip..."
 		ip = self.text_box.text
 		port = PORT
 
@@ -55,15 +58,20 @@ class JoinGame(Scene):
 
 		# (2b) try to connect with the Guest's connect function 
 		self.guest.set_host_ip(ip)
-		try:
-			self.guest.connect_to_host(timeout=10)
-		except Exception as e:
+		
+		err_code = self.guest.connect_to_host(timeout=10)
+		if err_code != True:
 			self.failure_label.text = "Unable to connect. Please try again"
 			self.attempting_connection = False
 			return
 
 		# (3) if success, change scene to band scene
 		self.attempting_connection = False
+		print "Connection successful!"
+
+
+
+		self.guest.send_to_band('suh', host_only=True)
 
 def build_scene(**kwargs):
 	return JoinGame(**kwargs)
