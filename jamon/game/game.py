@@ -10,6 +10,12 @@ class Event(object):
 		self.type = event_type
 		self.__dict__.update(kwargs)
 
+	@property
+	def __kwargs__(self):
+		d = dict(self.__dict__)
+		del d['type']
+		return d
+
 class Game(object):
 	def __init__(self):
 		self._scenes = {}
