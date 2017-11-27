@@ -4,6 +4,7 @@ from kivy.graphics import Scale, Rotate, Translate
 from kivy.graphics import Ellipse, Rectangle, Color
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image
+from kivy.core.text import Label as CoreLabel
 
 from jamon.game.common.gfxutil import KFAnim
 
@@ -115,5 +116,10 @@ class GradientRectSprite(Sprite):
 		  	texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
 		  	super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
 
-
-
+class TextSprite(Sprite):
+	def __init__(self, text, pos=(0,0), color=(1,1,1), **text_kwargs):
+		text = CoreLabel(text=text, **text_kwargs)
+		text.refresh()
+		# Create rectangle object for the text
+		rect = Rectangle(size=text.size, pos=pos, texture=text.texture)
+		super(TextSprite, self).__init__(rect, color)
