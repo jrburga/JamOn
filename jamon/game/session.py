@@ -6,14 +6,8 @@ from kivy.core.window import Window
 
 from common.clock import Clock, Scheduler, SimpleTempoMap
 
-
-# default music settings
-tempo = 120
-bars = 4
-divs = 4
-
 class Session(GameObject):
-	def __init__(self):
+	def __init__(self, tempo, bars, divs, players):
 		super(Session, self).__init__()
 		self.tempo = tempo
 		self.bars = bars
@@ -24,7 +18,7 @@ class Session(GameObject):
 		self.clock = Clock()
 		self.temp_map = SimpleTempoMap(bpm=tempo)
 		self.sched = Scheduler(self.clock, self.temp_map)
-		self.players = [Player(bars, tempo), Player(bars, tempo, num=1), Player(bars, tempo, num=2, inst='drums')]
+		self.players = players
 		self.IM = InstrumentManager(self.sched)
 
 		i2player = Window.width/len(self.players)

@@ -1,10 +1,19 @@
 from jamon.game.game import Scene, GameObject
+from jamon.game.player import Player
 from jamon.game.session import Session
+
+# default music settings
+tempo = 120
+bars = 4
+divs = 4
 
 class Practice(Scene):
 	def __init__(self, **kwargs):
 		super(Practice, self).__init__(**kwargs)
-		self.add(Session())
+		players = [Player(bars, tempo), 
+				   Player(bars, tempo, num=1), 
+				   Player(bars, tempo, num=2, inst='drums')]
+		self.add(Session(tempo, bars, divs, players))
 		self.add_event_listener('on_key_down', self.change_scene)
 
 	def change_scene(self, s, event):
