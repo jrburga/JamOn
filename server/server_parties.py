@@ -20,7 +20,7 @@ MSG_SIZE = 2**20
 #> the "form band" phase
 
 class ServerObject(object):
-    def __init__(self, num_connections):
+    def __init__(self, num_connections=0):
         self.port = PORT
         self.host = HOST
         self.num_connections = num_connections
@@ -129,7 +129,7 @@ class Host(ServerObject):
 
         # came out of loop
         band_member.conn.close()
-        print "Stopped listening to," band_member
+        print "Stopped listening to", band_member
 
     def send_to_guests(self, msg):
         if isinstance(msg, basestring):
@@ -168,17 +168,20 @@ class Guest(ServerObject):
         self.host_ip = host_ip
 
     def connect_to_host(self, timeout=30):
-        try:
-            server_address = (self.host_ip, PORT)
-            print 'server address & port:', server_address
-            self.sock.connect(server_address, timeout=timeout)
-        except Exception as e:
-            raise e
-
+        
+        server_address = (self.host_ip, PORT)
+        print 'server address & port:', server_address
+        self.sock.settimeout(timeout)
+        err_code = self.sock.connect_ex(server_address)
+        self.sock.settimeout(None)
+        if err_code not in [0, None]:
+            print "WARNING: Connection Error", err_code
+            return err_code
         # if success, do (1) make host_member, (2) start the listen loop
         self.host_member = BandMember(None, self.host_ip, True)
 
         start_new_thread(self.host_listen, ())
+        return True
 
     def host_listen(self):
         """
@@ -197,7 +200,7 @@ class Guest(ServerObject):
 
         # came out of loop
         band_member.conn.close()
-        print "Stopped listening to," band_member
+        print "Stopped listening to", band_member
 
     def disconnect_from_host(self):
         print "Disconnecting from host"
