@@ -152,9 +152,9 @@ class GameObject(object):
 class Scene(GameObject):
 	name = None
 	scene_events = ['on_scene_change', 'on_server_request']
-	def __init__(self, **kwargs):
+	def __init__(self, base_widget, **kwargs):
 		super(Scene, self).__init__()
-		self.base_widget = kwargs['base_widget']
+		self.base_widget = base_widget
 		self._events = deque()
 		self._events = []
 
