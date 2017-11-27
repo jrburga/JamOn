@@ -42,10 +42,6 @@ class GameObject(object):
 		self._widgets = set()
 		self._event_listeners = defaultdict(lambda: [])
 
-	def _add_widget(self, widget):
-		assert self._parent, 'Game Object needs scene to attach widget'
-		self._parent._add_widget(widget)
-
 	@property
 	def widgets(self):
 		widgets = self._widgets.copy()
@@ -155,10 +151,6 @@ class Scene(GameObject):
 		self.base_widget = kwargs['base_widget']
 		self._events = deque()
 		self._events = []
-	def _add_widget(self, widget):
-		return
-		assert self.base_widget, 'Scene needs base widget to attach widget'
-		self.base_widget.add_widget(widget)
 
 	def next_scene(self):
 		new_scene = self._new_scene
