@@ -22,6 +22,8 @@ class Player(Keyboard):
 		self.instrument = Instrument(inst)
 
 		self.note_sequence = []
+		self.seq_ind = 0
+		self.last_time = 0
 
 		perc = True if inst=='drums' else False
 		self.track = Track(num_lanes, bars, tempo, percussive=perc)
@@ -31,7 +33,7 @@ class Player(Keyboard):
 			self.composing = True
 
 		self.num = num
-
+		self.time = 0
 		self.add(self.track)
 
 	def key_down(self, lane_num):
@@ -57,7 +59,25 @@ class Player(Keyboard):
 		self.time = time
 
 	def on_update(self):
-		pass
+		# Play notes if not composing
+		if self.time < self.last_time:
+			self.seq_ind = 0
+
+		if not self.composing and len(self.note_sequence) > 0:
+			if self.seq_ind < len(self.note_sequence):
+				next_time, notes = self.note_sequence[self.seq_ind]
+				if next_time <= self.time:
+					print self.time
+					for (lane, onoff) in notes:
+						if onoff == 'on':
+							print "NOTE ON", lane
+							self.instrument.note_on(lane)
+						elif onoff == 'off':
+							print "NOTE OFF", lane
+							self.instrument.note_off(lane)
+					self.seq_ind  += 1
+
+		self.last_time = self.time
 
 	@property
 	def session(self):
@@ -67,6 +87,7 @@ class Player(Keyboard):
 		# set note_sequence
 		notes = {}
 		for i, lane in enumerate(self.track.lanes):
+			print 'locked:', lane.locked_times
 			for (time, length) in lane.locked_times:
 				end_time = time + length
 				if time not in notes:
@@ -79,7 +100,7 @@ class Player(Keyboard):
 		for k in sorted(notes.iterkeys()):
 			self.note_sequence.append( (k, notes[k]) )
 		print self.note_sequence
-		
+
 		self.composing = False
 		self.trigger_event('on_lock_in')
 

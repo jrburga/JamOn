@@ -256,11 +256,13 @@ class Lane(GameObject):
 				self.stage = 0
 			elif num_curr == len(self.locked_times) == self.prev_num_locked:
 				self.stage = 3
-				return
 			else:
 				self.stage = 2
 
 		print 'new stage:', self.stage
+
+		if self.stage == 3:
+			return
 
 		self.prev_num_locked = len(self.locked_times)
 		self.locked_times = []
