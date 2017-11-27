@@ -1,3 +1,5 @@
 from jamon.game.game import Scene, GameObject
 
-scene = Scene('perform')
+
+def build_scene(**kwargs):
+	return Scene()

@@ -2,6 +2,7 @@ from kivy.graphics.instructions import InstructionGroup
 from kivy.graphics import PushMatrix, PopMatrix
 from kivy.graphics import Scale, Rotate, Translate
 from kivy.graphics import Ellipse, Rectangle, Color
+from kivy.graphics.texture import Texture
 from kivy.core.image import Image
 
 from jamon.game.common.gfxutil import KFAnim
@@ -98,4 +99,21 @@ class CircleSprite(Sprite):
 class RectSprite(Sprite):
 	def __init__(self, size, color):
 		super(RectSprite, self).__init__(Rectangle(size=size), color)
+
+class GradientRectSprite(Sprite):
+	def __init__(self, size, color_1, color_2, dir='vertical'):
+		  texture = Texture.create(size=size, colorfmt="rgb")
+		  if dir=='vertical':
+		  	p_size = size[1]
+		  	width = size[0]
+		  	buf = []
+		  	for x in range(p_size):
+		  		for _ in range(width):
+		  			for i in range(3):
+		  				buf.append(int(color_1[i]*255-x*(color_1[i]-color_2[i])*255/p_size))
+		  	buf = b''.join(map(chr, buf))
+		  	texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
+		  	super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
+
+
 
