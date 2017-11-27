@@ -32,7 +32,7 @@ class TextBox(GameObject):
 		super(TextBox, self).__init__()
 		self.widget = _TextInput(**kwargs)
 
-		self.widget.on_parent = on_parent
+		# self.widget.on_parent = on_parent
 		self.add_widget(self.widget)
 
 	@property
