@@ -9,6 +9,7 @@ class MainWidget(BaseWidget):
 	def __init__(self, argv):
 		super(MainWidget, self).__init__()
 
+		self.game_state = GameState()
 		self.audio = Audio(2)
 
 		self.scenes = scenes
@@ -19,7 +20,7 @@ class MainWidget(BaseWidget):
 			print 'starting in scene ' + argv[1]
 			start_scene = argv[1]
 		kwargs = {}
-		self.game_state = GameState()
+		
 		if start_scene:
 			self.load_new_scene(start_scene, **kwargs)
 		else:
@@ -72,11 +73,12 @@ class MainWidget(BaseWidget):
 		if event.server_type == "host_game":
 			self.game_state.server_object = Host()
 		elif event.server_type == "join_game":
-			self.game_state.server_object = Guest()
+			self.game_state.server_object = Host()
 
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
+
 
 class GameState(object):
 	def __init__(self):
