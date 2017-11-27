@@ -28,13 +28,9 @@ class JoinGame(Scene):
 		self.text_box = TextBox(pos=(Window.width * 0.25, Window.height * 0.4), multiline=False,
 								on_text_validate=self.attempt_connection, size=(Window.width * 0.5, Window.height * 0.1))
 		
-		# self.text_box = TextBox()
-
 		self.add_game_object(self.text_box)
 		self.add_game_object(self.failure_label)
 		self.add_game_object(self.ip_label)
-		
-
 
 	def attempt_connection(self, *args):
 		"""
