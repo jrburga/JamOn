@@ -73,7 +73,7 @@ class MainWidget(BaseWidget):
 		if event.server_type == "host_game":
 			self.game_state.server_object = Host()
 		elif event.server_type == "join_game":
-			self.game_state.server_object = Host()
+			self.game_state.server_object = Guest()
 
 	def on_update(self):
 		self.scene._on_update()
