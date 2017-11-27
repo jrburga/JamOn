@@ -83,7 +83,7 @@ def register_terminate_func(f) :
 
 
 
-def run(widget):
+def run(widget, argv):
     """Pass in a widget, and this will automatically run it. Will also
     call termination functions (g_terminate_funcs) at the end of the run,
     even if it was caused by a program crash
@@ -91,7 +91,7 @@ def run(widget):
 
     class MainApp(App):
         def build(self):
-            return widget()
+            return widget(argv)
 
     try:
         MainApp().run()

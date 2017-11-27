@@ -1,3 +1,4 @@
+from game.game import Event
 from game.common.core import *
 from game.common.audio import Audio
 from server.server_parties import *
@@ -5,20 +6,24 @@ from scenes import scenes
 import numpy as np
 
 class MainWidget(BaseWidget):
-	def __init__(self):
+	def __init__(self, argv):
 		super(MainWidget, self).__init__()
+
 		self.audio = Audio(2)
 
 		self.scenes = scenes
 		self.scene = None
 
 		start_scene = 'main_menu'
+		if len(argv) > 1:
+			print 'starting in scene ' + argv[1]
+			start_scene = argv[1]
 		kwargs = {}
 		self.game_state = GameState()
 		if start_scene:
 			self.load_new_scene(start_scene, **kwargs)
 		else:
-			self.load_new_scene(scenes.keys()[0])
+			self.load_new_scene(scenes.keys()[0], **kwargs)
 
 	def unload_current_scene(self):
 		if self.scene == None: return
@@ -37,28 +42,28 @@ class MainWidget(BaseWidget):
 			self.add_widget(widget)
 
 	def on_key_down(self, keycode, modifiers):
-		self.scene.trigger_event('on_key_down', 
-								  keycode=keycode, 
-								  modifiers=modifiers)
+		self.scene._handle_event(Event('on_key_down', 
+							  			keycode=keycode, 
+							  			modifiers=modifiers))
 
 	def on_key_up(self, keycode):
-		self.scene.trigger_event('on_key_up',
-								 keycode=keycode)
+		self.scene._handle_event(Event('on_key_up',
+								 		keycode=keycode))
 		
 	def on_touch_down(self, touch):
 		super(MainWidget, self).on_touch_down(touch)
-		self.scene.trigger_event('on_touch_down',
-								  touch=touch)
+		self.scene._handle_event(Event('on_touch_down',
+								  		touch=touch))
 
 	def on_touch_up(self, touch):
 		super(MainWidget, self).on_touch_up(touch)
-		self.scene.trigger_event('on_touch_up',
-								  touch=touch)
+		self.scene._handle_event(Event('on_touch_up',
+								  		touch=touch))
 
 	def on_touch_move(self, touch):
 		super(MainWidget, self).on_touch_move(touch)
-		self.scene.trigger_event('on_touch_move',
-								  touch=touch)
+		self.scene._handle_event(Event('on_touch_move',
+								  		touch=touch))
 
 	def on_scene_change(self, event):
 		self.load_new_scene(event.scene_name)
