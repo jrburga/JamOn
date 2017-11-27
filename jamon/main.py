@@ -67,7 +67,6 @@ class MainWidget(BaseWidget):
 								  		touch=touch))
 
 	def on_scene_change(self, event):
-		print event.__dict__
 		self.load_new_scene(**event.__kwargs__)
 	
 	def on_server_request(self, event):
