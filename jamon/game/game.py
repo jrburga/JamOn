@@ -155,6 +155,7 @@ class Scene(GameObject):
 		self.base_widget = kwargs['base_widget']
 		self._events = deque()
 		self._events = []
+
 	def _add_widget(self, widget):
 		return
 		assert self.base_widget, 'Scene needs base widget to attach widget'
