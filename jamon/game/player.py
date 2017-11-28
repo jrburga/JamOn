@@ -104,5 +104,19 @@ class Player(Keyboard):
 		self.composing = False
 		self.trigger_event('on_lock_in')
 
+class PlayerRemote(Player):
+	def __init__(self, bars, tempo, num=0, inst='piano'):
+		super(PlayerRemote, self).__init__(bars, tempo, num, inst)
+		self.keys = []
+
+	# overwrite these
+	def on_key_down(self, event):
+		pass
+
+	def on_key_up(self, event):
+		pass
+
+	def on_msg_recieve(self, event):
+		print event
 
 

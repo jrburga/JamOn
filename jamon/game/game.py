@@ -10,6 +10,12 @@ class Event(object):
 		self.type = event_type
 		self.__dict__.update(kwargs)
 
+	@property
+	def __kwargs__(self):
+		d = dict(self.__dict__)
+		del d['type']
+		return d
+
 class Game(object):
 	def __init__(self):
 		self._scenes = {}
@@ -41,10 +47,6 @@ class GameObject(object):
 		self._game_objects = set()
 		self._widgets = set()
 		self._event_listeners = defaultdict(lambda: [])
-
-	def _add_widget(self, widget):
-		assert self._parent, 'Game Object needs scene to attach widget'
-		self._parent._add_widget(widget)
 
 	@property
 	def widgets(self):
@@ -150,9 +152,9 @@ class GameObject(object):
 class Scene(GameObject):
 	name = None
 	scene_events = ['on_scene_change', 'on_server_request']
-	def __init__(self, **kwargs):
+	def __init__(self, base_widget, **kwargs):
 		super(Scene, self).__init__()
-		self.base_widget = kwargs['base_widget']
+		self.base_widget = base_widget
 		self._events = deque()
 		self._events = []
 

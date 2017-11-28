@@ -9,6 +9,7 @@ class MainWidget(BaseWidget):
 	def __init__(self, argv):
 		super(MainWidget, self).__init__()
 
+		self.game_state = GameState()
 		self.audio = Audio(2)
 
 		self.scenes = scenes
@@ -19,7 +20,7 @@ class MainWidget(BaseWidget):
 			print 'starting in scene ' + argv[1]
 			start_scene = argv[1]
 		kwargs = {}
-		self.game_state = GameState()
+		
 		if start_scene:
 			self.load_new_scene(start_scene, **kwargs)
 		else:
@@ -66,7 +67,7 @@ class MainWidget(BaseWidget):
 								  		touch=touch))
 
 	def on_scene_change(self, event):
-		self.load_new_scene(event.scene_name)
+		self.load_new_scene(**event.__kwargs__)
 	
 	def on_server_request(self, event):
 		if event.server_type == "host_game":
@@ -77,6 +78,7 @@ class MainWidget(BaseWidget):
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
+
 
 class GameState(object):
 	def __init__(self):
