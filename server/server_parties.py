@@ -3,6 +3,7 @@ import sys
 from thread import *
 import numpy as np
 import json
+from jamon.game.game import GameObject
 
 HOST        = '0.0.0.0'
 GUEST       = '127.0.0.1'
