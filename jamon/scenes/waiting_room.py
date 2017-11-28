@@ -6,6 +6,8 @@ from jamon.game.components.graphics import *
 from jamon.game.widgets import *
 from kivy.core.window import Window
 
+import json
+
 
 USER_BLURB_SIZE = (400, 250)
 
@@ -49,8 +51,13 @@ class WaitingRoom(Scene):
 
 		# Todo: callback for start game @jake
 
-		# self.start_game_button.bind()
+		self.start_game_button.bind(self.start_game_callback())
 		self.add_game_object(self.start_game_button)
+
+	def start_game_callback(self):
+		def start_game(button):
+			self.host.send_to_band(json.dumps(self.band_members))
+		return start_game
 
 	def band_display(self):
 		"""
@@ -68,11 +75,9 @@ class WaitingRoom(Scene):
 		size = USER_BLURB_SIZE
 		
 		# = TextSprite()
-
 	def on_update(self):
 		# TODO: check if new members joined and add them to the view as they join
 		pass
 
 def build_scene(**kwargs):
 	return WaitingRoom(**kwargs)
-
