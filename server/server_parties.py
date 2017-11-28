@@ -4,6 +4,8 @@ from thread import *
 import numpy as np
 import json
 from jamon.game.game import GameObject
+from urllib2 import urlopen
+
 
 HOST        = '0.0.0.0'
 GUEST       = '127.0.0.1'
@@ -177,7 +179,7 @@ class Host(ServerObject):
 class Guest(ServerObject):
     def __init__(self):
         super(Guest, self).__init__()
-        # self.ip = GUEST
+        self.ip = urlopen('http://ip.42.pl/raw').read()
         # self.bind_to_port()
         self.is_guest = True
         self.host_ip = 'localhost' #Default, but obviously not logical

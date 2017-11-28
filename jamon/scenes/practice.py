@@ -17,9 +17,11 @@ class Practice(Scene):
 		players = []
 		# for bm, band_member in band_members.items()
 		for i, bm in enumerate(band_members):
+			is_me = bm['ip'] == server_obj.ip
+			print bm['ip'], server_obj.ip
 			players.append(Player(server_obj,
 								  bm['username'], 
-								  bm['ip'] == server_obj.ip,
+								  is_me,
 								  bars,
 								  tempo,
 								  i,
