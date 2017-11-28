@@ -2,3 +2,4 @@
 *.pyo
 jamon/game/common/config.cfg
 data/
+*.DS_Store

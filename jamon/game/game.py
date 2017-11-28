@@ -158,6 +158,11 @@ class Scene(GameObject):
 		self._events = deque()
 		self._events = []
 
+	def _add_widget(self, widget):
+		return
+		assert self.base_widget, 'Scene needs base widget to attach widget'
+		self.base_widget.add_widget(widget)
+
 	def next_scene(self):
 		new_scene = self._new_scene
 		self._new_scene = None

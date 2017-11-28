@@ -10,9 +10,9 @@ divs = 4
 class Practice(Scene):
 	def __init__(self, **kwargs):
 		super(Practice, self).__init__(**kwargs)
-		players = [Player(bars, tempo), 
-				   Player(bars, tempo, num=1), 
-				   Player(bars, tempo, num=2, inst='drums')]
+		players = [Player('Bob', True, bars, tempo), 
+				   Player('Joe', False, bars, tempo, num=1), 
+				   Player('Linda', False, bars, tempo, num=2, inst='drums')]
 		self.add(Session(tempo, bars, divs, players))
 		self.add_event_listener('on_key_down', self.change_scene)
 

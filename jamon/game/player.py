@@ -3,6 +3,9 @@ from game import GameObject
 from controller import Keyboard
 from instrument import Instrument
 from track import Track
+from components.sprites import PlayerOutlineSprite, PlayerNameSprite, PlayerStatusSprite
+
+from kivy.core.window import Window
 
 num_lanes = 8
 default_keys = [
@@ -15,11 +18,23 @@ default_keys = [
 
 default_keys = [[ord(k) for k in dk] for dk in default_keys]
 
+statuses = {
+	1: 'Create a Pattern!',
+	2: 'Locked in!',
+}
+
 class Player(Keyboard):
-	def __init__(self, bars, tempo, num=0, inst='piano'):
+	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
 		self.keys = default_keys[num]
 		self.instrument = Instrument(inst)
+
+		# Boolean that represents whether this Player object correlates to
+		# the player for this system. I think this won't be needed once we 
+		# make other players use a different controller...
+		self.is_me = is_me
+
+		self.name = name
 
 		self.note_sequence = []
 		self.seq_ind = 0
@@ -27,14 +42,51 @@ class Player(Keyboard):
 
 		perc = True if inst=='drums' else False
 		self.track = Track(num_lanes, bars, tempo, percussive=perc)
+		self.track.position.x = 5
+		self.track.position.y = Window.height*0.005
 
-		self.composing = False
-		if num == 0:
-			self.composing = True
+		
 
 		self.num = num
 		self.time = 0
+
+		self.add_graphic(PlayerOutlineSprite(is_me))
+		self.add_graphic(PlayerNameSprite(name, is_me))
+
+		self.status = 0
+		self.status_sprite = None
+
+		self.composing = False
+		if num == 0:
+			self.start_composing()
+
 		self.add(self.track)
+
+
+	def start_composing(self):
+		if self.composing:
+			return
+		self.composing = True
+		if self.is_me:
+			self.set_status(1)
+
+	def stop_composing(self):
+		if not self.composing:
+			return
+		self.composing = False
+		if self.is_me:
+			self.set_status(2)
+
+
+	def set_status(self, status):
+		self.status = status
+		if self.status_sprite is not None:
+			self.remove_graphic(self.status_sprite)
+		if status in statuses:
+			self.status_sprite = PlayerStatusSprite(statuses[status])
+			self.add_graphic(self.status_sprite)
+		else:
+			self.status_sprite = None
 
 	def key_down(self, lane_num):
 		if lane_num == num_lanes:
@@ -101,7 +153,6 @@ class Player(Keyboard):
 			self.note_sequence.append( (k, notes[k]) )
 		print self.note_sequence
 
-		self.composing = False
 		self.trigger_event('on_lock_in')
 
 class PlayerRemote(Player):

@@ -42,13 +42,6 @@ class Track(GameObject):
 		self.add_graphic(self.sprite)
 		self.add(*self.lanes)
 
-		#Draw bar lines
-		bar_lines = [BarLineSprite(i) for i in range(16)]
-		for i, bl in enumerate(bar_lines):
-			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
-			self.add_graphic(bl)
-
-
 		self.add_graphic(self.now_bar)
 
 	@property
@@ -127,7 +120,7 @@ class Lane(GameObject):
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
-		self.poss_gem = None
+		self.matching_gem = None
 		self.current_gems = []
 		self.old_gems = []
 		self.locked_times = []
@@ -148,6 +141,12 @@ class Lane(GameObject):
 		self.stage = 0
 
 		self.posted_note = False
+
+				#Draw bar lines
+		bar_lines = [BarLineSprite(i) for i in range(16)]
+		for i, bl in enumerate(bar_lines):
+			bl.position = (0, h*(1-i/16.)-bl.size[1])
+			self.add_graphic(bl)
 
 
 	@property
@@ -182,42 +181,55 @@ class Lane(GameObject):
 				print 'gem overlap'
 				return
 
-		# check if old gem is already there
-		for gem in self.old_gems:
-			if time_quant == gem.time:
-				#Save gem for beatmatching possiblity
-				self.poss_gem = gem
-				break
 		gem = Gem(0, time_quant)
 		self.add(gem)
 		gem.set_pos()
 		self.active_gem = gem
 		self.current_gems.append(gem)
 
+		# check if old gem is already there
+		for gem in self.old_gems:
+			if time_quant == gem.time:
+				#Save gem for beatmatching possiblity
+				# self.poss_gem = gem
+				self.match_gem(self.active_gem, gem)
+				break
+
+
+	def match_gem(self, new_gem, old_gem):
+		print 'matched!'
+		new_gem.matched(old_gem.stage)
+		# Check if gem is in final stage (locked in)
+		self.matching_gem = new_gem
 
 	def on_release(self, time):
 		if self.active_gem is None:
 			return
 		self.active_gem.on_release(time)
 		# Check if beat matched:
-		if self.poss_gem is not None:
-			if self.track.drum or self.active_gem.length == self.poss_gem.length:
-				print 'matched!'
-				self.active_gem.matched(self.poss_gem.stage)
+		if self.matching_gem is not None:
+				# Finish off the matching
 				# Check if gem is in final stage (locked in)
-				if self.active_gem.stage >= 1:
-					if (self.active_gem.time, self.active_gem.length) not in self.locked_times:
-						self.locked_times.append( (self.active_gem.time, self.active_gem.length) )
+				if self.matching_gem.stage >= 1:
+					if (self.matching_gem.time, self.matching_gem.length) not in self.locked_times:
+						self.locked_times.append( (self.matching_gem.time, self.matching_gem.length) )
 					print 'Gem locked in'
-		self.poss_gem = None
+		self.matching_gem = None
 		self.active_gem = None
 
 	def remove_old_gems(self):
 		to_remove = []
 		for gem in self.old_gems:
-			if gem.y-gem.get_height() > self.track.now_bar.position[1]:
-				print 'removing gem'
+
+			if gem.position.y > self.track.now_bar.position[1]:
+				# Remove gem entirely
+				print 'removing gem, length', gem.get_height()
 				to_remove.append(gem)
+
+			elif gem.y > self.track.now_bar.position[1]:
+				# Set gem length to right length
+				gem.update_remove_length(self.track.now_bar.position[1])
+
 		for gem in to_remove:
 			self.old_gems.remove(gem)
 			self.remove(gem)
@@ -284,12 +296,14 @@ class Gem(GameObject):
 		self.time = time
 		self.length = length
 		self.stage = stage
-		self.color_stages = ((.8, .3, .4), (.5, .55, .4), (.2, .8, .4))
+		self.color_stages = ((.8, .3, .4), (.85, .75, .1), (.2, .8, .4))
 		color = self.color_stages[stage]
 		self.sprite = GemSprite(color)
 		self.posistion = (100,100)
 		self.add_graphic(self.sprite)
 		self.y = 0
+
+		self.total_height = None
 
 		
 		
@@ -317,18 +331,28 @@ class Gem(GameObject):
 			self.lane.track.quant.quantize_gem(self)
 
 		# Draw gradient gem
-		self.add_graphic(GradientGemSprite(self.sprite.size, self.color_stages[0]))
+		if not self.lane.track.drum:
+			self.remove_graphic(self.sprite)
+			self.sprite = GradientGemSprite(self.sprite.size, self.color_stages[self.stage])
+			self.add_graphic(self.sprite)
 
 	# Called when the gem has been matched -- increase stage count and change color
 	def matched(self, prev_stage):
 		self.stage = min(2, prev_stage + 1)
 		color = self.color_stages[self.stage]
+		self.remove_graphic(self.sprite)
+		self.sprite = GemSprite(color)
+		self.add_graphic(self.sprite)
 		# Dispay gradient if not drum note
-		if not self.lane.track.drum:
-			self.add_graphic(GradientGemSprite(self.sprite.size, color))
-		else:
-			#Just change color
-			self.add_graphic(GemSprite(color))
+		# if not self.lane.track.drum:
+		# 	self.remove_graphic(self.sprite)
+		# 	self.sprite = GradientGemSprite(self.sprite.size, color)
+		# 	self.add_graphic(self.sprite)
+		# else:
+		# 	#Just change color
+		# 	self.remove_graphic(self.sprite)
+		# 	self.sprite = GemSprite(color)
+		# 	self.add_graphic(self.sprite)
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
@@ -346,6 +370,13 @@ class Gem(GameObject):
 		size_x, size_y = self.sprite.texture.size
 		self.sprite.texture.size = (size_x, self.y-y)
 		self.position.y = y
+
+	def update_remove_length(self, y):
+		if self.total_height is None:
+			# Rememeber height before shrinking
+			self.total_height = self.get_height()
+		size_x, size_y = self.sprite.texture.size
+		self.sprite.texture.size = (size_x, self.total_height - self.y + y)
 
 	def __str__(self):
 		return '<GEM %0.2f : %0.2f>' % (self.time, self.length)
