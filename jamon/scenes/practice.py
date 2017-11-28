@@ -7,15 +7,23 @@ tempo = 120
 bars = 4
 divs = 4
 
+insts = ['piano', 'drums']*2
+
 class Practice(Scene):
 	def __init__(self, band_members, **kwargs):
 		super(Practice, self).__init__(**kwargs)
+		server_obj = self.base_widget.game_state.server_object
 		print band_members
 		players = []
 		# for bm, band_member in band_members.items()
-		players = [Player('Bob', True, bars, tempo), 
-				   Player('Joe', False, bars, tempo, num=1), 
-				   Player('Linda', False, bars, tempo, num=2, inst='drums')]
+		for i, bm in enumerate(band_members):
+			players.append(Player(server_obj,
+								  bm['username'], 
+								  bm['ip'] == server_obj.ip,
+								  bars,
+								  tempo,
+								  i,
+								  inst=insts[i]))
 		self.add(Session(tempo, bars, divs, players))
 		self.add_event_listener('on_key_down', self.change_scene)
 

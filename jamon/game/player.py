@@ -24,7 +24,7 @@ statuses = {
 }
 
 class Player(Keyboard):
-	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
+	def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
 		self.keys = default_keys[num]
 		self.instrument = Instrument(inst)

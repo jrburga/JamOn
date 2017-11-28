@@ -209,6 +209,7 @@ class Guest(ServerObject):
         Loop to listen to host -- should be called in another thread
         """
         # TODO Send band_member_info to client
+
         self.sock.send('Initial Band Member Info: From Guest')
         band_member = BandMember(self.sock, self.ip, False)
 
@@ -230,18 +231,18 @@ class Guest(ServerObject):
         self.sock.close()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def send_to_band(self, msg, host_only=False):
-        """
-        Sends to the host with "send_to_band":True
-        """
-        if isinstance(msg, basestring):
-            msg = {"data":msg}
-            # In case we wish to send strings for some reason
+    # def send_to_band(self, msg, host_only=False):
+    #     """
+    #     Sends to the host with "send_to_band":True
+    #     """
+    #     if isinstance(msg, basestring):
+    #         msg = {"data":msg}
+    #         # In case we wish to send strings for some reason
         
-        send_dict = {"send_to_band":not host_only}
-        send_dict.update(msg)
-        msg_str = json.dumps(send_dict)
-        self.sock.send(msg_str)
+    #     send_dict = {"send_to_band":not host_only}
+    #     send_dict.update(msg)
+    #     msg_str = json.dumps(send_dict)
+    #     self.sock.send(msg_str)
 
 class BandMember(object):
     """
@@ -264,7 +265,7 @@ class BandMember(object):
             self.username = username + "_" + username_id
 
     def info(self):
-        return {'addr': self.addr_str, 'username': self.username}
+        return {'ip': self.addr[0], 'username': self.username}
 
 if __name__ == '__main__':
     band_member = BandMember(None, ('1231', '1231'), False)
