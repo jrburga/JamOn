@@ -46,7 +46,7 @@ class ServerObject(object):
             #TODO -- Better fail handling
             sys.exit()
 
-    def msg_received(self, data, sender):
+    def msg_received(self, msg, sender):
         """
         data (str): The data in the message
         sender (BandMember): The sender of the message
