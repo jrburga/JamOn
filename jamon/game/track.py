@@ -221,9 +221,16 @@ class Lane(GameObject):
 	def remove_old_gems(self):
 		to_remove = []
 		for gem in self.old_gems:
-			if gem.y-gem.get_height() > self.track.now_bar.position[1]:
-				print 'removing gem'
+
+			if gem.position.y > self.track.now_bar.position[1]:
+				# Remove gem entirely
+				print 'removing gem, length', gem.get_height()
 				to_remove.append(gem)
+
+			elif gem.y > self.track.now_bar.position[1]:
+				# Set gem length to right length
+				gem.update_remove_length(self.track.now_bar.position[1])
+
 		for gem in to_remove:
 			self.old_gems.remove(gem)
 			self.remove(gem)
@@ -297,6 +304,8 @@ class Gem(GameObject):
 		self.add_graphic(self.sprite)
 		self.y = 0
 
+		self.total_height = None
+
 		
 		
 	@property
@@ -323,7 +332,10 @@ class Gem(GameObject):
 			self.lane.track.quant.quantize_gem(self)
 
 		# Draw gradient gem
-		self.add_graphic(GradientGemSprite(self.sprite.size, self.color_stages[0]))
+		if not self.lane.track.drum:
+			self.remove_graphic(self.sprite)
+			self.sprite = GradientGemSprite(self.sprite.size, self.color_stages[0])
+			self.add_graphic(self.sprite)
 
 	# Called when the gem has been matched -- increase stage count and change color
 	def matched(self, prev_stage):
@@ -331,10 +343,14 @@ class Gem(GameObject):
 		color = self.color_stages[self.stage]
 		# Dispay gradient if not drum note
 		if not self.lane.track.drum:
-			self.add_graphic(GradientGemSprite(self.sprite.size, color))
+			self.remove_graphic(self.sprite)
+			self.sprite = GradientGemSprite(self.sprite.size, color)
+			self.add_graphic(self.sprite)
 		else:
 			#Just change color
-			self.add_graphic(GemSprite(color))
+			self.remove_graphic(self.sprite)
+			self.sprite = GemSprite(color)
+			self.add_graphic(self.sprite)
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
@@ -352,6 +368,13 @@ class Gem(GameObject):
 		size_x, size_y = self.sprite.texture.size
 		self.sprite.texture.size = (size_x, self.y-y)
 		self.position.y = y
+
+	def update_remove_length(self, y):
+		if self.total_height is None:
+			# Rememeber height before shrinking
+			self.total_height = self.get_height()
+		size_x, size_y = self.sprite.texture.size
+		self.sprite.texture.size = (size_x, self.total_height - self.y + y)
 
 	def __str__(self):
 		return '<GEM %0.2f : %0.2f>' % (self.time, self.length)
