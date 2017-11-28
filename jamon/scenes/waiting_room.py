@@ -56,7 +56,8 @@ class WaitingRoom(Scene):
 
 	def start_game_callback(self):
 		def start_game(button):
-			self.host.send_to_band(json.dumps(self.band_members))
+			msg = json.dumps([b.info() for b in self.band_members])
+			self.host.send_to_band(msg)
 		return start_game
 
 	def band_display(self):

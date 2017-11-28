@@ -122,7 +122,7 @@ class Host(ServerObject):
         band_member.conn.close()
         print "Stopped listening to", band_member
 
-    def send_to_band(self, msg, sender):
+    def send_to_band(self, msg, sender=None):
         """
         Sends a message to the entire band
         """
@@ -250,8 +250,9 @@ class BandMember(object):
             username_id = str(np.random.randint(1000000))
             self.username = username + "_" + username_id
 
-    def __repr__(self):
-        return json.dumps({'addr': self.addr_str, 'username': self.username})
+    def info(self):
+        return {'addr': self.addr_str, 'username': self.username}
 
-
-
+if __name__ == '__main__':
+    band_member = BandMember(None, ('1231', '1231'), False)
+    print json.dumps([band_member.info()])
