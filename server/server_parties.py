@@ -251,7 +251,7 @@ class BandMember(object):
             self.username = username + "_" + username_id
 
     def __repr__(self):
-        return {'addr': self.addr, 'username': self.username}
+        return json.dumps({'addr': self.addr, 'username': self.username})
 
 
 
