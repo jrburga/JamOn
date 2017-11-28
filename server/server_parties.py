@@ -206,7 +206,7 @@ class Guest(ServerObject):
         """
         # TODO Send band_member_info to client
         self.sock.send('Initial Band Member Info: From Guest')
-        band_member = BandMember(self.sock, self.host, False)
+        band_member = BandMember(self.sock, self.ip, False)
 
         # Infinite loop so that we constantly listen
         while True:
