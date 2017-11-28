@@ -20,7 +20,7 @@ MSG_SIZE = 2**20
 #> For now, it's designed so that they can only join during 
 #> the "form band" phase
 
-class ServerObject(object):
+class ServerObject(GameObject):
     def __init__(self, num_connections=0):
         super(ServerObject, self).__init__()
         self.port = PORT
@@ -49,6 +49,15 @@ class ServerObject(object):
     def msg_received(self, msg, sender):
         print 'message received'
         print msg, sender
+
+        assert len(msg) == 1, 'all messages should be wrapped in 1-item dictionary'
+        typ = msg.keys()[0]
+        data = msg[typ]
+
+        if typ == 'game_info':
+            if hasattr(self, 'start_game'):
+                self.start_game(data)
+
 
 class Host(ServerObject):
     def __init__(self, num_connections=NUM_CONNS):
@@ -171,6 +180,9 @@ class Guest(ServerObject):
 
         self.band_members = [self.host_member]
 
+    def start_game(self, player_list):
+        print 'starting game...'
+        self.trigger_event('on_scene_change', scene_name='practice', band_members=player_list)
 
     def set_host_ip(self, host_ip):
         self.host_ip = host_ip
