@@ -49,7 +49,6 @@ class WaitingRoom(Scene):
 
 		# Todo: callback for start game @jake
 
-
 		# self.start_game_button.bind()
 		self.add_game_object(self.start_game_button)
 

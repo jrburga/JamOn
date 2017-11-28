@@ -52,6 +52,8 @@ class ServerObject(object):
         # Make sure to check and see if this is the first message 
         # from the new member. If so, fill in their info in the band_member
         # dict
+        print "I received a message!"
+
         raise NotImplementedError
 
 class Host(ServerObject):
@@ -93,21 +95,8 @@ class Host(ServerObject):
 
     def stop_searching(self):
         self.band_formed = True
-        socket.socket(socket.AF_INET, 
-                      socket.SOCK_STREAM).connect( (self.host, self.port)) 
-                      # ^dummy socket to kill the accept() statement
-
-    # def play_ping_pong(self, band_member):
-    #     for i in range(NUM_PINGPONGS):
-    #         #ping
-
-
-    #         #wait for pong
-
-    #         #save
-    #     #synthesize & save results
-    #     pass
-
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect( (self.host, self.port)) 
+        # ^dummy socket to kill the accept() statement
 
     def guest_listen(self, band_member):
         """
@@ -117,9 +106,9 @@ class Host(ServerObject):
         # self.play_ping_pong(band_member)
 
         # TODO Send band_member_info to client
-        band_member.conn.send('Initial Band Member Info')
+        band_member.conn.send('Send Initial Band Member Info Here')
 
-        # Not the best method but works for now I guess
+        # This num_blanks_in_a_row is my hacky method for determining if the connection has been broken
         num_blanks_in_a_row = 0
         # Infinite loop so that we constantly listen
         while num_blanks_in_a_row <= 10:
@@ -138,10 +127,14 @@ class Host(ServerObject):
         band_member.conn.close()
         print "Stopped listening to", band_member
 
-    def send_to_guests(self, msg):
+    def send_to_band(self, msg, sender):
+        """
+        Sends a message to the entire band
+        """
         if isinstance(msg, basestring):
             for band_member in self.band_members:
-                band_member.conn.send(msg)
+                if band_member is not sender:
+                    band_member.conn.send(msg)
             return
         msg_json = json.dumps(msg)
         for band_member in self.band_members:
@@ -155,9 +148,16 @@ class Host(ServerObject):
         # Make sure to check and see if this is the first message 
         # from the new member. If so, fill in their info in the band_member
         # dict
+
         try:
             msg_data = json.loads(msg)
-            # TODO: Act on the message
+            
+            #First, forward it if it needs to be forwarded
+            if 'send_to_band' in msg_data and msg_data['send_to_band']:
+                self.send_to_band(msg_data, sender)
+
+            #Then, call the super method to handle the message
+            super(Host, self).msg_received(msg_data, sender)
         except Exception as e:
             # Data is a string
             if msg.strip() == "Band Formed":
@@ -178,7 +178,6 @@ class Guest(ServerObject):
         self.host_ip = host_ip
 
     def connect_to_host(self, timeout=30):
-        
         server_address = (self.host_ip, self.port)
         print 'server address & port:', server_address
         self.sock.settimeout(timeout)
@@ -220,6 +219,10 @@ class Guest(ServerObject):
         """
         Sends to the host with "send_to_band":True
         """
+        if isinstance(msg, basestring):
+            msg = {"data":msg}
+            # In case we wish to send strings for some reason
+        
         send_dict = {"send_to_band":not host_only}
         send_dict.update(msg)
         msg_str = json.dumps(send_dict)
