@@ -1,7 +1,7 @@
 from kivy.graphics.instructions import InstructionGroup
 from kivy.graphics import PushMatrix, PopMatrix
 from kivy.graphics import Scale, Rotate, Translate
-from kivy.graphics import Ellipse, Rectangle, Color
+from kivy.graphics import Ellipse, Rectangle, Color, Line
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image
 from kivy.core.text import Label as CoreLabel
@@ -101,6 +101,11 @@ class RectSprite(Sprite):
 	def __init__(self, size, color):
 		super(RectSprite, self).__init__(Rectangle(size=size), color)
 
+class RectOutlineSprite(Sprite):
+	def __init__(self, size, color, width=2):
+		w, h = size
+		super(RectOutlineSprite, self).__init__(Line(points=[0,0,w,0,w,h-width,0,h-width,0,0], width=width), color)
+
 class GradientRectSprite(Sprite):
 	def __init__(self, size, color_1, color_2, dir='vertical'):
 		  texture = Texture.create(size=size, colorfmt="rgb")
@@ -117,9 +122,9 @@ class GradientRectSprite(Sprite):
 		  	super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
 
 class TextSprite(Sprite):
-	def __init__(self, text, pos=(0,0), color=(1,1,1), **text_kwargs):
-		text = CoreLabel(text=text, **text_kwargs)
+	def __init__(self, text, pos=(0,0), color=(1,1,1), font_size=20, stretch=1, **text_kwargs):
+		text = CoreLabel(text=text, font_size=font_size, **text_kwargs)
 		text.refresh()
 		# Create rectangle object for the text
-		rect = Rectangle(size=text.size, pos=pos, texture=text.texture)
+		rect = Rectangle(size=(text.size[0]*stretch, text.size[1]), pos=pos, texture=text.texture)
 		super(TextSprite, self).__init__(rect, color)
