@@ -42,13 +42,6 @@ class Track(GameObject):
 		self.add_graphic(self.sprite)
 		self.add(*self.lanes)
 
-		# #Draw bar lines
-		# bar_lines = [BarLineSprite(i) for i in range(16)]
-		# for i, bl in enumerate(bar_lines):
-		# 	bl.position = (0, self.h*(1-i/16.)-bl.size[1])
-		# 	self.add_graphic(bl)
-
-
 		self.add_graphic(self.now_bar)
 
 	@property

@@ -3,6 +3,9 @@ from game import GameObject
 from controller import Keyboard
 from instrument import Instrument
 from track import Track
+from components.sprites import PlayerOutlineSprite, PlayerNameSprite
+
+from kivy.core.window import Window
 
 num_lanes = 8
 default_keys = [
@@ -16,10 +19,17 @@ default_keys = [
 default_keys = [[ord(k) for k in dk] for dk in default_keys]
 
 class Player(Keyboard):
-	def __init__(self, bars, tempo, num=0, inst='piano'):
+	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
 		self.keys = default_keys[num]
 		self.instrument = Instrument(inst)
+
+		# Boolean that represents whether this Player object correlates to
+		# the player for this system. I think this won't be needed once we 
+		# make other players use a different controller...
+		self.is_me = is_me
+
+		self.name = name
 
 		self.note_sequence = []
 		self.seq_ind = 0
@@ -27,6 +37,8 @@ class Player(Keyboard):
 
 		perc = True if inst=='drums' else False
 		self.track = Track(num_lanes, bars, tempo, percussive=perc)
+		self.track.position.x = 5
+		self.track.position.y = Window.height*0.005
 
 		self.composing = False
 		if num == 0:
@@ -34,6 +46,10 @@ class Player(Keyboard):
 
 		self.num = num
 		self.time = 0
+
+		self.add_graphic(PlayerOutlineSprite(is_me))
+		self.add_graphic(PlayerNameSprite(name, is_me))
+
 		self.add(self.track)
 
 	def key_down(self, lane_num):
