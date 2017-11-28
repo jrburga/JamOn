@@ -54,9 +54,21 @@ class ServerObject(object):
         # Make sure to check and see if this is the first message 
         # from the new member. If so, fill in their info in the band_member
         # dict
-        print "I received a message!"
 
-        raise NotImplementedError
+        try:
+            msg_data = json.loads(msg)
+            
+            #First, forward it if it needs to be forwarded
+            if 'send_to_band' in msg_data and msg_data['send_to_band']:
+                self.send_to_band(msg_data, sender)
+
+            #Then, call the super method to handle the message
+            super(Host, self).msg_received(msg_data, sender)
+
+        except Exception as e:
+            # Data is a string
+            if msg.strip() == "Band Formed":
+                self.stop_searching()
 
 class Host(ServerObject):
     def __init__(self, num_connections=NUM_CONNS):
@@ -142,31 +154,6 @@ class Host(ServerObject):
         msg_json = json.dumps(msg)
         for band_member in self.band_members:
             band_member.conn.send(msg_json)
-
-    def msg_received(self, msg, sender):
-        """
-        data (str): The data in the message
-        sender (BandMember): The sender of the message
-        """
-        # Make sure to check and see if this is the first message 
-        # from the new member. If so, fill in their info in the band_member
-        # dict
-
-        try:
-            msg_data = json.loads(msg)
-            
-            #First, forward it if it needs to be forwarded
-            if 'send_to_band' in msg_data and msg_data['send_to_band']:
-                self.send_to_band(msg_data, sender)
-
-            #Then, call the super method to handle the message
-            super(Host, self).msg_received(msg_data, sender)
-
-        except Exception as e:
-            # Data is a string
-            if msg.strip() == "Band Formed":
-                self.stop_searching()
-
 
 class Guest(ServerObject):
     def __init__(self):
