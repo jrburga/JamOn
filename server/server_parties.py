@@ -57,7 +57,7 @@ class Host(ServerObject):
         self.is_host = True
         self.sock.listen(self.num_connections)
         self.band_formed = False
-        self.band_members = {}      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
+        self.band_members = {'host': BandMember(None, self.ip, True, username='Host')}      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
 
         
     def find_other_players(self):
@@ -127,8 +127,8 @@ class Host(ServerObject):
         Sends a message to the entire band
         """
         if isinstance(msg, basestring):
-            for band_member in self.band_members:
-                if band_member is not sender:
+            for bm, band_member in self.band_members.items():
+                if bm is not sender:
                     band_member.conn.send(msg)
             return
         msg_json = json.dumps(msg)
