@@ -127,7 +127,7 @@ class Lane(GameObject):
 		cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
-		self.poss_gem = None
+		self.matching_gem = None
 		self.current_gems = []
 		self.old_gems = []
 		self.locked_times = []
@@ -207,26 +207,21 @@ class Lane(GameObject):
 		print 'matched!'
 		new_gem.matched(old_gem.stage)
 		# Check if gem is in final stage (locked in)
-		if new_gem.stage >= 1:
-			if (new_gem.time, new_gem.length) not in self.locked_times:
-				self.locked_times.append( (new_gem.time, new_gem.length) )
-			print 'Gem locked in'
+		self.matching_gem = new_gem
 
 	def on_release(self, time):
 		if self.active_gem is None:
 			return
 		self.active_gem.on_release(time)
 		# Check if beat matched:
-		if self.poss_gem is not None:
-			if self.track.drum or self.active_gem.length == self.poss_gem.length:
-				print 'matched!'
-				self.active_gem.matched(self.poss_gem.stage)
+		if self.matching_gem is not None:
+				# Finish off the matching
 				# Check if gem is in final stage (locked in)
-				if self.active_gem.stage >= 1:
-					if (self.active_gem.time, self.active_gem.length) not in self.locked_times:
-						self.locked_times.append( (self.active_gem.time, self.active_gem.length) )
+				if self.matching_gem.stage >= 1:
+					if (self.matching_gem.time, self.matching_gem.length) not in self.locked_times:
+						self.locked_times.append( (self.matching_gem.time, self.matching_gem.length) )
 					print 'Gem locked in'
-		self.poss_gem = None
+		self.matching_gem = None
 		self.active_gem = None
 
 	def remove_old_gems(self):
