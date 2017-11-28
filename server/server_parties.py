@@ -30,7 +30,7 @@ class ServerObject(GameObject):
         self.ip = HOST
         self.num_connections = num_connections
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+        self.is_host = False
         # self.bind_to_port()
 
     def get_ip_address(self):
