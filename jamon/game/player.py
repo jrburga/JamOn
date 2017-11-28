@@ -3,7 +3,7 @@ from game import GameObject
 from controller import Keyboard
 from instrument import Instrument
 from track import Track
-from components.sprites import PlayerOutlineSprite, PlayerNameSprite
+from components.sprites import PlayerOutlineSprite, PlayerNameSprite, PlayerStatusSprite
 
 from kivy.core.window import Window
 
@@ -17,6 +17,11 @@ default_keys = [
 # assert([len(dk) == num_lanes for dk in default_keys])
 
 default_keys = [[ord(k) for k in dk] for dk in default_keys]
+
+statuses = {
+	1: 'Create a Pattern!',
+	2: 'Locked in!',
+}
 
 class Player(Keyboard):
 	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
@@ -40,9 +45,7 @@ class Player(Keyboard):
 		self.track.position.x = 5
 		self.track.position.y = Window.height*0.005
 
-		self.composing = False
-		if num == 0:
-			self.composing = True
+		
 
 		self.num = num
 		self.time = 0
@@ -50,7 +53,40 @@ class Player(Keyboard):
 		self.add_graphic(PlayerOutlineSprite(is_me))
 		self.add_graphic(PlayerNameSprite(name, is_me))
 
+		self.status = 0
+		self.status_sprite = None
+
+		self.composing = False
+		if num == 0:
+			self.start_composing()
+
 		self.add(self.track)
+
+
+	def start_composing(self):
+		if self.composing:
+			return
+		self.composing = True
+		if self.is_me:
+			self.set_status(1)
+
+	def stop_composing(self):
+		if not self.composing:
+			return
+		self.composing = False
+		if self.is_me:
+			self.set_status(2)
+
+
+	def set_status(self, status):
+		self.status = status
+		if self.status_sprite is not None:
+			self.remove_graphic(self.status_sprite)
+		if status in statuses:
+			self.status_sprite = PlayerStatusSprite(statuses[status])
+			self.add_graphic(self.status_sprite)
+		else:
+			self.status_sprite = None
 
 	def key_down(self, lane_num):
 		if lane_num == num_lanes:
@@ -117,7 +153,6 @@ class Player(Keyboard):
 			self.note_sequence.append( (k, notes[k]) )
 		print self.note_sequence
 
-		self.composing = False
 		self.trigger_event('on_lock_in')
 
 class PlayerRemote(Player):
