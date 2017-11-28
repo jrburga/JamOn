@@ -51,6 +51,11 @@ class ServerObject(GameObject):
         print 'message received'
         print msg, sender
 
+        try:
+            msg = json.loads(msg)
+        except ValueError:
+            return
+
         assert len(msg) == 1, 'all messages should be wrapped in 1-item dictionary'
         typ = msg.keys()[0]
         data = msg[typ]
