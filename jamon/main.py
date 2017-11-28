@@ -27,7 +27,8 @@ class MainWidget(BaseWidget):
 			self.load_new_scene(scenes.keys()[0], **kwargs)
 
 	def unload_current_scene(self):
-		self.scene.remove(self.game_state.server_object)
+		if self.game_state.server_object:
+			self.scene.remove(self.game_state.server_object)
 		if self.scene == None: return
 		self.scene.base_widget = None
 		self.canvas.remove(self.scene._transform)
@@ -38,7 +39,8 @@ class MainWidget(BaseWidget):
 	def load_new_scene(self, scene_name, **kwargs):
 		self.unload_current_scene()
 		self.scene = self.scenes[scene_name](base_widget=self, **kwargs)
-		self.scene(self.game_state.server_object)
+		if self.game_state.server_object:
+			self.scene.add(self.game_state.server_object)
 		self.audio.set_generator(self.scene._mixer)
 		self.canvas.add(self.scene._transform)
 		for widget in self.scene.widgets:
