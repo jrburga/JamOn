@@ -122,7 +122,7 @@ class Host(ServerObject):
         band_member.conn.close()
         print "Stopped listening to", band_member
 
-    def send_to_band(self, msg):
+    def send_to_band(self, msg, sender):
         """
         Sends a message to the entire band
         """
@@ -239,6 +239,7 @@ class BandMember(object):
         conn is a socket object?? TODO
         addr is a tuple of IP address (str) and Port (int)
         """
+        super(BandMember, self).__init__()
         self.conn = conn
         self.addr = addr
         self.addr_str = addr[0] + ":" + str(addr[1])
@@ -248,6 +249,9 @@ class BandMember(object):
         else:
             username_id = str(np.random.randint(1000000))
             self.username = username + "_" + username_id
+
+    def __repr__(self):
+        return {'addr': self.addr, 'username': self.username}
 
 
 
