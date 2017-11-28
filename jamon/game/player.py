@@ -156,8 +156,8 @@ class Player(Keyboard):
 		self.trigger_event('on_lock_in')
 
 class PlayerRemote(Player):
-	def __init__(self, bars, tempo, num=0, inst='piano'):
-		super(PlayerRemote, self).__init__(bars, tempo, num, inst)
+	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
+		super(PlayerRemote, self).__init__(name, is_me, bars, tempo, num, inst)
 		self.keys = []
 
 	# overwrite these

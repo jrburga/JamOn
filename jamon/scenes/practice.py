@@ -8,8 +8,11 @@ bars = 4
 divs = 4
 
 class Practice(Scene):
-	def __init__(self, **kwargs):
+	def __init__(self, band_members, **kwargs):
 		super(Practice, self).__init__(**kwargs)
+		print band_members
+		players = []
+		# for bm, band_member in band_members.items()
 		players = [Player('Bob', True, bars, tempo), 
 				   Player('Joe', False, bars, tempo, num=1), 
 				   Player('Linda', False, bars, tempo, num=2, inst='drums')]
