@@ -5,6 +5,7 @@ import numpy as np
 import json
 
 HOST        = '0.0.0.0'
+GUEST       = '127.0.0.1'
 PORT        = 21385
 NUM_CONNS   = 4
 NUM_PINGPONGS = 4
@@ -21,12 +22,13 @@ MSG_SIZE = 2**20
 
 class ServerObject(object):
     def __init__(self, num_connections=0):
+        super(ServerObject, self).__init__()
         self.port = PORT
-        self.host = HOST
+        self.ip = HOST
         self.num_connections = num_connections
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        self.bind_to_port()
+        # self.bind_to_port()
 
     def get_ip_address(self):
         return socket.gethostbyname(socket.gethostname())
@@ -35,7 +37,7 @@ class ServerObject(object):
         """Simple function to bind to the port
         """
         try:
-            self.sock.bind((self.host, self.port))
+            self.sock.bind((self.ip, self.port))
         except socket.error , msg:
             print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
             if msg[0] == 48:
@@ -57,11 +59,13 @@ class ServerObject(object):
 class Host(ServerObject):
     def __init__(self, num_connections=NUM_CONNS):
         super(Host, self).__init__(num_connections)
+        self.bind_to_port()
         self.is_host = True
         self.sock.listen(self.num_connections)
         self.band_formed = False
         self.band_members = {}      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
 
+        
     def find_other_players(self):
         """
         Called when the user clicks 'HOST JAM SESH' and would
@@ -94,7 +98,7 @@ class Host(ServerObject):
     def stop_searching(self):
         self.band_formed = True
         socket.socket(socket.AF_INET, 
-                      socket.SOCK_STREAM).connect( (self.host, self.port)) 
+                      socket.SOCK_STREAM).connect( (GUEST, self.port)) 
                       # ^dummy socket to kill the accept() statement
 
     # def play_ping_pong(self, band_member):
@@ -123,7 +127,6 @@ class Host(ServerObject):
         while True:
             # Receiving from client
             data = band_member.conn.recv(MSG_SIZE)
-            print "Message Received from", band_member
             print data
             self.msg_received(data, band_member)
 
@@ -150,6 +153,8 @@ class Host(ServerObject):
         # dict
         try:
             msg_data = json.loads(msg)
+            print "Message Received from", sender
+            print msg_data
             # TODO: Act on the message
         except Exception as e:
             # Data is a string
@@ -160,9 +165,16 @@ class Host(ServerObject):
 class Guest(ServerObject):
     def __init__(self):
         super(Guest, self).__init__()
+        # self.ip = GUEST
+        # self.bind_to_port()
         self.is_guest = True
         self.host_ip = 'localhost' #Default, but obviously not logical
         self.host_member = None
+    def bind_to_port(self):
+        try:
+            self.sock.connect((self.ip, self.port))
+        except socket.error, msg:
+            print msg
 
     def set_host_ip(self, host_ip):
         self.host_ip = host_ip
@@ -172,11 +184,12 @@ class Guest(ServerObject):
         server_address = (self.host_ip, PORT)
         print 'server address & port:', server_address
         self.sock.settimeout(timeout)
-        err_code = self.sock.connect_ex(server_address)
+        # err_code = self.sock.connect_ex(server_address)
+        self.sock.connect((self.host_ip, PORT))
         self.sock.settimeout(None)
-        if err_code not in [0, None]:
-            print "WARNING: Connection Error", err_code
-            return err_code
+        # if err_code not in [0, None]:
+        #     print "WARNING: Connection Error", err_code
+        #     return err_code
         # if success, do (1) make host_member, (2) start the listen loop
         self.host_member = BandMember(None, self.host_ip, True)
 
@@ -194,13 +207,15 @@ class Guest(ServerObject):
         while True:
             # Receiving from client
             data = self.sock.recv(MSG_SIZE)
-            print "Message Received from", band_member
             print data
-            self.msg_received(data, band_member)
+            print "Message Received from", None
+            
+            self.msg_received(data, None)
 
         # came out of loop
-        band_member.conn.close()
-        print "Stopped listening to", band_member
+        # band_member.conn.close()
+        self.sock.close()
+        # print "Stopped listening to", band_emember
 
     def disconnect_from_host(self):
         print "Disconnecting from host"
