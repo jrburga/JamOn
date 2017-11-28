@@ -9,7 +9,7 @@ track_size = (track_width, Window.height)
 lane_size = (lane_width, Window.height)
 now_bar_size = (track_width, now_bar_width)
 gem_size = (lane_width, now_bar_width)
-bar_line_size = (track_width, 2)
+bar_line_size = (lane_width, 2)
 
 track_color = (.85, .85, .85)
 now_bar_color = (.13, .54, .13)
