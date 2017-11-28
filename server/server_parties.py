@@ -119,13 +119,20 @@ class Host(ServerObject):
         # TODO Send band_member_info to client
         band_member.conn.send('Initial Band Member Info')
 
+        # Not the best method but works for now I guess
+        num_blanks_in_a_row = 0
         # Infinite loop so that we constantly listen
-        while True:
+        while num_blanks_in_a_row <= 10:
             # Receiving from client
             data = band_member.conn.recv(MSG_SIZE)
-            print "Message Received from", band_member
-            print data
-            self.msg_received(data, band_member)
+            
+            if data:
+                print "Message Received from", band_member
+                print data
+                self.msg_received(data, band_member)
+                num_blanks_in_a_row = 0
+            if data == "" or data is None or data.strip() == "":
+                num_blanks_in_a_row += 1
 
         # came out of loop
         band_member.conn.close()
@@ -198,7 +205,6 @@ class Guest(ServerObject):
             # Receiving from client
             data = self.sock.recv(MSG_SIZE)
             print "Message Received from", band_member
-            print data
             self.msg_received(data, band_member)
 
         # came out of loop
