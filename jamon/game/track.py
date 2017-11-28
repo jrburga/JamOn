@@ -188,18 +188,29 @@ class Lane(GameObject):
 				print 'gem overlap'
 				return
 
-		# check if old gem is already there
-		for gem in self.old_gems:
-			if time_quant == gem.time:
-				#Save gem for beatmatching possiblity
-				self.poss_gem = gem
-				break
 		gem = Gem(0, time_quant)
 		self.add(gem)
 		gem.set_pos()
 		self.active_gem = gem
 		self.current_gems.append(gem)
 
+		# check if old gem is already there
+		for gem in self.old_gems:
+			if time_quant == gem.time:
+				#Save gem for beatmatching possiblity
+				# self.poss_gem = gem
+				self.match_gem(self.active_gem, gem)
+				break
+
+
+	def match_gem(self, new_gem, old_gem):
+		print 'matched!'
+		new_gem.matched(old_gem.stage)
+		# Check if gem is in final stage (locked in)
+		if new_gem.stage >= 1:
+			if (new_gem.time, new_gem.length) not in self.locked_times:
+				self.locked_times.append( (new_gem.time, new_gem.length) )
+			print 'Gem locked in'
 
 	def on_release(self, time):
 		if self.active_gem is None:
@@ -297,7 +308,7 @@ class Gem(GameObject):
 		self.time = time
 		self.length = length
 		self.stage = stage
-		self.color_stages = ((.8, .3, .4), (.5, .55, .4), (.2, .8, .4))
+		self.color_stages = ((.8, .3, .4), (.85, .75, .1), (.2, .8, .4))
 		color = self.color_stages[stage]
 		self.sprite = GemSprite(color)
 		self.posistion = (100,100)
@@ -334,23 +345,26 @@ class Gem(GameObject):
 		# Draw gradient gem
 		if not self.lane.track.drum:
 			self.remove_graphic(self.sprite)
-			self.sprite = GradientGemSprite(self.sprite.size, self.color_stages[0])
+			self.sprite = GradientGemSprite(self.sprite.size, self.color_stages[self.stage])
 			self.add_graphic(self.sprite)
 
 	# Called when the gem has been matched -- increase stage count and change color
 	def matched(self, prev_stage):
 		self.stage = min(2, prev_stage + 1)
 		color = self.color_stages[self.stage]
+		self.remove_graphic(self.sprite)
+		self.sprite = GemSprite(color)
+		self.add_graphic(self.sprite)
 		# Dispay gradient if not drum note
-		if not self.lane.track.drum:
-			self.remove_graphic(self.sprite)
-			self.sprite = GradientGemSprite(self.sprite.size, color)
-			self.add_graphic(self.sprite)
-		else:
-			#Just change color
-			self.remove_graphic(self.sprite)
-			self.sprite = GemSprite(color)
-			self.add_graphic(self.sprite)
+		# if not self.lane.track.drum:
+		# 	self.remove_graphic(self.sprite)
+		# 	self.sprite = GradientGemSprite(self.sprite.size, color)
+		# 	self.add_graphic(self.sprite)
+		# else:
+		# 	#Just change color
+		# 	self.remove_graphic(self.sprite)
+		# 	self.sprite = GemSprite(color)
+		# 	self.add_graphic(self.sprite)
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
