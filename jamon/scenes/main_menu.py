@@ -26,27 +26,31 @@ class MainMenu(Scene):
         bottom_y_center = AREA_HEIGHT * 2./5 - 8./10 * BUTTON_HEIGHT
         top_y_center = AREA_HEIGHT * 4./5 - 6./10 * BUTTON_HEIGHT
 
-        def button_actions(button_str):
-            def callback_fn(go):
-                if button_str in ['join_game', 'host_game']:
-                    go.trigger_event('on_server_request', server_type=button_str)
-                go.trigger_event('on_scene_change', scene_name=button_str)
-            return callback_fn
+        def host_game_cb(go):
+            go.trigger_event('on_server_request', server_type='host_game')
+            go.trigger_event('on_scene_change', scene_name='waiting_room', is_host=True)
 
         host_game_button = Button(pos=(left_x_center, top_y_center), 
                                   size=(BUTTON_WIDTH, BUTTON_HEIGHT), 
                                   text="Host Game")
-        host_game_button.bind(button_actions('host_game'))
+        host_game_button.bind(host_game_cb)
+
+        def join_game_cb(go):
+            go.trigger_event('on_server_request', server_type='join_game')
+            go.trigger_event('on_scene_change', scene_name='join_game')
 
         join_game_button = Button(pos=(right_x_center, top_y_center), 
                                   size=(BUTTON_WIDTH, BUTTON_HEIGHT), 
                                   text="Join Game")
-        join_game_button.bind(button_actions('join_game'))
+        join_game_button.bind(join_game_cb)
+
+        def change_username_cb(go):
+            go.trigger_event('on_scene_change', scene_name='change_username')
 
         change_username_button = Button(pos=(left_x_center, bottom_y_center), 
                                         size=(BUTTON_WIDTH, BUTTON_HEIGHT), 
                                         text="Change Username")
-        change_username_button.bind(button_actions('change_username'))
+        change_username_button.bind(change_username_cb)
 
         self.add_game_object(host_game_button)
         self.add_game_object(join_game_button)

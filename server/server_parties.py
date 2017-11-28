@@ -163,13 +163,16 @@ class Guest(ServerObject):
         self.is_guest = True
         self.host_ip = 'localhost' #Default, but obviously not logical
         self.host_member = None
+        self.port = PORT
+
+        self.band_members = [self.host_member]
 
     def set_host_ip(self, host_ip):
         self.host_ip = host_ip
 
     def connect_to_host(self, timeout=30):
         
-        server_address = (self.host_ip, PORT)
+        server_address = (self.host_ip, self.port)
         print 'server address & port:', server_address
         self.sock.settimeout(timeout)
         err_code = self.sock.connect_ex(server_address)
@@ -178,7 +181,7 @@ class Guest(ServerObject):
             print "WARNING: Connection Error", err_code
             return err_code
         # if success, do (1) make host_member, (2) start the listen loop
-        self.host_member = BandMember(None, self.host_ip, True)
+        self.host_member = BandMember(None, (self.host_ip, self.port), True)
 
         start_new_thread(self.host_listen, ())
         return True
