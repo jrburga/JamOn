@@ -51,7 +51,11 @@ class ServerObject(GameObject):
 
     def msg_received(self, msg, sender):
         print 'super message receieved', msg
-        msg = json.loads(msg)
+        try:
+            msg = json.loads(msg)
+        except Exception, e:
+            print e
+            return
 
         if 'send_to_band' in msg:
             del msg['send_to_band']
