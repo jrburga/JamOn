@@ -2,9 +2,9 @@ from game import GameObject
 from collections import defaultdict
 
 class Controller(GameObject):
-	def __init__(self, keys):
+	def __init__(self, keys=[]):
 		super(Controller, self).__init__()
-		self.keys = []
+		self.keys = keys
 
 	def key_down(self, key_index):
 		pass
@@ -17,8 +17,7 @@ class Keyboard(Controller):
 	Directly binds specific keys to actions.
 	'''
 	def __init__(self):
-		super(Keyboard, self).__init__([])
-		self.keys = []
+		super(Keyboard, self).__init__()
 
 	def on_key_down(self, event):
 		key = event.keycode[0]

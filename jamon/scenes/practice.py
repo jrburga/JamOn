@@ -17,7 +17,7 @@ class Practice(Scene):
 		players = []
 		# for bm, band_member in band_members.items()
 		for i, bm in enumerate(band_members):
-			is_me = bm['ip'] == server_obj.ip or (bm['ip'] == 0 and server_obj.is_host)
+			is_me = bm['ip'] == server_obj.ip or (bm['ip'] == '0' and server_obj.is_host)
 			print bm['ip'], server_obj.ip
 			players.append(Player(server_obj,
 								  bm['username'], 

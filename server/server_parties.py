@@ -50,9 +50,6 @@ class ServerObject(GameObject):
             sys.exit()
 
     def msg_received(self, msg, sender):
-        print 'message received'
-        print msg, sender
-
         try:
             msg = json.loads(msg)
         except ValueError:
@@ -65,6 +62,8 @@ class ServerObject(GameObject):
         if typ == 'game_info':
             if hasattr(self, 'start_game'):
                 self.start_game(data)
+        elif typ == 'send_to_band':
+            self.trigger_event(data['event'], action=data['action'])
 
 
 class Host(ServerObject):
@@ -149,8 +148,9 @@ class Host(ServerObject):
                     band_member.conn.send(msg)
             return
         msg_json = json.dumps(msg)
-        for band_member in self.band_members:
-            band_member.conn.send(msg_json)
+        for band_member in self.band_members.values():
+            if band_member.conn:
+                band_member.conn.send(msg_json)
 
     def msg_received(self, msg, sender):
         """
@@ -238,18 +238,18 @@ class Guest(ServerObject):
         self.sock.close()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # def send_to_band(self, msg, host_only=False):
-    #     """
-    #     Sends to the host with "send_to_band":True
-    #     """
-    #     if isinstance(msg, basestring):
-    #         msg = {"data":msg}
-    #         # In case we wish to send strings for some reason
+    def send_to_band(self, msg, host_only=False):
+        """
+        Sends to the host with "send_to_band":True
+        """
+        if isinstance(msg, basestring):
+            msg = {"data":msg}
+            # In case we wish to send strings for some reason
         
-    #     send_dict = {"send_to_band":not host_only}
-    #     send_dict.update(msg)
-    #     msg_str = json.dumps(send_dict)
-    #     self.sock.send(msg_str)
+        send_dict = {"send_to_band":not host_only}
+        send_dict.update(msg)
+        msg_str = json.dumps(send_dict)
+        self.sock.send(msg_str)
 
 class BandMember(object):
     """

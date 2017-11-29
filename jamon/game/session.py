@@ -39,10 +39,12 @@ class Session(GameObject):
 		# self.clock.start()
 		self.IM.metro.start()
 		self.paused = True
+		self.start()
 
 	def on_key_down(self, event):
-		if event.keycode[1] == 'enter':
-			self.toggle() 
+		# if event.keycode[1] == 'enter':
+		# 	self.toggle() 
+		pass
 
 	def toggle(self):
 		if self.paused:
