@@ -72,8 +72,7 @@ class ServerObject(GameObject):
         elif typ == 'action':
             if 'action' in data:
                 self.trigger_event(data['event'], action=data['action'])
-            else:
-                self.trigger_event(data['event'])
+                
         elif typ == 'message':
             print 'message received:', data
 

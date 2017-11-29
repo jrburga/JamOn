@@ -61,15 +61,16 @@ class Session(GameObject):
 		self.clock.start()
 		
 
-	def next_player(self):
+	def next_player(self, sequence):
 		if self.current_player < self.num_players:
+			self.players[self.current_player].note_sequence = sequence
 			self.players[self.current_player].stop_composing()
 			self.current_player += 1
 		if self.current_player < self.num_players:
 			self.players[self.current_player].start_composing()
 
 	def on_lock_in(self, event):
-		self.next_player()
+		self.next_player(event.action['sequence'])
 
 	def on_update(self):
 		self.sched.on_update()
