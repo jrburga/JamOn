@@ -125,7 +125,7 @@ class Player(Keyboard):
 
 
 	def server_note_on(self, event):
-		print 'event triggered'
+		# print 'event triggered'
 		if self.composing and not self.is_me:
 			action = event.action
 			self.track.lanes[action['lane_num']].on_press(action['time'])
@@ -152,13 +152,13 @@ class Player(Keyboard):
 			if self.seq_ind < len(self.note_sequence):
 				next_time, notes = self.note_sequence[self.seq_ind]
 				if next_time <= self.time:
-					print self.time
+					# print self.time
 					for (lane, onoff) in notes:
 						if onoff == 'on':
-							print "NOTE ON", lane
+							# print "NOTE ON", lane
 							self.instrument.note_on(lane)
 						elif onoff == 'off':
-							print "NOTE OFF", lane
+							# print "NOTE OFF", lane
 							self.instrument.note_off(lane)
 					self.seq_ind  += 1
 
@@ -170,9 +170,10 @@ class Player(Keyboard):
 
 	def lock_in_sequence(self):
 		# set note_sequence
+		print 'locking in sequence'
 		notes = {}
 		for i, lane in enumerate(self.track.lanes):
-			print 'locked:', lane.locked_times
+			# print 'locked:', lane.locked_times
 			for (time, length) in lane.locked_times:
 				end_time = time + length
 				if time not in notes:
@@ -184,12 +185,13 @@ class Player(Keyboard):
 		# sort the note sequence
 		for k in sorted(notes.iterkeys()):
 			self.note_sequence.append( (k, notes[k]) )
-		print self.note_sequence
+		# print self.note_sequence
 
 		# 
 		
-		if self.is_me:
+		if self.is_me and self.composing:
 			msg = {'action': {'event': 'on_lock_in'}}
+			# self.trigger_event('on_lock_in')
 			self.server_obj.send_to_band(msg)
 		# else:
 		# 	self.trigger_event('on_lock_in')

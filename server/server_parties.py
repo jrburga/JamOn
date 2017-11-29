@@ -50,7 +50,7 @@ class ServerObject(GameObject):
             sys.exit()
 
     def msg_received(self, msg, sender):
-        print 'super message receieved', msg
+        # print 'super message receieved', msg
         try:
             msg = json.loads(msg)
         except Exception, e:
@@ -177,7 +177,7 @@ class Host(ServerObject):
         # dict
 
         # try:
-        print 'msg receieved', msg
+        # print 'msg receieved', msg
         msg_data = json.loads(msg)
         #First, forward it if it needs to be forwarded
         # if 'send_to_band' in msg_data and msg_data['send_to_band']:

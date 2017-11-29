@@ -62,13 +62,13 @@ class Session(GameObject):
 		
 
 	def next_player(self):
-		self.players[self.current_player].stop_composing()
-		self.current_player += 1
+		if self.current_player < self.num_players:
+			self.players[self.current_player].stop_composing()
+			self.current_player += 1
 		if self.current_player < self.num_players:
 			self.players[self.current_player].start_composing()
 
 	def on_lock_in(self, event):
-		print 'locked in'
 		self.next_player()
 
 	def on_update(self):
