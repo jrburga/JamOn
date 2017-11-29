@@ -100,11 +100,11 @@ class Player(Keyboard):
 
 		if self.composing and self.is_me:
 			self.track.on_press(lane_num)
-			msg = {'event': 'server_note_on',
+			msg = {'message': {'event': 'server_note_on',
 					'action': {
 						'lane_num': lane_num, 
 				   		'time': self.time}
-				  }
+				  }}
 			self.server_obj.send_to_band(msg)
 		self.instrument.note_on(lane_num)
 
@@ -114,12 +114,12 @@ class Player(Keyboard):
 
 		if self.composing:
 			self.track.on_release(lane_num)
-			msg = {'event': 'server_note_off',
+			msg = {'message': {'event': 'server_note_off',
 					'action': {
 					   'lane_num': lane_num,
 					   'time': self.time
 				   	}
-				  }
+				  }}
 			self.server_obj.send_to_band(msg)
 		self.instrument.note_off(lane_num)
 
@@ -127,11 +127,15 @@ class Player(Keyboard):
 	def server_note_on(self, event):
 		print 'event triggered'
 		if self.composing and not self.is_me:
-			self.action_buffer.append(event.action)
+			action = event.action
+			self.track.lanes[action['lane_num']].on_press(action['time'])
+			self.action_buffer.append(action)
 
 	def server_note_off(self, event):
 		if self.composing and not self.is_me:
-			self.action_buffer.append(event.action)
+			action = event.action
+			self.track.lanes[action['lane_num']].on_press(action['time'])
+			self.action_buffer.append(action)
 
 	def set_now(self, time):
 		self.track.set_now(time)
