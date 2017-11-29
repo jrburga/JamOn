@@ -239,7 +239,7 @@ class Guest(ServerObject):
         while True:
             # Receiving from client
             data = self.sock.recv(MSG_SIZE)
-            print "Message Received from", band_member
+            print "Message Received from", band_member.info()
             self.msg_received(data, band_member)
 
 
