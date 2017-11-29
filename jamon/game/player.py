@@ -100,7 +100,7 @@ class Player(Keyboard):
 
 		if self.composing and self.is_me:
 			self.track.on_press(lane_num)
-			msg = {'message': {'event': 'server_note_on',
+			msg = {'action': {'event': 'server_note_on',
 					'action': {
 						'lane_num': lane_num, 
 				   		'time': self.time}
@@ -114,7 +114,7 @@ class Player(Keyboard):
 
 		if self.composing:
 			self.track.on_release(lane_num)
-			msg = {'message': {'event': 'server_note_off',
+			msg = {'action': {'event': 'server_note_off',
 					'action': {
 					   'lane_num': lane_num,
 					   'time': self.time
@@ -189,7 +189,7 @@ class Player(Keyboard):
 		# 
 		
 		if self.is_me:
-			msg = {'message': {'event': 'on_lock_in'}}
+			msg = {'action': {'event': 'on_lock_in'}}
 			self.server_obj.send_to_band(msg)
 		# else:
 		# 	self.trigger_event('on_lock_in')

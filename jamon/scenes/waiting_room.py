@@ -56,8 +56,8 @@ class WaitingRoom(Scene):
 
 	def start_game_callback(self):
 		def start_game(button):
-			msg = {'game_info': [b.info() for b in self.band_members.values()]}
-			self.host.send_to_band(json.dumps(msg), 'host')
+			msg = {'game_info': [b.info() for b in self.band_members]}
+			self.host.send_to_band(msg, 'host')
 			self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'])
 		return start_game
 

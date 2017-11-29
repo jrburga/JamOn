@@ -4,7 +4,7 @@ from jamon.game.session import Session
 
 # default music settings
 tempo = 120
-bars = 4
+bars = 1
 divs = 4
 
 insts = ['piano', 'drums']*2

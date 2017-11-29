@@ -85,7 +85,7 @@ class Host(ServerObject):
         self.is_host = True
         self.sock.listen(self.num_connections)
         self.band_formed = False
-        self.band_members = {'host': BandMember(None, self.ip, True, username='Host')}      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
+        self.band_members = [BandMember(None, self.ip, True, username='Host')]      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
 
         
     def find_other_players(self):
@@ -109,18 +109,19 @@ class Host(ServerObject):
             print "accepted!"
             if not self.band_formed:
                 band_member = BandMember(conn, addr, False)
-                self.band_members[band_member.addr_str] = band_member
+                self.band_members.append(band_member)
                 print 'Connected with ' + addr[0] + ':' + str(addr[1])
                 #start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function.
                 start_new_thread(self.guest_listen, (band_member,))
 
         print "Band formed!"
-        print "There are " + str(len(self.band_members.keys()) + 1) + " band members (including the host)"
+        print "There are " + str(len(self.band_members) + 1) + " band members (including the host)"
 
     def stop_searching(self):
         print 'stopping search...'
         self.band_formed = True
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect( (self.ip, self.port)) 
+        # socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((HOST, self.port)) 
+        print 'lol'
         # ^dummy socket to kill the accept() statement
 
     def guest_listen(self, band_member):
@@ -131,7 +132,7 @@ class Host(ServerObject):
         # self.play_ping_pong(band_member)
 
         # TODO Send band_member_info to client
-        band_member.conn.send(json.dumps({'message':'Send Initial Band Member Info Here'})
+        band_member.conn.send(json.dumps({'message':'Send Initial Band Member Info Here'}))
 
         # This num_blanks_in_a_row is my hacky method for determining if the connection has been broken
         num_blanks_in_a_row = 0
@@ -159,11 +160,12 @@ class Host(ServerObject):
         #             band_member.conn.send(msg)
         #     return
         msg_json = json.dumps(msg)
-        for band_member in self.band_members.values():
+        for band_member in self.band_members:
             if band_member.conn:
                 band_member.conn.send(msg_json)
 
-        self.msg_received(msg, sender)
+        # self.msg_received(msg_json, sender)
+        super(Host, self).msg_received(msg_json, sender)
 
     def msg_received(self, msg, sender):
         """
@@ -175,8 +177,8 @@ class Host(ServerObject):
         # dict
 
         # try:
+        print 'msg receieved', msg
         msg_data = json.loads(msg)
-        print 'msg receieved', msg_data
         #First, forward it if it needs to be forwarded
         # if 'send_to_band' in msg_data and msg_data['send_to_band']:
         self.send_to_band(msg_data, sender)
@@ -184,11 +186,11 @@ class Host(ServerObject):
         #Then, call the super method to handle the message
         super(Host, self).msg_received(msg, sender)
 
-        except Exception as e:
-            # Data is a string
-            print e
-            if msg.strip() == "Band Formed":
-                self.stop_searching()
+        # except Exception as e:
+        #     # Data is a string
+        #     print e
+        #     if msg.strip() == "Band Formed":
+        #         self.stop_searching()
 
 class Guest(ServerObject):
     def __init__(self):
@@ -231,7 +233,7 @@ class Guest(ServerObject):
         """
         # TODO Send band_member_info to client
 
-        self.sock.send(json.dumps({'message':'Initial Band Member Info: From Guest'})
+        self.sock.send(json.dumps({'message':'Initial Band Member Info: From Guest'}))
         band_member = BandMember(self.sock, self.ip, False)
 
         # Infinite loop so that we constantly listen
