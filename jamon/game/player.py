@@ -58,7 +58,7 @@ class Player(Keyboard):
 		self.status_sprite = None
 
 		self.composing = False
-		if num == 0:
+		if num == 1:
 			self.start_composing()
 
 
@@ -130,12 +130,14 @@ class Player(Keyboard):
 			action = event.action
 			self.track.lanes[action['lane_num']].on_press(action['time'])
 			self.action_buffer.append(action)
+			self.instrument.note_on(action['lane_num'])
 
 	def server_note_off(self, event):
 		if self.composing and not self.is_me:
 			action = event.action
-			self.track.lanes[action['lane_num']].on_press(action['time'])
+			self.track.lanes[action['lane_num']].on_release(action['time'])
 			self.action_buffer.append(action)
+			self.instrument.note_off(action['lane_num'])
 
 	def set_now(self, time):
 		self.track.set_now(time)
@@ -184,7 +186,9 @@ class Player(Keyboard):
 			self.note_sequence.append( (k, notes[k]) )
 		print self.note_sequence
 
-		self.trigger_event('on_lock_in')
+		# self.trigger_event('on_lock_in')
+		msg = {'message': {'event': 'on_lock_in'}}
+		self.server_obj.send_to_band(msg)
 
 class PlayerRemote(Player):
 	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):

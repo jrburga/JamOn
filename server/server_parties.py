@@ -50,20 +50,24 @@ class ServerObject(GameObject):
             sys.exit()
 
     def msg_received(self, msg, sender):
-        try:
-            msg = json.loads(msg)
-        except ValueError:
-            return
+        print 'super message receieved', msg
+        msg = json.loads(msg)
 
+        if 'send_to_band' in msg:
+            del msg['send_to_band']
         assert len(msg) == 1, 'all messages should be wrapped in 1-item dictionary'
         typ = msg.keys()[0]
+        print typ
         data = msg[typ]
 
         if typ == 'game_info':
             if hasattr(self, 'start_game'):
                 self.start_game(data)
-        elif typ == 'send_to_band':
-            self.trigger_event(data['event'], action=data['action'])
+        elif typ == 'message':
+            if 'action' in data:
+                self.trigger_event(data['event'], action=data['action'])
+            else:
+                self.trigger_event(data['event'])
 
 
 class Host(ServerObject):
@@ -127,8 +131,6 @@ class Host(ServerObject):
             # Receiving from client
             data = band_member.conn.recv(MSG_SIZE)
             if data:
-                print "Message Received from", band_member
-                print data
                 self.msg_received(data, band_member)
                 num_blanks_in_a_row = 0
             if data == "" or data is None or data.strip() == "":
@@ -163,16 +165,17 @@ class Host(ServerObject):
 
         try:
             msg_data = json.loads(msg)
-            
+            print 'msg receieved', msg_data
             #First, forward it if it needs to be forwarded
             if 'send_to_band' in msg_data and msg_data['send_to_band']:
                 self.send_to_band(msg_data, sender)
 
             #Then, call the super method to handle the message
-            super(Host, self).msg_received(msg_data, sender)
+            super(Host, self).msg_received(msg, sender)
 
         except Exception as e:
             # Data is a string
+            print e
             if msg.strip() == "Band Formed":
                 self.stop_searching()
 
