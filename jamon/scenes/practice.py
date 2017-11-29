@@ -7,7 +7,7 @@ tempo = 120
 bars = 4
 divs = 4
 
-insts = ['piano', 'drums']*2
+insts = ['piano', 'piano']*2
 
 class Practice(Scene):
 	def __init__(self, band_members, **kwargs):
@@ -25,7 +25,7 @@ class Practice(Scene):
 								  bars,
 								  tempo,
 								  i,
-								  inst=insts[i]))
+								  inst='piano'))
 		self.add(Session(tempo, bars, divs, players))
 		self.add_event_listener('on_key_down', self.change_scene)
 

@@ -182,7 +182,7 @@ class Player(Keyboard):
 			# sort the note sequence
 			for k in sorted(notes.iterkeys()):
 				self.note_sequence.append( (k, notes[k]) )
-		# print self.note_sequence
+		print self.note_sequence
 
 		# 
 		
