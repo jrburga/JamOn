@@ -9,9 +9,9 @@ from kivy.core.window import Window
 
 num_lanes = 8
 default_keys = [
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r', ' '], 
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r', ' '],
-	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p', ' ']
+	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'], 
+	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'],
+	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
 ]
 
 # assert([len(dk) == num_lanes for dk in default_keys])
@@ -93,11 +93,6 @@ class Player(Keyboard):
 			self.status_sprite = None
 
 	def key_down(self, lane_num):
-		if lane_num == num_lanes:
-			if self.composing:
-				self.lock_in_sequence()
-			return
-
 		if self.composing and self.is_me:
 			self.track.on_press(lane_num)
 			msg = {'action': {'event': 'server_note_on',
@@ -125,7 +120,7 @@ class Player(Keyboard):
 
 
 	def server_note_on(self, event):
-		print 'event triggered'
+		# print 'event triggered'
 		if self.composing and not self.is_me:
 			action = event.action
 			self.track.lanes[action['lane_num']].on_press(action['time'])
@@ -152,13 +147,13 @@ class Player(Keyboard):
 			if self.seq_ind < len(self.note_sequence):
 				next_time, notes = self.note_sequence[self.seq_ind]
 				if next_time <= self.time:
-					print self.time
+					# print self.time
 					for (lane, onoff) in notes:
 						if onoff == 'on':
-							print "NOTE ON", lane
+							# print "NOTE ON", lane
 							self.instrument.note_on(lane)
 						elif onoff == 'off':
-							print "NOTE OFF", lane
+							# print "NOTE OFF", lane
 							self.instrument.note_off(lane)
 					self.seq_ind  += 1
 
@@ -169,27 +164,34 @@ class Player(Keyboard):
 		return self._parent
 
 	def lock_in_sequence(self):
+
 		# set note_sequence
-		notes = {}
-		for i, lane in enumerate(self.track.lanes):
-			print 'locked:', lane.locked_times
-			for (time, length) in lane.locked_times:
-				end_time = time + length
-				if time not in notes:
-					notes[time] = []
-				notes[time].append( (i, 'on') )
-				if end_time not in notes:
-					notes[end_time] = []
-				notes[end_time].append( (i, 'off') )
-		# sort the note sequence
-		for k in sorted(notes.iterkeys()):
-			self.note_sequence.append( (k, notes[k]) )
-		print self.note_sequence
+		if self.is_me:
+			print 'locking in sequence'
+			notes = {}
+			for i, lane in enumerate(self.track.lanes):
+				# print 'locked:', lane.locked_times
+				for (time, length) in lane.locked_times:
+					end_time = time + length
+					if time not in notes:
+						notes[time] = []
+					notes[time].append( (i, 'on') )
+					if end_time not in notes:
+						notes[end_time] = []
+					notes[end_time].append( (i, 'off') )
+			# sort the note sequence
+			for k in sorted(notes.iterkeys()):
+				self.note_sequence.append( (k, notes[k]) )
+		# print self.note_sequence
 
 		# 
 		
-		if self.is_me:
-			msg = {'action': {'event': 'on_lock_in'}}
+		if self.is_me and self.composing:
+			msg = {'action': {'event': 'on_lock_in', 
+							  	'action': {
+							  		'sequence': self.note_sequence
+							  		}}}
+			# self.trigger_event('on_lock_in')
 			self.server_obj.send_to_band(msg)
 		# else:
 		# 	self.trigger_event('on_lock_in')

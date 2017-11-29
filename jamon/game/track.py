@@ -24,7 +24,7 @@ class Track(GameObject):
 		self.seconds = self.spb*beats
 
 		# Add quantizer instance for quantization
-		self.quant = Quantizer(self.seconds, 32)
+		self.quant = Quantizer(self.seconds, bars*8)
 
 		self.t2y = self.h/self.seconds
 		# self.scale.x = 0.5
@@ -190,7 +190,7 @@ class Lane(GameObject):
 
 
 	def match_gem(self, new_gem, old_gem):
-		print 'matched!'
+		# print 'matched!'
 		new_gem.matched(old_gem.stage)
 		self.matching_gem = new_gem
 
@@ -232,11 +232,11 @@ class Lane(GameObject):
 	def new_phrase(self):
 		stages = [gem.stage for gem in self.current_gems]
 		self.locked_times = [(gem.time, gem.length) for gem in self.current_gems]
-		print 'gem stages:', stages
+		# print 'gem stages:', stages
 		notes_entered = len(stages) > 0
 		all_locked = all(stage==2 for stage in stages)
-		if all_locked:
-			print 'all locked'
+		# if all_locked:
+		# 	print 'all locked'
 		
 		# Remove lingering old gems
 		for gem in self.old_gems:
@@ -258,7 +258,7 @@ class Lane(GameObject):
 			elif all_locked:
 				self.stage = 2
 
-		print 'new stage:', self.stage
+		# print 'new stage:', self.stage
 
 		if self.stage == 2:
 			return
