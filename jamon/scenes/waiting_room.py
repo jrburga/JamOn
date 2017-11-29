@@ -33,7 +33,7 @@ class WaitingRoom(Scene):
 		"""
 		All of the non-player-specific display will be handled here
 		"""
-		# Window.height - 
+		# I apologize for this shitshow below... I'm trying to fix this label thing and I'll have to get to it later -Tim
 		label_size = (Window.width * 0.5, Window.height * 0.3)
 		self.waiting_room_label = Label(text="[anchor=left_side][color=ff8888][b]Waiting Room[/b][/color][anchor=right_side]", 
 									   font_size='50sp', markup=True, halign='left', valign='bottom',
@@ -43,8 +43,6 @@ class WaitingRoom(Scene):
 		self.add_game_object(self.waiting_room_label)
 		self.waiting_room_label.widget.texture_update()
 		self.waiting_room_label.widget.bind(texture_size=self.waiting_room_label.widget.setter('text_size'))
-
-		print self.waiting_room_label.widget.anchors
 		
 		# Let host start the game
 		if self.is_host:
