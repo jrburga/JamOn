@@ -34,21 +34,25 @@ class WaitingRoom(Scene):
 		All of the non-player-specific display will be handled here
 		"""
 		# Window.height - 
-		label_size = (Window.width, Window.height)
+		label_size = (Window.width * 0.5, Window.height * 0.3)
 		self.waiting_room_label = Label(text="[anchor=left_side][color=ff8888][b]Waiting Room[/b][/color][anchor=right_side]", 
-									   font_size='50sp', markup=True, halign='center', valign='top',
-									   pos=(400, 450),
-			              			   text_size=label_size)
-
+									   font_size='50sp', markup=True, halign='left', valign='bottom',
+									   pos=(350,Window.height - 200))
+		self.waiting_room_label.widget.bind(size=self.waiting_room_label.widget.setter('text_size'))
+		# self.waiting_room_label.widget.size = self.waiting_room_label.widget.texture_size
 		self.add_game_object(self.waiting_room_label)
+		self.waiting_room_label.widget.texture_update()
+		self.waiting_room_label.widget.bind(texture_size=self.waiting_room_label.widget.setter('text_size'))
+
+		print self.waiting_room_label.widget.anchors
 		
 		# Let host start the game
 		if self.is_host:
 			self.start_game_button = Button(text="  Start Game  ", font_size='20sp', markup=True, 
 											halign='center', valign='top',
 									   		pos=(Window.width * 0.7, Window.height * 0.8),
-			              			   		size=(400, 150))
-
+			              			   		size=(Window.width * 0.25, Window.height * 0.125))
+		print Window.width, Window.height
 		# Todo: callback for start game @jake
 
 		self.start_game_button.bind(self.start_game_callback())
@@ -79,7 +83,8 @@ class WaitingRoom(Scene):
 		# = TextSprite()
 	def on_update(self):
 		# TODO: check if new members joined and add them to the view as they join
-		pass
+		self.waiting_room_label.widget.pos = (350,Window.height - 200)
+		self.start_game_button.widget.pos=(Window.width * 0.7, Window.height * 0.8)
 
 def build_scene(**kwargs):
 	return WaitingRoom(**kwargs)
