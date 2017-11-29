@@ -42,7 +42,7 @@ class Session(GameObject):
 		self.start()
 
 	def on_key_down(self, event):
-		# if event.keycode[1] == 'enter':
+		# if event.keycode[1] == 'enter':on
 		# 	self.toggle() 
 		pass
 

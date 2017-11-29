@@ -158,6 +158,8 @@ class Host(ServerObject):
             if band_member.conn:
                 band_member.conn.send(msg_json)
 
+        self.msg_received(msg, sender)
+
     def msg_received(self, msg, sender):
         """
         data (str): The data in the message

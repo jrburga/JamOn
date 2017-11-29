@@ -27,7 +27,7 @@ class Player(Keyboard):
 	def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
 		super(Player, self).__init__()
 		self.server_obj = server_obj
-		self.keys = default_keys[num]
+		self.keys = default_keys[0] if is_me else []
 		self.instrument = Instrument(inst)
 
 		# Boolean that represents whether this Player object correlates to
@@ -58,7 +58,7 @@ class Player(Keyboard):
 		self.status_sprite = None
 
 		self.composing = False
-		if num == 1:
+		if num == 0:
 			self.start_composing()
 
 
@@ -186,9 +186,13 @@ class Player(Keyboard):
 			self.note_sequence.append( (k, notes[k]) )
 		print self.note_sequence
 
-		# self.trigger_event('on_lock_in')
-		msg = {'message': {'event': 'on_lock_in'}}
-		self.server_obj.send_to_band(msg)
+		# 
+		
+		if self.is_me:
+			msg = {'message': {'event': 'on_lock_in'}}
+			self.server_obj.send_to_band(msg)
+		# else:
+		# 	self.trigger_event('on_lock_in')
 
 class PlayerRemote(Player):
 	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
