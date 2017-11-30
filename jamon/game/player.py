@@ -3,7 +3,10 @@ from game import GameObject
 from controller import Keyboard
 from instrument import Instrument
 from track import Track
-from components.sprites import PlayerOutlineSprite, PlayerNameSprite, PlayerStatusSprite
+from components.sprites import *
+
+from text import TextObject
+
 
 from kivy.core.window import Window
 
@@ -30,6 +33,7 @@ class Player(Keyboard):
 		self.keys = default_keys[0] if is_me else []
 		self.instrument = Instrument(inst)
 
+
 		# Boolean that represents whether this Player object correlates to
 		# the player for this system. I think this won't be needed once we 
 		# make other players use a different controller...
@@ -46,13 +50,11 @@ class Player(Keyboard):
 		self.track.position.x = 5
 		self.track.position.y = Window.height*0.005
 
-		
-
 		self.num = num
 		self.time = 0
 
 		self.add_graphic(PlayerOutlineSprite(is_me))
-		self.add_graphic(PlayerNameSprite(name, is_me))
+		self.add(PlayerNameText(name, is_me))
 
 		self.status = 0
 		self.status_sprite = None
@@ -87,8 +89,8 @@ class Player(Keyboard):
 		if self.status_sprite is not None:
 			self.remove_graphic(self.status_sprite)
 		if status in statuses:
-			self.status_sprite = PlayerStatusSprite(statuses[status])
-			self.add_graphic(self.status_sprite)
+			self.status_sprite = PlayerStatusText(statuses[status])
+			self.add(self.status_sprite)
 		else:
 			self.status_sprite = None
 
@@ -211,5 +213,16 @@ class PlayerRemote(Player):
 	def on_msg_recieve(self, event):
 
 		print event
+
+
+class PlayerNameText(TextObject):
+	def __init__(self, name, me):
+		color = (.3, .6, .3) if me else (.4, .4, .4)
+		super(PlayerNameText, self).__init__(name, color=color, pos=(20,player_size[1]*.95))
+
+class PlayerStatusText(TextObject):
+	def __init__(self, status):
+		color = (.3, .6, .3)
+		super(PlayerStatusText, self).__init__(status, color=color, pos=(120,player_size[1]*.95))
 
 
