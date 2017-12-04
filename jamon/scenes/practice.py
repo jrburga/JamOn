@@ -7,7 +7,7 @@ tempo = 120
 bars = 4
 divs = 4
 
-insts = ['piano', 'drums']*2
+insts = ['piano', 'piano']*2
 
 class Practice(Scene):
 	def __init__(self, band_members, **kwargs):
