@@ -87,7 +87,7 @@ class Player(Keyboard):
 	def set_status(self, status):
 		self.status = status
 		if self.status_sprite is not None:
-			self.remove_graphic(self.status_sprite)
+			self.remove(self.status_sprite)
 		if status in statuses:
 			self.status_sprite = PlayerStatusText(statuses[status])
 			self.add(self.status_sprite)
