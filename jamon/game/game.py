@@ -66,10 +66,10 @@ class GameObject(object):
 		y *= self.scale.y
 		parent = self._parent
 		while parent is not None:
-			xp = self._parent.position.x
-			yp = self._parent.position.y
-			x += xp * self._parent.scale.x
-			y += yp * self._parent.scale.y
+			xp = parent.position.x
+			yp = parent.position.y
+			x += xp * parent.scale.x
+			y += yp * parent.scale.y
 			parent = parent._parent
 
 		return x,y

@@ -12,16 +12,20 @@ class PatternList(GameObject):
 
 		self.bars = bars
 
-		self.sprite = PatternListSprite()
-		self.add_graphic(self.sprite)
-		self.position.y = 5
+		
 
 		self.patterns = {}
+
+		self.scroll = ScrollView()
+		self.add(self.scroll)
+
+		self.sprite = PatternListSprite()
+		self.add_graphic(self.sprite)
 
 	def add_pattern(self, _id, seq=[], num_lanes=8):
 		idx = len(self.patterns)
 		pattern = Pattern(_id, idx, self.bars, seq, num_lanes)
-		self.add(pattern)
+		self.scroll.add(pattern)
 		self.patterns[_id] = pattern
 
 	def set_active(self, pattern):
@@ -35,6 +39,39 @@ class PatternList(GameObject):
 
 	def pattern_done_editing(self, pattern, seq):
 		self.patterns[pattern].done_editing(seq)
+
+
+class ScrollView(GameObject):
+	def __init__(self):
+		super(ScrollView, self).__init__()
+		self.up = False
+		self.down = False
+
+
+	def on_key_down(self, event):
+		if event.keycode[1] == 'down':
+			self.down = True
+		elif event.keycode[1] == 'up':
+			self.up = True
+
+	def on_key_up(self, event):
+		if event.keycode[1] == 'down':
+			self.down = False
+		elif event.keycode[1] == 'up':
+			self.up = False
+
+	def on_update(self):
+		if self.down and self.up:
+			return
+		if self.down:
+			self.position.y += 5
+		if self.up:
+			if self.position.y > 5:
+				self.position.y -= 5
+
+
+
+
 
 
 class Pattern(GameObject):
@@ -161,6 +198,7 @@ class PatternButton(GameObject):
 
 	def on_touch_down(self, event):
 		x, y = event.touch.pos
+		self.figure_pos()
 		if abs(x - self.x) < 10 and abs(y - self.y) < 10:
 			print 'TOUCHED!'
 			self.touched = True
@@ -173,10 +211,10 @@ class PatternButton(GameObject):
 			self.sprite.color.v = 0.5
 
 
-	def on_add(self):
+	def figure_pos(self):
 		x, y = self.get_abs_pos()
 		x += 15
-		y += pattern_height + 20
+		y += pattern_height + 10
 		print 'POS:', x, y
 		self.x = x
 		self.y = y

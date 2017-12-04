@@ -13,7 +13,7 @@ bar_line_size = (lane_width, 2)
 
 player_size = (track_width+10, Window.height-10)
 
-pattern_list_height = Window.height-10
+pattern_list_height = Window.height
 pattern_list_size=(Window.width - track_width-35, pattern_list_height)
 pattern_height = 50
 pattern_size = (pattern_list_size[0] - 10, pattern_height)
