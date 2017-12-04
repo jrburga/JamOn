@@ -51,15 +51,7 @@ class PlayerOutlineSprite(RectOutlineSprite):
 		color = (.3, .6, .3) if me else (.4, .4, .4)
 		super(PlayerOutlineSprite, self).__init__(player_size, color)
 
-class PlayerNameSprite(TextSprite):
-	def __init__(self, name, me):
-		color = (.3, .6, .3) if me else (.4, .4, .4)
-		super(PlayerNameSprite, self).__init__(name, color=color, stretch=2, pos=(20,player_size[1]*.95))
 
-class PlayerStatusSprite(TextSprite):
-	def __init__(self, status):
-		color = (.3, .6, .3)
-		super(PlayerStatusSprite, self).__init__(status, color=color, stretch=2, pos=(120,player_size[1]*.95))
 
 
 

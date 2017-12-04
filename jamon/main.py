@@ -16,10 +16,14 @@ class MainWidget(BaseWidget):
 		self.scene = None
 
 		start_scene = 'main_menu'
-		if len(argv) > 1:
-			print 'starting in scene ' + argv[1]
-			start_scene = argv[1]
+		args = []
 		kwargs = {}
+
+		if len(argv) > 1:
+			if argv[1] == 'practice':
+				start_scene = 'practice'
+				kwargs = {'band_members': 'fdsfds'}
+		
 		
 		if start_scene:
 			self.load_new_scene(start_scene, **kwargs)

@@ -4,6 +4,7 @@ from thread import *
 import numpy as np
 import json
 from jamon.game.game import GameObject
+
 from urllib2 import urlopen
 
 
@@ -61,7 +62,6 @@ class ServerObject(GameObject):
         #     del msg['send_to_band']
         assert len(msg) == 1, 'all messages should be wrapped in 1-item dictionary'
         typ = msg.keys()[0]
-        print typ
         data = msg[typ]
 
         if typ == 'game_info':
@@ -72,7 +72,7 @@ class ServerObject(GameObject):
         elif typ == 'action':
             if 'action' in data:
                 self.trigger_event(data['event'], action=data['action'])
-                
+
         elif typ == 'message':
             print 'message received:', data
 
@@ -84,7 +84,7 @@ class Host(ServerObject):
         self.is_host = True
         self.sock.listen(self.num_connections)
         self.band_formed = False
-        self.band_members = [BandMember(None, self.ip, True, username='Host')]      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
+        self.band_members = [BandMember(None, self.ip, True)]      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
 
         
     def find_other_players(self):
@@ -183,7 +183,7 @@ class Host(ServerObject):
         self.send_to_band(msg_data, sender)
 
         #Then, call the super method to handle the message
-        super(Host, self).msg_received(msg, sender)
+        # super(Host, self).msg_received(msg, sender)
 
         # except Exception as e:
         #     # Data is a string
@@ -239,7 +239,7 @@ class Guest(ServerObject):
         while True:
             # Receiving from client
             data = self.sock.recv(MSG_SIZE)
-            print "Message Received from", band_member
+            print "Message Received from", band_member.info()
             self.msg_received(data, band_member)
 
 
@@ -266,25 +266,27 @@ class Guest(ServerObject):
         msg_str = json.dumps(msg)
         self.sock.send(msg_str)
 
+member_names = np.random.permutation(['Rudolf', 'Dasher', 'Prancer', 'Eran', 'Berry', 'Dancer', 'Vixen', 'Donner', 'Cupid'])
 class BandMember(object):
     """
     Helper class for the Host/Guest to keep track of their band members
     """
-    def __init__(self, conn, addr, is_host, username="Guest"):
+    count = 0
+    def __init__(self, conn, addr, is_host, username=None):
         """
         conn is a socket object?? TODO
         addr is a tuple of IP address (str) and Port (int)
         """
         super(BandMember, self).__init__()
+        if username == None:
+            self.username = member_names[BandMember.count%len(member_names)]
+            BandMember.count += 1
+        else:
+            self.username = username
         self.conn = conn
         self.addr = addr
         self.addr_str = addr[0] + ":" + str(addr[1])
         self.is_host = is_host
-        if username != "Guest":
-            self.username = username
-        else:
-            username_id = str(np.random.randint(1000000))
-            self.username = username + "_" + username_id
 
     def info(self):
         return {'ip': self.addr[0], 'username': self.username}

@@ -8,6 +8,8 @@ from kivy.core.text import Label as CoreLabel
 
 from jamon.game.common.gfxutil import KFAnim
 
+from kivy.properties import BooleanProperty
+
 class Transform(InstructionGroup):
 	def __init__(self, graphics):
 		super(Transform, self).__init__()
@@ -121,10 +123,23 @@ class GradientRectSprite(Sprite):
 		  	texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
 		  	super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
 
+class StaticRect(Rectangle):
+	# do_scale = BooleanProperty(False)
+
+	def __init__(self, *args, **kwargs):
+		super(StaticRect, self).__init__(*args, **kwargs)
+
+	def __setattr_(self, name, value):
+		print 'setting', name, value
+		setattr(super(StaticRect, self), name, value)
+
+
 class TextSprite(Sprite):
-	def __init__(self, text, pos=(0,0), color=(1,1,1), font_size=20, stretch=1, **text_kwargs):
+	def __init__(self, text, pos=(0,0), color=(1,1,1), font_size=20, stretch=(1,1), **text_kwargs):
 		text = CoreLabel(text=text, font_size=font_size, **text_kwargs)
 		text.refresh()
 		# Create rectangle object for the text
-		rect = Rectangle(size=(text.size[0]*stretch, text.size[1]), pos=pos, texture=text.texture)
+		new_size = (text.size[0]*stretch[0], text.size[1]*stretch[1])
+		rect = Rectangle(size=new_size, pos=pos, texture=text.texture)
 		super(TextSprite, self).__init__(rect, color)
+
