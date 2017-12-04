@@ -3,7 +3,7 @@ from components.sprites import *
 from quantizer import Quantizer
 
 # Should really fix this graphically and not here.
-OFFSET = 7
+OFFSET = 2
 
 class Track(GameObject):
 	def __init__(self, num_lanes, bars, tempo, percussive=False):
@@ -33,6 +33,7 @@ class Track(GameObject):
 		i2lane = self.w/num_lanes
 		for i, lane in enumerate(self.lanes):
 			lane.position.x = i*i2lane+OFFSET
+			lane.scale.x = 1. / (num_lanes+1)
 
 		self.tempo = tempo
 		self.bars = bars
@@ -117,7 +118,7 @@ class Lane(GameObject):
 		self.count = Lane.COUNT
 		Lane.COUNT += 1
 		self.sprite = LaneSprite()
-		cx, cy = self.sprite.center
+		# cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
 		self.matching_gem = None

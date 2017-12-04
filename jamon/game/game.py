@@ -59,6 +59,24 @@ class GameObject(object):
 		self._widgets.add(widget)
 		# self._add_widget(widget)
 
+	def get_abs_pos(self):
+		x = self.position.x
+		y = self.position.y
+		x *= self.scale.x
+		y *= self.scale.y
+		parent = self._parent
+		while parent is not None:
+			xp = self._parent.position.x
+			yp = self._parent.position.y
+			x += xp * self._parent.scale.x
+			y += yp * self._parent.scale.y
+			parent = parent._parent
+
+		return x,y
+
+	def on_add(self):
+		pass
+
 	@property
 	def position(self):
 		return self._transform.position
@@ -101,6 +119,7 @@ class GameObject(object):
 	def add(self, *game_objects):
 		for go in game_objects:
 			self.add_game_object(go)
+			go.on_add()
 
 	def add_game_object(self, game_object):
 		# self.add_widget(game_object)
