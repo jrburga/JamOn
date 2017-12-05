@@ -48,6 +48,10 @@ class GameObject(object):
 		self._widgets = set()
 		self._event_listeners = defaultdict(lambda: [])
 
+
+		self.updating = False
+		self.to_add = []
+
 	@property
 	def widgets(self):
 		widgets = self._widgets.copy()
@@ -58,6 +62,24 @@ class GameObject(object):
 	def add_widget(self, widget):
 		self._widgets.add(widget)
 		# self._add_widget(widget)
+
+	def get_abs_pos(self):
+		x = self.position.x
+		y = self.position.y
+		x *= self.scale.x
+		y *= self.scale.y
+		parent = self._parent
+		while parent is not None:
+			xp = parent.position.x
+			yp = parent.position.y
+			x += xp * parent.scale.x
+			y += yp * parent.scale.y
+			parent = parent._parent
+
+		return x,y
+
+	def on_add(self):
+		pass
 
 	@property
 	def position(self):
@@ -100,7 +122,11 @@ class GameObject(object):
 
 	def add(self, *game_objects):
 		for go in game_objects:
-			self.add_game_object(go)
+			if self.updating:
+				self.to_add.append(go)
+			else:
+				self.add_game_object(go)
+				go.on_add()
 
 	def add_game_object(self, game_object):
 		# self.add_widget(game_object)
@@ -140,13 +166,21 @@ class GameObject(object):
 			go._handle_event(event)
 
 	def _on_update(self):
+		self.updating = True
 		self.on_update()
 		dt = kivyClock.frametime
 		self._graphics.on_update(dt)
 		for go in self._game_objects:
 			go._on_update()
+		self.updating = False
+		for go in self.to_add:
+			self.add(go)
+		self.to_add = []
 
 	def on_update(self):
+		pass
+
+	def on_add(self):
 		pass
 
 class Scene(GameObject):

@@ -124,16 +124,6 @@ class GradientRectSprite(Sprite):
 		  	texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
 		  	super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
 
-class StaticRect(Rectangle):
-	# do_scale = BooleanProperty(False)
-
-	def __init__(self, *args, **kwargs):
-		super(StaticRect, self).__init__(*args, **kwargs)
-
-	def __setattr_(self, name, value):
-		print 'setting', name, value
-		setattr(super(StaticRect, self), name, value)
-
 
 class TextSprite(Sprite):
 	def __init__(self, text, pos=(0,0), color=(1,1,1), font_size=20, stretch=(1,1), **text_kwargs):
@@ -143,4 +133,8 @@ class TextSprite(Sprite):
 		new_size = (text.size[0]*stretch[0], text.size[1]*stretch[1])
 		rect = Rectangle(size=new_size, pos=pos, texture=text.texture)
 		super(TextSprite, self).__init__(rect, color)
+
+class ImageSprite(Sprite):
+	def __init__(self, fname, color=(1,1,1), **kwargs):
+		super(ImageSprite, self).__init__(Rectangle(source='images/'+fname, **kwargs), color)
 

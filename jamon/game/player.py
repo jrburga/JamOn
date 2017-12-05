@@ -12,7 +12,7 @@ from kivy.core.window import Window
 
 num_lanes = 8
 default_keys = [
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'], 
+	['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'], 
 	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'],
 	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
 ]
@@ -27,19 +27,21 @@ statuses = {
 }
 
 class Player(Keyboard):
-	def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
+	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
+	def __init__(self, bars, tempo, inst='piano'):
 		super(Player, self).__init__()
-		self.server_obj = server_obj
-		self.keys = default_keys[0] if is_me else []
+		# self.server_obj = server_obj
+		# self.keys = default_keys[0] if is_me else []
+		self.keys = default_keys[0]
 		self.instrument = Instrument(inst)
 
 
 		# Boolean that represents whether this Player object correlates to
 		# the player for this system. I think this won't be needed once we 
 		# make other players use a different controller...
-		self.is_me = is_me
+		# self.is_me = is_me
 
-		self.name = name
+		# self.name = name
 
 		self.note_sequence = []
 		self.seq_ind = 0
@@ -47,21 +49,21 @@ class Player(Keyboard):
 
 		perc = True if inst=='drums' else False
 		self.track = Track(num_lanes, bars, tempo, percussive=perc)
-		self.track.position.x = 5
-		self.track.position.y = Window.height*0.005
+		# self.track.position.x = 5
+		self.track.position.y = Window.height*0.01
 
-		self.num = num
+		# self.num = num
 		self.time = 0
 
-		self.add_graphic(PlayerOutlineSprite(is_me))
-		self.add(PlayerNameText(name, is_me))
+		# self.add_graphic(PlayerOutlineSprite(is_me))
+		# self.add(PlayerNameText(name, is_me))
 
 		self.status = 0
 		self.status_sprite = None
 
 		self.composing = False
-		if num == 0:
-			self.start_composing()
+		# if num == 0:
+		self.start_composing()
 
 
 		self.action_buffer = []
@@ -73,21 +75,21 @@ class Player(Keyboard):
 		if self.composing:
 			return
 		self.composing = True
-		if self.is_me:
-			self.set_status(1)
+		# if self.is_me:
+		# 	self.set_status(1)
 
 	def stop_composing(self):
 		if not self.composing:
 			return
 		self.composing = False
-		if self.is_me:
-			self.set_status(2)
+		# if self.is_me:
+		# 	self.set_status(2)
 
 
 	def set_status(self, status):
 		self.status = status
 		if self.status_sprite is not None:
-			self.remove_graphic(self.status_sprite)
+			self.remove(self.status_sprite)
 		if status in statuses:
 			self.status_sprite = PlayerStatusText(statuses[status])
 			self.add(self.status_sprite)
@@ -95,14 +97,14 @@ class Player(Keyboard):
 			self.status_sprite = None
 
 	def key_down(self, lane_num):
-		if self.composing and self.is_me:
+		if self.composing:
 			self.track.on_press(lane_num)
-			msg = {'action': {'event': 'server_note_on',
-					'action': {
-						'lane_num': lane_num, 
-				   		'time': self.time}
-				  }}
-			self.server_obj.send_to_band(msg)
+			# msg = {'action': {'event': 'server_note_on',
+			# 		'action': {
+			# 			'lane_num': lane_num, 
+			# 	   		'time': self.time}
+			# 	  }}
+			# self.server_obj.send_to_band(msg)
 		self.instrument.note_on(lane_num)
 
 	def key_up(self, lane_num):
@@ -111,30 +113,30 @@ class Player(Keyboard):
 
 		if self.composing:
 			self.track.on_release(lane_num)
-			msg = {'action': {'event': 'server_note_off',
-					'action': {
-					   'lane_num': lane_num,
-					   'time': self.time
-				   	}
-				  }}
-			self.server_obj.send_to_band(msg)
+			# msg = {'action': {'event': 'server_note_off',
+			# 		'action': {
+			# 		   'lane_num': lane_num,
+			# 		   'time': self.time
+			# 	   	}
+			# 	  }}
+			# self.server_obj.send_to_band(msg)
 		self.instrument.note_off(lane_num)
 
 
-	def server_note_on(self, event):
-		# print 'event triggered'
-		if self.composing and not self.is_me:
-			action = event.action
-			self.track.lanes[action['lane_num']].on_press(action['time'])
-			self.action_buffer.append(action)
-			self.instrument.note_on(action['lane_num'])
+	# def server_note_on(self, event):
+	# 	# print 'event triggered'
+	# 	if self.composing and not self.is_me:
+	# 		action = event.action
+	# 		self.track.lanes[action['lane_num']].on_press(action['time'])
+	# 		self.action_buffer.append(action)
+	# 		self.instrument.note_on(action['lane_num'])
 
-	def server_note_off(self, event):
-		if self.composing and not self.is_me:
-			action = event.action
-			self.track.lanes[action['lane_num']].on_release(action['time'])
-			self.action_buffer.append(action)
-			self.instrument.note_off(action['lane_num'])
+	# def server_note_off(self, event):
+	# 	if self.composing and not self.is_me:
+	# 		action = event.action
+	# 		self.track.lanes[action['lane_num']].on_release(action['time'])
+	# 		self.action_buffer.append(action)
+	# 		self.instrument.note_off(action['lane_num'])
 
 	def set_now(self, time):
 		self.track.set_now(time)
@@ -198,21 +200,21 @@ class Player(Keyboard):
 		# else:
 		# 	self.trigger_event('on_lock_in')
 
-class PlayerRemote(Player):
-	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
-		super(PlayerRemote, self).__init__(name, is_me, bars, tempo, num, inst)
-		self.keys = []
+# class PlayerRemote(Player):
+# 	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
+# 		super(PlayerRemote, self).__init__(name, is_me, bars, tempo, num, inst)
+# 		self.keys = []
 
-	# overwrite these
-	def on_key_down(self, event):
-		pass
+# 	# overwrite these
+# 	def on_key_down(self, event):
+# 		pass
 
-	def on_key_up(self, event):
-		pass
+# 	def on_key_up(self, event):
+# 		pass
 
-	def on_msg_recieve(self, event):
+# 	def on_msg_recieve(self, event):
 
-		print event
+# 		print event
 
 
 class PlayerNameText(TextObject):

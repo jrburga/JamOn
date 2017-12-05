@@ -22,7 +22,7 @@ class MainWidget(BaseWidget):
 		if len(argv) > 1:
 			if argv[1] == 'practice':
 				start_scene = 'practice'
-				kwargs = {'band_members': 'fdsfds'}
+				kwargs = {'band_members': []}
 		
 		
 		if start_scene:

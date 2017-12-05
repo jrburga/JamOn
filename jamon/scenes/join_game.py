@@ -68,7 +68,7 @@ class JoinGame(Scene):
 		self.attempting_connection = False
 		print "Connection successful!"
 
-		self.guest.send_to_band({'yo':True}, host_only=True)
+		# self.guest.send_to_band({'yo':True}, host_only=True)
 
 def build_scene(**kwargs):
 	return JoinGame(**kwargs)

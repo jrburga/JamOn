@@ -3,7 +3,7 @@ from components.sprites import *
 from quantizer import Quantizer
 
 # Should really fix this graphically and not here.
-OFFSET = 7
+OFFSET = 2
 
 class Track(GameObject):
 	def __init__(self, num_lanes, bars, tempo, percussive=False):
@@ -12,7 +12,7 @@ class Track(GameObject):
 		self.now = 0
 		self.sprite = TrackSprite()
 		self.now_bar = NowBarSprite()
-		self.w, self.h = self.sprite.size
+		self.w, self.h = track_size
 		self.last_y = 0
 
 
@@ -30,16 +30,25 @@ class Track(GameObject):
 		# self.scale.x = 0.5
 		# self.position = ((Window.width-self.w)/2, 0)
 
+		# Draw bar lines
+		bar_lines = [BarLineSprite(i) for i in range(16)]
+		for i, bl in enumerate(bar_lines):
+			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
+			self.add_graphic(bl)
+
 		i2lane = self.w/num_lanes
 		for i, lane in enumerate(self.lanes):
 			lane.position.x = i*i2lane+OFFSET
+			lane.scale.x = 1. / (num_lanes+1)
 
 		self.tempo = tempo
 		self.bars = bars
 
+		self.num_lanes = num_lanes
+
 		# self.t2y_ratio = 
 
-		self.add_graphic(self.sprite)
+		# self.add_graphic(self.sprite)
 		self.add(*self.lanes)
 
 		self.add_graphic(self.now_bar)
@@ -116,8 +125,8 @@ class Lane(GameObject):
 		super(Lane, self).__init__()
 		self.count = Lane.COUNT
 		Lane.COUNT += 1
-		self.sprite = LaneSprite()
-		cx, cy = self.sprite.center
+		self.sprite = LaneLineSprite()
+		# cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
 		self.matching_gem = None
@@ -127,8 +136,9 @@ class Lane(GameObject):
 		# owned by a lane will be gems
 		# but maybe not since _game_objects is a set()
 		self.now = 0
-		w, h = self.sprite.size
+		w, h = lane_size
 		self.add_graphic(self.sprite)
+		
 
 		# Represents how locked in the lane is
 		# 0 - no notes
@@ -139,11 +149,17 @@ class Lane(GameObject):
 
 		self.posted_note = False
 
-				#Draw bar lines
-		bar_lines = [BarLineSprite(i) for i in range(16)]
-		for i, bl in enumerate(bar_lines):
-			bl.position = (0, h*(1-i/16.)-bl.size[1])
-			self.add_graphic(bl)
+		# # Draw bar lines
+		# bar_lines = [BarLineSprite(i) for i in range(16)]
+		# for i, bl in enumerate(bar_lines):
+		# 	bl.position = (0, h*(1-i/16.)-bl.size[1])
+		# 	self.add_graphic(bl)
+
+	def on_add(self):
+		if self.count == self.track.num_lanes - 1:
+			secondLine = LaneLineSprite()
+			secondLine.position = (lane_width+5, 0)
+			self.add_graphic(secondLine)
 
 
 	@property
