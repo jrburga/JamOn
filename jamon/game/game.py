@@ -126,6 +126,7 @@ class GameObject(object):
 				self.to_add.append(go)
 			else:
 				self.add_game_object(go)
+				go.on_add()
 
 	def add_game_object(self, game_object):
 		# self.add_widget(game_object)
@@ -177,6 +178,9 @@ class GameObject(object):
 		self.to_add = []
 
 	def on_update(self):
+		pass
+
+	def on_add(self):
 		pass
 
 class Scene(GameObject):

@@ -26,12 +26,19 @@ class PatternList(GameObject):
 		self.add_graphic(self.sprite)
 
 
+	def send_event(self, msg):
+		# This is where it will call the server to send the message
+
+		# FOR DEBUGGING PURPOSES
+		if msg['event']=='add':
+			import random
+			self.add_pattern(random.randint(0, 10000000))
+		elif msg['event']=='remove':
+			self.remove_pattern(msg['id'])
 
 	def add_btn_clicked(self):
-		# This is for debugging purposes
-		print 'add button clicked'
-		import random
-		self.add_pattern(random.randint(0, 10000000))
+		self.send_event({'event':'add'})
+		
 
 	def remove_pattern(self, _id):
 		pattern = self.patterns[_id]
@@ -205,8 +212,7 @@ class Pattern(GameObject):
 	def on_delete_click(self):
 		if self.locked:
 			return
-		# This is for degubbing purposes
-		self._parent._parent.remove_pattern(self._id)
+		self._parent._parent.send_event({'event': 'remove', 'id': self._id})
 
 	def set_active(self):
 		if self.active:
