@@ -77,13 +77,18 @@ class PatternNoteSprite(RectSprite):
 class PatternPlaySprite(ImageSprite):
 	def __init__(self):
 		color = (0, .6, .8)
-		size = (20,20)
+		size = (30,30)
 		super(PatternPlaySprite, self).__init__('play.png', color, size=size)
 
+class PatternDeleteSprite(ImageSprite):
+	def __init__(self):
+		color = (1, .3, 0)
+		size = (30,30)
+		super(PatternDeleteSprite, self).__init__('delete.png', color, size=size)
 
 class PatternAddSprite(ImageSprite):
 	def __init__(self):
-		size = (20,20)
+		size = (30,30)
 		super(PatternAddSprite, self).__init__('add.png', size=size)
 
 class PatternNowBarSprite(RectSprite):

@@ -4,6 +4,7 @@ from kivy.core.window import Window
 from widgets import Button
 from kivy.core.image import Image
 from text import TextObject
+from instrument import Instrument
 
 class PatternList(GameObject):
 
@@ -48,9 +49,9 @@ class PatternList(GameObject):
 		self.add_btn.position.y += pattern_height + spacing
 
 
-	def add_pattern(self, _id, seq=[], num_lanes=8):
+	def add_pattern(self, _id, seq=[], inst='piano'):
 		idx = len(self.patterns)
-		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, num_lanes)
+		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, inst)
 		self.scroll.add(pattern)
 		self.patterns[_id] = pattern
 
@@ -119,14 +120,18 @@ spacing = 50
 
 class Pattern(GameObject):
 
-	def __init__(self, _id, idx, bars, tempo, seq, num_lanes):
+	def __init__(self, _id, idx, bars, tempo, seq, inst):
 		super(Pattern, self).__init__()
 		self._id = _id
 		self.bars = bars
 		self.tempo = tempo
 		self.seq = seq
+		self.figure_notes()
+		self.note_idx = 0
+		self.last_time = 0
 		self.idx = idx
-		self.num_lanes = num_lanes
+		self.instrument = Instrument(inst)
+		self.num_lanes = len(self.instrument.notes)
 
 		self.now = 0
 		self.spb = 60./tempo
@@ -152,6 +157,9 @@ class Pattern(GameObject):
 		# Display pattern buttons
 		self.play_btn = PatternButton('play', self.on_play_click)
 		self.add(self.play_btn)
+		self.delete_btn = PatternButton('delete', self.on_delete_click)
+		self.delete_btn.position.x += 30
+		self.add(self.delete_btn)
 
 		self.active = False
 
@@ -161,6 +169,23 @@ class Pattern(GameObject):
 
 		self.sprites_to_remove = []
 		self.objects_to_remove = []
+
+	def figure_notes(self):
+		note_dict = {}
+		for (lane, start, length) in self.seq:
+			end = start + length
+			if start not in note_dict:
+				note_dict[start] = [('on', lane)]
+			else:
+				note_dict[start].append(('on', lane))
+			if end not in note_dict:
+				note_dict[end] = [('off', lane)]
+			else:
+				note_dict[end].append(('off', lane))
+		self.notes = []
+		for time in sorted(note_dict.iterkeys()):
+			self.notes.append( (time, note_dict[time]) )
+
 
 	def display_midi(self):
 		self.note_sprites = []
@@ -173,14 +198,15 @@ class Pattern(GameObject):
 			self.add_graphic(sprite)
 
 	def on_play_click(self):
-		# if self.locked:
-		# 	return
-
-		# This is for degubbing purposes
-		self._parent._parent.remove_pattern(self._id)
-
+		if self.locked:
+			return
 		print '%d clicked' % self._id
 
+	def on_delete_click(self):
+		if self.locked:
+			return
+		# This is for degubbing purposes
+		self._parent._parent.remove_pattern(self._id)
 
 	def set_active(self):
 		if self.active:
@@ -210,7 +236,7 @@ class Pattern(GameObject):
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
 		self.info_text = TextObject(editor+' is editing...', font_size=14, color=self.outline_sprite.color.rgb)
-		self.info_text.position = (60, pattern_height)
+		self.info_text.position = (70, pattern_height)
 		self.add(self.info_text)
 
 	def done_editing(self, seq):
@@ -245,6 +271,23 @@ class Pattern(GameObject):
 		x = self.time2x(self.now)
 		self.now_bar.position = (x, y)
 
+		# Play the notes
+		if self.now < self.last_time:
+			self.note_idx = 0
+		if self.note_idx < len(self.notes):
+			time, events = self.notes[self.note_idx]
+			if self.now > time:
+				self.note_idx += 1
+				for (onoff, lane) in events:
+					if onoff == 'on':
+						print 'on', time, lane
+						self.instrument.note_on(lane)
+					else:
+						self.instrument.note_off(lane)
+						print 'off', time, lane
+		self.last_time = self.now
+
+
 
 class PatternButton(GameObject):
 	def __init__(self, typ, callback):
@@ -261,6 +304,8 @@ class PatternButton(GameObject):
 			self.sprite = PatternPlaySprite()
 		elif self.typ == 'add':
 			self.sprite = PatternAddSprite()
+		elif self.typ == 'delete':
+			self.sprite = PatternDeleteSprite()
 
 		self.sprite.position = (5, pattern_height)
 		self.sprite.color.v = 0.5
@@ -272,7 +317,7 @@ class PatternButton(GameObject):
 	def on_touch_down(self, event):
 		x, y = event.touch.pos
 		self.figure_pos()
-		if abs(x - self.x) < 10 and abs(y - self.y) < 10:
+		if abs(x - self.x) < 15 and abs(y - self.y) < 15:
 			self.touched = True
 			self.sprite.color.v = 1
 
@@ -285,8 +330,8 @@ class PatternButton(GameObject):
 
 	def figure_pos(self):
 		x, y = self.get_abs_pos()
-		x += 15
-		y += pattern_height + 10
+		x += 20
+		y += pattern_height + 15
 		self.x = x
 		self.y = y
 
