@@ -35,6 +35,10 @@ class PatternList(GameObject):
 			self.add_pattern(random.randint(0, 10000000))
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])
+		elif msg['event']=='queue':
+			self.set_queued(msg['id'])
+		elif msg['event']=='dequeue':
+			self.set_dequeued(msg['id'])
 
 	def add_btn_clicked(self):
 		self.send_event({'event':'add'})
@@ -65,11 +69,11 @@ class PatternList(GameObject):
 		# move add button down
 		self.add_btn.position.y -= (pattern_height + spacing)
 
-	def set_active(self, pattern):
-		self.patterns[pattern].set_active()
+	def set_queued(self, pattern):
+		self.patterns[pattern].set_queued()
 
-	def set_inactive(self, pattern):
-		self.patterns[pattern].set_inactive()
+	def set_dequeued(self, pattern):
+		self.patterns[pattern].set_dequeued()
 
 	def pattern_editing(self, pattern, editor):
 		self.patterns[pattern].editing(editor)
@@ -168,7 +172,8 @@ class Pattern(GameObject):
 		self.delete_btn.position.x += 30
 		self.add(self.delete_btn)
 
-		self.active = False
+		# STATE: 0: muted, 1: queued, 2: playing, 4: de-queued
+		self.state = 0
 
 		self.locked = False
 
@@ -207,32 +212,39 @@ class Pattern(GameObject):
 	def on_play_click(self):
 		if self.locked:
 			return
-		print '%d clicked' % self._id
+		event = 'queue' if self.state in (0,3) else 'dequeue'
+		self._parent._parent.send_event({'event':event, 'id':self._id})
 
 	def on_delete_click(self):
 		if self.locked:
 			return
 		self._parent._parent.send_event({'event': 'remove', 'id': self._id})
 
-	def set_active(self):
-		if self.active:
+	def set_queued(self):
+		if self.state == 3: #formerly dequeued
+			self.set_active()
 			return
-		self.active = True
+		self.state = 1
 		self.outline_sprite.color.v = 1
-		self.outline_sprite.color.h = 0.9
+	 	self.outline_sprite.color.h = 0.7
+
+	def set_dequeued(self):
+		if self.state == 1: #formerly queued (never played)
+			self.set_inactive()
+			return
+		self.state = 3
+	 	self.outline_sprite.color.v = 0.5
+	 	self.outline_sprite.color.h = 0.7
+
+	def set_active(self):
+		self.state = 2
+	 	self.outline_sprite.color.v = 1
+	 	self.outline_sprite.color.h = 0.9
 
 	def set_inactive(self):
-		if not self.active:
-			return
-		self.active = False
-		self.outline_sprite.color.v = 0.5
-		self.outline_sprite.color.h = 0.55
-
-	def toggle_active(self):
-		if self.active:
-			self.set_inactive()
-		else:
-			self.set_active()
+	 	self.state = 0
+	 	self.outline_sprite.color.v = 0.5
+	 	self.outline_sprite.color.h = 0.55
 
 	def editing(self, editor):
 		self.locked = True
@@ -253,7 +265,6 @@ class Pattern(GameObject):
 		self.locked = False
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
-		self.active = False
 		self.set_active()
 
 	def time2x(self, t):
@@ -277,9 +288,22 @@ class Pattern(GameObject):
 		x = self.time2x(self.now)
 		self.now_bar.position = (x, y)
 
-		# Play the notes
+		
+
+		# See if new bar happened
 		if self.now < self.last_time:
 			self.note_idx = 0
+
+			#Queue-dequeue
+			if self.state == 1:
+				self.set_active()
+			elif self.state == 3:
+				self.set_inactive()
+
+		# Set mute if active or not
+		self.instrument.set_mute(self.state < 2)
+
+		# Play the notes
 		if self.note_idx < len(self.notes):
 			time, events = self.notes[self.note_idx]
 			if self.now > time:

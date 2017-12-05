@@ -46,6 +46,7 @@ class Instrument(object):
 		(self.patch, self.notes) = INSTRUMENTS[inst]
 		self.vel = 75
 		self.manager = None
+		self.mute = False
 
 	def note_on(self, lane):
 		assert 0 <= lane < len(self.notes)
@@ -53,7 +54,7 @@ class Instrument(object):
 			print "instrument not added to manager"
 			raise Exception
 		pitch = self.notes[lane]
-		self.manager.noteon(self.channel, pitch, self.vel)
+		self.manager.noteon(self.channel, pitch, self.vel if not self.mute else 0)
 
 
 	def note_off(self, lane):
@@ -63,3 +64,7 @@ class Instrument(object):
 			raise Exception
 		pitch = self.notes[lane]
 		self.manager.noteoff(self.channel, pitch)
+
+	def set_mute(self, mute):
+		self.mute = mute
+
