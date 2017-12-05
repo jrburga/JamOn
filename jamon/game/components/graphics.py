@@ -135,5 +135,5 @@ class TextSprite(Sprite):
 
 class ImageSprite(Sprite):
 	def __init__(self, fname, color=(1,1,1), **kwargs):
-		super(ImageSprite, self).__init__(Rectangle(source='data/'+fname, **kwargs), color)
+		super(ImageSprite, self).__init__(Rectangle(source='images/'+fname, **kwargs), color)
 
