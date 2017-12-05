@@ -24,7 +24,7 @@ class Session(GameObject):
 		self.IM = InstrumentManager(self.sched)
 
 		### NEW CODE ###
-		self.pattern_list = PatternList(self.bars)
+		self.pattern_list = PatternList(self.bars, tempo)
 		self.add(self.pattern_list)
 		self.player = Player(bars, tempo, inst='piano')
 		self.player.position.x = Window.width - player_size[0] - 20
@@ -36,6 +36,8 @@ class Session(GameObject):
 		self.pattern_list.add_pattern(0)
 		self.pattern_list.add_pattern(1,test_seq, 8)
 		self.pattern_list.add_pattern(2)
+		self.pattern_list.add_pattern(3)
+		self.pattern_list.add_pattern(4)
 		self.pattern_list.pattern_editing(0, 'John')
 		self.pattern_list.pattern_editing(1, 'Bob')
 
@@ -94,3 +96,4 @@ class Session(GameObject):
 		self.sched.on_update()
 		# for player in self.players:
 		self.player.set_now(self.clock.get_time()%self.seconds)
+		self.pattern_list.set_now(self.clock.get_time()%self.seconds)

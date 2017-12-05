@@ -48,6 +48,10 @@ class GameObject(object):
 		self._widgets = set()
 		self._event_listeners = defaultdict(lambda: [])
 
+
+		self.updating = False
+		self.to_add = []
+
 	@property
 	def widgets(self):
 		widgets = self._widgets.copy()
@@ -118,8 +122,10 @@ class GameObject(object):
 
 	def add(self, *game_objects):
 		for go in game_objects:
-			self.add_game_object(go)
-			go.on_add()
+			if self.updating:
+				self.to_add.append(go)
+			else:
+				self.add_game_object(go)
 
 	def add_game_object(self, game_object):
 		# self.add_widget(game_object)
@@ -159,11 +165,16 @@ class GameObject(object):
 			go._handle_event(event)
 
 	def _on_update(self):
+		self.updating = True
 		self.on_update()
 		dt = kivyClock.frametime
 		self._graphics.on_update(dt)
 		for go in self._game_objects:
 			go._on_update()
+		self.updating = False
+		for go in self.to_add:
+			self.add(go)
+		self.to_add = []
 
 	def on_update(self):
 		pass

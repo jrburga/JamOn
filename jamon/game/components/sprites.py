@@ -17,10 +17,13 @@ pattern_list_height = Window.height
 pattern_list_size=(Window.width - track_width-35, pattern_list_height)
 pattern_height = 50
 pattern_size = (pattern_list_size[0] - 10, pattern_height)
+pattern_now_bar_size = (3, pattern_height)
+
 
 track_color = (.85, .85, .85)
 now_bar_color = (.13, .54, .13)
 lane_color = (1, 1, 1)
+pattern_now_bar_color = (.6, .3, .5)
 # gem_texture = Image('path/to/image.png').texture
 
 class GemSprite(RectSprite):
@@ -77,6 +80,15 @@ class PatternPlaySprite(ImageSprite):
 		size = (20,20)
 		super(PatternPlaySprite, self).__init__('play.png', color, size=size)
 
+
+class PatternAddSprite(ImageSprite):
+	def __init__(self):
+		size = (20,20)
+		super(PatternAddSprite, self).__init__('add.png', size=size)
+
+class PatternNowBarSprite(RectSprite):
+	def __init__(self):
+		super(PatternNowBarSprite, self).__init__(pattern_now_bar_size, pattern_now_bar_color)
 
 
 

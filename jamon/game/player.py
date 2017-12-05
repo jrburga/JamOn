@@ -12,7 +12,7 @@ from kivy.core.window import Window
 
 num_lanes = 8
 default_keys = [
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'], 
+	['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'], 
 	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'],
 	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
 ]

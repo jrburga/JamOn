@@ -7,26 +7,55 @@ from text import TextObject
 
 class PatternList(GameObject):
 
-	def __init__(self, bars):
+	def __init__(self, bars, tempo):
 		super(PatternList, self).__init__()
 
 		self.bars = bars
-
-		
+		self.tempo = tempo
 
 		self.patterns = {}
 
 		self.scroll = ScrollView()
+		self.add_btn = PatternButton('add', self.add_btn_clicked)
+		self.add_btn.position = (5, pattern_list_height-80)
+		self.scroll.add(self.add_btn)
 		self.add(self.scroll)
 
 		self.sprite = PatternListSprite()
 		self.add_graphic(self.sprite)
 
+
+
+	def add_btn_clicked(self):
+		# This is for debugging purposes
+		print 'add button clicked'
+		import random
+		self.add_pattern(random.randint(0, 10000000))
+
+	def remove_pattern(self, _id):
+		pattern = self.patterns[_id]
+		idx = pattern.idx
+		self.scroll.remove(pattern)
+		del self.patterns[_id]
+
+		# Shift everything below the pattern up
+		for k in self.patterns:
+			p = self.patterns[k]
+			if p.idx > idx:
+				p.position.y += pattern_height + spacing
+
+		# Shift add button up
+		self.add_btn.position.y += pattern_height + spacing
+
+
 	def add_pattern(self, _id, seq=[], num_lanes=8):
 		idx = len(self.patterns)
-		pattern = Pattern(_id, idx, self.bars, seq, num_lanes)
+		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, num_lanes)
 		self.scroll.add(pattern)
 		self.patterns[_id] = pattern
+
+		# move add button down
+		self.add_btn.position.y -= (pattern_height + spacing)
 
 	def set_active(self, pattern):
 		self.patterns[pattern].set_active()
@@ -40,12 +69,21 @@ class PatternList(GameObject):
 	def pattern_done_editing(self, pattern, seq):
 		self.patterns[pattern].done_editing(seq)
 
+	def set_now(self, now):
+		for k in self.patterns:
+			self.patterns[k].set_now(now)
+
 
 class ScrollView(GameObject):
 	def __init__(self):
 		super(ScrollView, self).__init__()
 		self.up = False
 		self.down = False
+
+		self.objects_to_remove = []
+
+	def remove(self, obj):
+		self.objects_to_remove.append(obj)
 
 
 	def on_key_down(self, event):
@@ -69,29 +107,44 @@ class ScrollView(GameObject):
 			if self.position.y > 5:
 				self.position.y -= 5
 
+		# Remove items
+		for obj in self.objects_to_remove:
+			super(ScrollView, self).remove(obj)
+		self.objects_to_remove = []
 
 
 
 
+spacing = 50
 
 class Pattern(GameObject):
 
-	def __init__(self, _id, idx, bars, seq, num_lanes):
+	def __init__(self, _id, idx, bars, tempo, seq, num_lanes):
 		super(Pattern, self).__init__()
 		self._id = _id
 		self.bars = bars
+		self.tempo = tempo
 		self.seq = seq
 		self.idx = idx
 		self.num_lanes = num_lanes
+
+		self.now = 0
+		self.spb = 60./tempo
+		beats = bars*4
+		self.seconds = self.spb*beats
 
 		# Display the pattern outline
 		self.outline_sprite = PatternOutlineSprite()
 		self.outline_sprite.color.v = 0.5
 		self.outline_sprite.color.h = .55
 		self.add_graphic(self.outline_sprite)
-		spacing = 50
+		
 		self.position.x = 5
 		self.position.y = pattern_list_height - (pattern_height + spacing) * (1 + idx)
+
+		# Create the nowbar
+		self.now_bar = PatternNowBarSprite()
+		self.add_graphic(self.now_bar)
 
 		# Display MIDI
 		self.display_midi()
@@ -112,16 +165,19 @@ class Pattern(GameObject):
 	def display_midi(self):
 		self.note_sprites = []
 		for (lane, start, length) in self.seq:
-			size_x = pattern_size[0] / self.bars * length / 2 # why is /2 needed here...?
+			size_x = pattern_size[0] / self.seconds * length
 			size_y = pattern_size[1] / self.num_lanes - 2
 			sprite = PatternNoteSprite( (size_x, size_y) )
-			sprite.position = (start * pattern_size[0] / self.bars / 2, lane * pattern_size[1] / self.num_lanes)
+			sprite.position = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
 			self.note_sprites.append(sprite)
 			self.add_graphic(sprite)
 
 	def on_play_click(self):
-		if self.locked:
-			return
+		# if self.locked:
+		# 	return
+
+		# This is for degubbing purposes
+		self._parent._parent.remove_pattern(self._id)
 
 		print '%d clicked' % self._id
 
@@ -168,6 +224,12 @@ class Pattern(GameObject):
 		self.active = False
 		self.set_active()
 
+	def time2x(self, t):
+		return pattern_size[0]*t/self.seconds
+
+	def set_now(self, now):
+		self.now = now
+
 	def on_update(self):
 		# Needs to be handled synchronously and not from events
 		for s in self.sprites_to_remove:
@@ -176,6 +238,13 @@ class Pattern(GameObject):
 				self.remove_graphic(s)
 		for o in self.objects_to_remove:
 			self.remove(o)
+
+
+		# Move now bar
+		_, y = self.now_bar.position
+		x = self.time2x(self.now)
+		self.now_bar.position = (x, y)
+
 
 class PatternButton(GameObject):
 	def __init__(self, typ, callback):
@@ -190,24 +259,27 @@ class PatternButton(GameObject):
 
 		if self.typ == 'play':
 			self.sprite = PatternPlaySprite()
+		elif self.typ == 'add':
+			self.sprite = PatternAddSprite()
 
 		self.sprite.position = (5, pattern_height)
 		self.sprite.color.v = 0.5
 		self.add_graphic(self.sprite)
+
+		self.events = []
 
 
 	def on_touch_down(self, event):
 		x, y = event.touch.pos
 		self.figure_pos()
 		if abs(x - self.x) < 10 and abs(y - self.y) < 10:
-			print 'TOUCHED!'
 			self.touched = True
-			self.callback()
 			self.sprite.color.v = 1
 
 	def on_touch_up(self, event):
 		if self.touched:
 			self.touched = False
+			self.events.append(self.callback)
 			self.sprite.color.v = 0.5
 
 
@@ -215,9 +287,13 @@ class PatternButton(GameObject):
 		x, y = self.get_abs_pos()
 		x += 15
 		y += pattern_height + 10
-		print 'POS:', x, y
 		self.x = x
 		self.y = y
+
+	def on_update(self):
+		while self.events:
+			self.events.pop(0)()
+
 
 
 
