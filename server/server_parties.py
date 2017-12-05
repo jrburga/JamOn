@@ -85,7 +85,6 @@ class Host(ServerObject):
         self.sock.listen(self.num_connections)
         self.band_formed = False
         self.band_members = [BandMember(None, (self.ip, ""), True)]      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
-
         
     def find_other_players(self):
         """

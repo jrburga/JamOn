@@ -2,7 +2,9 @@ from game import GameObject
 
 from kivy.uix.textinput import TextInput as _TextInput
 from kivy.uix.button import Button as _Button
+from kivy.uix.togglebutton import ToggleButton as _ToggleButton
 from kivy.uix.label import Label as _Label
+from kivy.uix.behaviors import ToggleButtonBehavior
 
 class Button(GameObject):
 	def __init__(self, **kwargs):
@@ -18,6 +20,20 @@ class Button(GameObject):
 	def _on_press(self, instance):
 		for callback in self.callbacks:
 			callback(self)
+
+	@property
+	def text(self):
+		return self.widget.text
+
+	@text.setter
+	def text(self, new_text):
+		self.widget.text = new_text
+
+class ToggleButton(GameObject):
+	def __init__(self, **kwargs):
+		super(ToggleButton, self).__init__()
+		self.widget = _ToggleButton(allow_no_selection=False, **kwargs)
+		self.add_widget(self.widget)
 
 	@property
 	def text(self):

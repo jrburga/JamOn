@@ -1,6 +1,7 @@
 from game import GameObject
 from common.synth import Synth
 from common.metro import Metronome
+from collections import OrderedDict
 
 class InstrumentManager(GameObject):
 
@@ -32,18 +33,24 @@ class InstrumentManager(GameObject):
 
 
 
-INSTRUMENTS = {
-			'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72] ),
-			'vibraphone': ( (  0, 11), [60, 62, 64, 65, 67, 69, 71, 72] ),
-			'guitar': ( (  0, 24), [48, 50, 52, 53, 55, 57, 59, 60] ),
-			'drums': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
-		}
+INSTRUMENT_SETS = OrderedDict([
+				('ROCK', {'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72] ),
+					'vibraphone': ( (  0, 11), [60, 62, 64, 65, 67, 69, 71, 72] ),
+					'guitar': ( (  0, 24), [48, 50, 52, 53, 55, 57, 59, 60] ),
+					'drums': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
+				}), 
+				('ROCK2', {
+					'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72] ),
+					'vibraphone': ( (  0, 11), [60, 62, 64, 65, 67, 69, 71, 72] ),
+					'guitar': ( (  0, 24), [48, 50, 52, 53, 55, 57, 59, 60] ),
+					'drums': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
+				})])
 
 class Instrument(object):
 	
-	def __init__(self, inst):
+	def __init__(self, inst, inst_set='ROCK'):
 		super(Instrument, self).__init__()
-		(self.patch, self.notes) = INSTRUMENTS[inst]
+		(self.patch, self.notes) = INSTRUMENT_SETS[inst_set][inst]
 		self.vel = 75
 		self.manager = None
 
