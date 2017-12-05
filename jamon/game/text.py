@@ -8,7 +8,6 @@ class TextObject(GameObject):
 		super(TextObject, self).__init__()
 
 		self.done = False
-
 		self.text = text
 		self.kwargs = kwargs
 
@@ -18,11 +17,10 @@ class TextObject(GameObject):
 		self.sprite = TextSprite(self.text, stretch = stretch, **self.kwargs)
 		self.add_graphic(self.sprite)
 
-
 	def on_update(self):
 		if self.done:
 			return
-			
+
 		if self._parent is not None:
 			self.done = True
 			x1, y1 = (1,1)
