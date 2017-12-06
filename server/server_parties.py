@@ -50,6 +50,9 @@ class ServerObject(GameObject):
             #TODO -- Better fail handling
             sys.exit()
 
+    def parse_message(self, message):
+        return message.replace('}{', '}*{').split('*')
+
     def msg_received(self, msg, sender):
         # print 'super message receieved', msg
         try:
@@ -140,7 +143,8 @@ class Host(ServerObject):
             # Receiving from client
             data = band_member.conn.recv(MSG_SIZE)
             if data:
-                self.msg_received(data, band_member)
+                for msg in self.parse_message(data):
+                    self.msg_received(msg, band_member)
                 num_blanks_in_a_row = 0
             if data == "" or data is None or data.strip() == "":
                 num_blanks_in_a_row += 1
@@ -176,7 +180,6 @@ class Host(ServerObject):
         # dict
 
         # try:
-        # print 'msg receieved', msg
         msg_data = json.loads(msg)
         #First, forward it if it needs to be forwarded
         # if 'send_to_band' in msg_data and msg_data['send_to_band']:
@@ -240,7 +243,8 @@ class Guest(ServerObject):
             # Receiving from client
             data = self.sock.recv(MSG_SIZE)
             print "Message Received from", band_member.info()
-            self.msg_received(data, band_member)
+            for msg in self.parse_message(data):
+                self.msg_received(msg, band_member)
 
 
         # came out of loop
@@ -288,8 +292,14 @@ class BandMember(object):
         self.addr_str = addr[0] + ":" + str(addr[1])
         self.is_host = is_host
 
+        self._id = id(self)
+
     def info(self):
         return {'ip': self.addr[0], 'username': self.username}
+
+    @property
+    def ID(self):
+        return self._id
 
 if __name__ == '__main__':
     band_member = BandMember(None, ('1231', '1231'), False)
