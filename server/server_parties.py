@@ -28,7 +28,7 @@ class ServerObject(GameObject):
     def __init__(self, num_connections=0):
         super(ServerObject, self).__init__()
         self.port = PORT
-        self.ip = HOST
+        self.ip = urlopen('http://ip.42.pl/raw').read()
         self.num_connections = num_connections
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.is_host = False
@@ -87,8 +87,7 @@ class Host(ServerObject):
         self.is_host = True
         self.sock.listen(self.num_connections)
         self.band_formed = False
-        self.band_members = [BandMember(None, self.ip, True)]      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
-
+        self.band_members = [BandMember(None, (self.ip, ""), True)]      # Will look like: {"addr[0]+':'+addr[1]":BandMember}
         
     def find_other_players(self):
         """
@@ -289,7 +288,10 @@ class BandMember(object):
             self.username = username
         self.conn = conn
         self.addr = addr
-        self.addr_str = addr[0] + ":" + str(addr[1])
+        if addr[1]:
+            self.addr_str = addr[0] + ":" + str(addr[1])
+        else:
+            self.addr_str = addr[0]            
         self.is_host = is_host
 
         self._id = id(self)
