@@ -37,21 +37,43 @@ class PatternList(GameObject):
 		# FOR DEBUGGING PURPOSES
 		if msg['event']=='add':
 			import random
-			self.add_pattern(random.randint(0, 10000000))
+			_id = random.randint(0, 100000)
+			self.create_pattern(_id, msg['inst'])
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])
 		elif msg['event']=='queue':
 			self.set_queued(msg['id'])
 		elif msg['event']=='dequeue':
 			self.set_dequeued(msg['id'])
+		elif msg['event']=='done_edit':
+			self.pattern_done_editing(msg['id'], msg['seq'])
+	
+	# Called when the user begins creating a new pattern
+	def create_pattern(self, _id, inst):
+		# Add a patten to the top of the list
+		pattern = Pattern(_id, 0, self.bars, self.tempo, [], inst, self._parent.IM)
 
-	def add_btn_clicked(self):
-		pass
+		# Shift index of all other patterns down
+		for k in self.patterns:
+			p = self.patterns[k]
+			p.idx += 1
+			p.move_to(p.position.y - pattern_height - spacing)
 
-		# Create instrument display panel
+		# Add pattern to dict
+		self.patterns[_id] = pattern
 
-		# self.send_event({'event':'add'})
-		
+		# Tell pattern it's being edited
+		pattern.editing(is_me=True)
+
+		# Add pattern to the screen
+		self.scroll.add(pattern)
+
+		# Give the track the pattern info to update the midi live
+		track = self._parent.player.track
+		track.set_active_pattern(pattern)
+
+		# Set the instrument to the correct instrument
+		self._parent.player.instrument.set_inst(inst)
 
 	def remove_pattern(self, _id):
 		pattern = self.patterns[_id]
@@ -72,7 +94,7 @@ class PatternList(GameObject):
 
 	def add_pattern(self, _id, seq=[], inst='piano'):
 		idx = len(self.patterns)
-		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, inst)
+		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, inst, self._parent.IM)
 		self.scroll.add(pattern)
 		self.patterns[_id] = pattern
 
@@ -103,16 +125,33 @@ class InstrumentPanel(GameObject):
 		self.sprite = InstrumentPanelSrite()
 		self.add_graphic(self.sprite)
 
-		self.inst_btns = [PatternButton(inst, self.get_inst_btn_callback(inst)) for inst in ('guitar', 'piano', 'drum', 'vibraphone')]
+		self.inst_btns = [PatternButton(inst, self.get_inst_btn_callback(i)) for i, inst in enumerate(('guitar', 'piano', 'drum', 'vibraphone'))]
 		for i, e in enumerate(self.inst_btns):
 			e.position = (70 + i * 70, -20)
 			self.add(e)
 
+		self.active_idx = None
 
+	def deactivate(self):
+		if self.active_idx is None:
+			return
+		btn = self.inst_btns[self.active_idx]
+		btn.sprite.color.rgb = (1,1,1)
+		btn.sprite.color.v = 0.5
+		self.active_idx = None
 
-	def get_inst_btn_callback(self, btn):
+	def get_inst_btn_callback(self, idx):
 		def cb():
-			print btn + ' called!'
+			btn = self.inst_btns[idx]
+			print btn.typ + ' called!'
+			track = self._parent._parent.player.track
+			if not track.active:
+				track.set_active(True)
+				btn.sprite.color.rgb = (0,1,0)
+				btn.sprite.color.v = 0.5
+				self.active_idx = idx
+				self._parent.send_event({'event':'add', 'inst':btn.typ})
+
 		return cb
 
 
@@ -156,30 +195,56 @@ class ScrollView(GameObject):
 		self.objects_to_remove = []
 
 
+class PatternNote(GameObject):
+	def __init__(self, lane, start, length, seconds, num_lanes):
+		super(PatternNote, self).__init__()
+		self.start = start
+		self.length = length
+		self.lane = lane
+		self.seconds = seconds
+		self.num_lanes = num_lanes
+
+		size_x = pattern_size[0] / self.seconds * length
+		size_y = pattern_size[1] / self.num_lanes - 2
+		sprite = PatternNoteSprite( (size_x, size_y) )
+		self.add_graphic(sprite)
+
+		self.position.xy = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
 
 
 spacing = 50
 
 class Pattern(GameObject):
 
-	def __init__(self, _id, idx, bars, tempo, seq, inst):
+	def __init__(self, _id, idx, bars, tempo, seq, inst, IM):
 		super(Pattern, self).__init__()
 		self._id = _id
 		self.bars = bars
 		self.tempo = tempo
 		self.seq = seq
+		self.note_sprites = {}
 		self.figure_notes()
 		self.note_idx = 0
 		self.last_time = 0
 		self.idx = idx
 		self.instrument = Instrument(inst)
+		IM.add(self.instrument)
 		self.num_lanes = len(self.instrument.notes)
-
 		self.now = 0
 		self.run_time = 0
 		self.spb = 60./tempo
 		beats = bars*4
 		self.seconds = self.spb*beats
+
+		self.notes = {} # key = (start, lane)
+		for (lane, start, length) in seq:
+			note = PatternNote(lane, start, length, self.seconds, self.num_lanes)
+			self.notes[ (start, lane) ] = note
+			self.add(note)
+
+		self.old_notes = {}
+
+		
 
 		# Display the pattern outline
 		self.outline_sprite = PatternOutlineSprite()
@@ -195,7 +260,7 @@ class Pattern(GameObject):
 		self.add_graphic(self.now_bar)
 
 		# Display MIDI
-		self.display_midi()
+		# self.display_midi()
 
 		# Display pattern buttons
 		self.play_btn = PatternScrollButton('play', self.on_play_click)
@@ -214,6 +279,7 @@ class Pattern(GameObject):
 		self.state = 0
 
 		self.locked = False
+		self.is_editing = False
 
 		self.info_text = None
 
@@ -227,6 +293,43 @@ class Pattern(GameObject):
 	def move_to(self, y):
 		self.anim = KFAnim( (self.run_time, self.position.y), (self.run_time + 0.3, y))
 
+	# Adds a note to the mid
+	def add_note(self, start, length, lane):
+		note = PatternNote(lane, start, length, self.seconds, self.num_lanes)
+		self.notes[ (start, lane) ] = note
+		self.add(note)
+
+
+	def remove_note(self, start, lane):
+		if (start, lane) not in self.old_notes:
+			print 'something went wrong... (Pattern.remove_note)'
+			return
+		note = self.old_notes[ (start, lane) ]
+		self.remove(note)
+		# del self.old_notes[ (start, lane) ]
+
+	def new_phrase(self):
+		# Move notes to old notes
+		self.old_notes = self.notes
+		self.notes = {}
+
+	# Called when the user is done editing this pattern
+	def lock_in(self):
+		# Create seq list from old notes
+		self.seq = []
+		for k in self.old_notes:
+			note = self.old_notes[k]
+			self.seq.append( (note.lane, note.start, note.length) )
+
+		# Queue the pattern
+		self._parent._parent.send_event({'event':'done_edit', 'id':self._id, 'seq':self.seq})
+
+		# Show instrument button as unclicked
+		self._parent._parent.inst_panel.deactivate()
+
+
+
+
 	def figure_notes(self):
 		note_dict = {}
 		for (lane, start, length) in self.seq:
@@ -239,30 +342,38 @@ class Pattern(GameObject):
 				note_dict[end] = [('off', lane)]
 			else:
 				note_dict[end].append(('off', lane))
-		self.notes = []
+		self.note_events = []
 		for time in sorted(note_dict.iterkeys()):
-			self.notes.append( (time, note_dict[time]) )
+			self.note_events.append( (time, note_dict[time]) )
 
 
-	def display_midi(self):
-		self.note_sprites = []
-		for (lane, start, length) in self.seq:
-			size_x = pattern_size[0] / self.seconds * length
-			size_y = pattern_size[1] / self.num_lanes - 2
-			sprite = PatternNoteSprite( (size_x, size_y) )
-			sprite.position = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
-			self.note_sprites.append(sprite)
-			self.add_graphic(sprite)
+	# Creates note_sprites list and displays sprites based on self.seq
+	# def display_midi(self):
+	# 	self.note_sprites = {}
+	# 	for (lane, start, length) in self.seq:
+	# 		size_x = pattern_size[0] / self.seconds * length
+	# 		size_y = pattern_size[1] / self.num_lanes - 2
+	# 		sprite = PatternNoteSprite( (size_x, size_y) )
+	# 		sprite.position = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
+	# 		self.note_sprites[(lane, start)] = sprite
+	# 		self.add_graphic(sprite)
+
 
 	def on_play_click(self):
-		if self.locked:
+		if self.is_editing:
 			return
 		event = 'queue' if self.state in (0,3) else 'dequeue'
 		self._parent._parent.send_event({'event':event, 'id':self._id})
 
 	def on_delete_click(self):
-		if self.locked:
+		if self.is_editing:
 			return
+
+		# TO IMPLEMENT LATER: DELETING TRACK BEFORE YOU FINISH EDITING IT
+		# if self.is_editing:
+		# 	# This means the current player is editing this pattern and deleting it before it's done
+		# 	self._parent._parent.player.track.set_active(False)
+		# 	self._parent._parent
 		self._parent._parent.send_event({'event': 'remove', 'id': self._id})
 
 	def set_queued(self):
@@ -291,14 +402,18 @@ class Pattern(GameObject):
 	 	self.outline_sprite.color.v = 0.5
 	 	self.outline_sprite.color.h = 0.55
 
-	def editing(self, editor):
-		self.locked = True
+	def editing(self, editor='', is_me=False):
+		self.locked = not is_me
+		self.is_editing = True
 		self.outline_sprite.color.v = 1
 		self.outline_sprite.color.h = 0
 
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
-		self.info_text = TextObject(editor+' is editing...', font_size=14, color=self.outline_sprite.color.rgb)
+		if not is_me:
+			self.info_text = TextObject(editor+' is editing...', font_size=14, color=self.outline_sprite.color.rgb)
+		else:
+			self.info_text = TextObject('You are editing...', font_size=14, color=self.outline_sprite.color.rgb)
 		self.info_text.position = (200, pattern_height)
 		self.add(self.info_text)
 
@@ -306,11 +421,19 @@ class Pattern(GameObject):
 		self.seq = seq
 		for ns in self.note_sprites:
 			self.sprites_to_remove.append(ns)
-		self.display_midi()
 		self.locked = False
+		self.is_editing = False
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
-		self.set_active()
+		self.figure_notes()
+		# Draw new notes
+		for k in self.notes:
+			if k not in self.old_notes:
+				self.remove(self.notes[k])
+		for k in self.old_notes:
+			if self.old_notes[k]._parent is None:
+				self.add(self.old_notes[k])
+		self.set_queued()
 
 	def time2x(self, t):
 		return pattern_size[0]*t/self.seconds
@@ -349,8 +472,8 @@ class Pattern(GameObject):
 		self.instrument.set_mute(self.state < 2)
 
 		# Play the notes
-		if self.note_idx < len(self.notes):
-			time, events = self.notes[self.note_idx]
+		if self.note_idx < len(self.note_events):
+			time, events = self.note_events[self.note_idx]
 			if self.now > time:
 				self.note_idx += 1
 				for (onoff, lane) in events:

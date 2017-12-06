@@ -30,12 +30,13 @@ class Session(GameObject):
 		self.player.position.x = Window.width - player_size[0] - 20
 		self.add(self.player)
 		self.IM.add(self.player.instrument)
+		
 
 		########## FOR TESTING ##########
 		test_seq = [(0,0,1), (1,1,2), (2,1,2), (5, 3, 2), (6, 2, 5), (7,0,8)]
 		self.pattern_list.add_pattern(0)
 		self.pattern_list.add_pattern(1,test_seq, 'guitar')
-		self.IM.add(self.pattern_list.patterns[1].instrument)
+		# self.IM.add(self.pattern_list.patterns[1].instrument)
 		self.pattern_list.add_pattern(2)
 		self.pattern_list.add_pattern(3)
 		self.pattern_list.add_pattern(4)

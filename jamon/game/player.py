@@ -85,6 +85,12 @@ class Player(Keyboard):
 		# if self.is_me:
 		# 	self.set_status(2)
 
+	def space_bar_pressed(self):
+		if self.track.active:
+			print 'locking in'
+			self.track.active_pattern.lock_in()
+			self.track.set_active(False)
+
 
 	def set_status(self, status):
 		self.status = status

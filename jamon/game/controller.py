@@ -30,3 +30,5 @@ class Keyboard(Controller):
 		if key in self.keys:
 			index = self.keys.index(key)
 			self.key_up(index)
+		elif key == 32: #spacebar
+			self.space_bar_pressed()

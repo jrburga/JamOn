@@ -18,6 +18,10 @@ class Track(GameObject):
 		self.last_y = 0
 		self.num_lanes = num_lanes
 
+		# Dictates whether the player is currently editing a track
+		self.set_active(False)
+		self.active_pattern = None
+
 
 		self.drum = percussive
 		# w, h = self.sprite.size
@@ -51,7 +55,7 @@ class Track(GameObject):
 
 		# self.t2y_ratio = 
 
-		# self.add_graphic(self.sprite)
+		self.add_graphic(self.sprite)
 		self.add(*self.lanes)
 
 		self.add_graphic(self.now_bar)
@@ -67,15 +71,27 @@ class Track(GameObject):
 	def player(self):
 		return self._parent
 
+	def set_active(self, active):
+		self.sprite.color.rgb = (.3,.8,.7) if active else (.6, .6, .6)
+		self.now_bar.color.rgb = now_bar_color if active else (.6, .6, .6)
+		self.active = active
+		if not active:
+			self.active_pattern = None
+
+	def set_active_pattern(self, pattern):
+		self.active_pattern = pattern
+
 	def t2y_conversion(self, time):
 		return self.sprite.height-self.t2y
 
 	# def time2y(self, time):
 	def on_press(self, lane_num):
-		self.lanes[lane_num].on_press(self.now)
+		if self.active:
+			self.lanes[lane_num].on_press(self.now)
 
 	def on_release(self, lane_num):
-		self.lanes[lane_num].on_release(self.now)
+		if self.active:
+			self.lanes[lane_num].on_release(self.now)
 
 	def time2y(self, t):
 		return self.h-self.t2y*(t)
@@ -92,7 +108,7 @@ class Track(GameObject):
 		
 
 		# Display the bar
-		self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
+		# self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
 
 		x, _ = self.now_bar.position
 		y = self.time2y(self.now)
@@ -107,6 +123,11 @@ class Track(GameObject):
 			if new_phrase:
 				lane.new_phrase()
 			lane.on_lane_update()
+
+
+		# Call new_phrase for active pattern
+		if new_phrase and self.active:
+			self.active_pattern.new_phrase()
 
 		if new_phrase:
 			notes_entered = False
@@ -208,25 +229,21 @@ class Lane(GameObject):
 		# 		break
 
 
-	def match_gem(self, new_gem, old_gem):
-		# print 'matched!'
-		new_gem.matched(old_gem.stage)
-		self.matching_gem = new_gem
+	# def match_gem(self, new_gem, old_gem):
+	# 	# print 'matched!'
+	# 	new_gem.matched(old_gem.stage)
+	# 	self.matching_gem = new_gem
 
 	def on_release(self, time):
 		if self.active_gem is None:
 			return
 		self.active_gem.on_release(time)
 
-		if self.matching_gem is not None:
-				# Finish off the matching
-				# Check if gem is in final stage (locked in)
-				# if self.matching_gem.stage >= 1:
-				# 	if (self.matching_gem.time, self.matching_gem.length) not in self.locked_times:
-				# 		self.locked_times.append( (self.matching_gem.time, self.matching_gem.length) )
-				#	 print 'Gem locked in'
-				pass
-		self.matching_gem = None
+		# If editing a pattern, update the pattern with the note
+		if self.track.active:
+			pattern = self.track.active_pattern
+			pattern.add_note(self.active_gem.time, self.active_gem.length, self.count) #count==lane num
+
 		self.active_gem = None
 
 	def remove_old_gems(self):
@@ -237,6 +254,10 @@ class Lane(GameObject):
 				# Remove gem entirely
 				to_remove.append(gem)
 
+				# Tell the active pattern to remove the note
+				if self.track.active:
+					self.track.active_pattern.remove_note(gem.time, self.count) #count==lane num
+
 			elif gem.y > self.track.now_bar.position[1]:
 				# Set gem length to right length
 				gem.update_remove_length(self.track.now_bar.position[1])
@@ -244,6 +265,7 @@ class Lane(GameObject):
 		for gem in to_remove:
 			self.old_gems.remove(gem)
 			self.remove(gem)
+
 
 	def set_now(self, time):
 		self.now = time
@@ -260,6 +282,10 @@ class Lane(GameObject):
 		# Remove lingering old gems
 		for gem in self.old_gems:
 			self.remove(gem)
+			# Tell the active pattern to remove the note
+			if self.track.active:
+				self.track.active_pattern.remove_note(gem.time, self.count) #count==lane num
+
 		self.old_gems = self.current_gems
 		self.current_gems = []
 
@@ -286,6 +312,7 @@ class Lane(GameObject):
 			# Post note at beginning of loop
 			self.posted_note = False
 			self.on_press(0)
+
 
 	def on_lane_update(self):
 		if self.active_gem is not None and not self.track.drum:
