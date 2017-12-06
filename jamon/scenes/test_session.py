@@ -1,5 +1,5 @@
 from jamon.game.game import Scene, GameObject
-from jamon.game.player import Player, PlayerRemote
+from jamon.game.player import Player
 from jamon.game.session import Session
 
 from server.dummy_parties import ServerObject
