@@ -77,6 +77,9 @@ class Track(GameObject):
 		self.active = active
 		if not active:
 			self.active_pattern = None
+			# Remove all the gems
+			for lane in self.lanes:
+				lane.refresh()
 
 	def set_active_pattern(self, pattern):
 		self.active_pattern = pattern
@@ -116,8 +119,8 @@ class Track(GameObject):
 		new_phrase = self.last_y < y
 		self.last_y = y
 
-		if not self.player.composing:
-			return
+		# if not self.player.composing:
+		# 	return
 
 		for lane in self.lanes:
 			if new_phrase:
@@ -129,18 +132,18 @@ class Track(GameObject):
 		if new_phrase and self.active:
 			self.active_pattern.new_phrase()
 
-		if new_phrase:
-			notes_entered = False
-			all_locked = True
-			for lane in self.lanes:
-				stage = lane.stage
-				notes_entered = notes_entered or stage > 0
-				if stage > 0:
-					all_locked = all_locked and stage == 2
+		# if new_phrase:
+		# 	# notes_entered = False
+		# 	all_locked = True
+		# 	for lane in self.lanes:
+		# 		stage = lane.stage
+		# 		notes_entered = notes_entered or stage > 0
+		# 		if stage > 0:
+		# 			all_locked = all_locked and stage == 2
 
-			if notes_entered and all_locked:
-				print "TRACK LOCKED IN"
-				self.player.lock_in_sequence()
+			# if notes_entered and all_locked:
+			# 	print "TRACK LOCKED IN"
+			# 	self.player.lock_in_sequence()
 
 
 class Lane(GameObject):
@@ -153,7 +156,6 @@ class Lane(GameObject):
 		# cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
-		self.matching_gem = None
 		self.current_gems = []
 		self.old_gems = []
 		# kind of redundant since all game_objets
@@ -169,7 +171,7 @@ class Lane(GameObject):
 		# 1 - still inserting notes
 		# 2 - all locked
 		# Updated at end of every phrase
-		self.stage = 0
+		# self.stage = 0
 
 		self.posted_note = False
 
@@ -245,6 +247,18 @@ class Lane(GameObject):
 			pattern.add_note(self.active_gem.time, self.active_gem.length, self.count) #count==lane num
 
 		self.active_gem = None
+
+	# Totally clear the lane
+	def refresh(self):
+		gems = set(self.gems)
+		for gem in gems:
+			self.remove(gem)
+		self.current_gems = []
+		self.old_gems = []
+		self.active_gem = None
+		self.posted_note = False
+
+
 
 	def remove_old_gems(self):
 		to_remove = []
