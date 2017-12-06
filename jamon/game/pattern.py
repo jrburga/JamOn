@@ -5,6 +5,7 @@ from widgets import Button
 from kivy.core.image import Image
 from text import TextObject
 from instrument import Instrument
+from kivy.clock import Clock as kivyClock
 
 class PatternList(GameObject):
 
@@ -62,7 +63,7 @@ class PatternList(GameObject):
 		for k in self.patterns:
 			p = self.patterns[k]
 			if p.idx > idx:
-				p.position.y += pattern_height + spacing
+				p.move_to(p.position.y + pattern_height + spacing)
 
 		# Shift add button up
 		# self.add_btn.position.y += pattern_height + spacing
@@ -175,6 +176,7 @@ class Pattern(GameObject):
 		self.num_lanes = len(self.instrument.notes)
 
 		self.now = 0
+		self.run_time = 0
 		self.spb = 60./tempo
 		beats = bars*4
 		self.seconds = self.spb*beats
@@ -199,8 +201,14 @@ class Pattern(GameObject):
 		self.play_btn = PatternScrollButton('play', self.on_play_click)
 		self.add(self.play_btn)
 		self.delete_btn = PatternScrollButton('delete', self.on_delete_click)
-		self.delete_btn.position.x += 30
+		self.delete_btn.position.x += 35
 		self.add(self.delete_btn)
+
+		# Display instrument icon
+		inst_sprite = PatternInstrumentIconSprite(inst + '.png')
+		inst_sprite.position = (80,52)
+		self.add_graphic(inst_sprite)
+
 
 		# STATE: 0: muted, 1: queued, 2: playing, 4: de-queued
 		self.state = 0
@@ -211,6 +219,13 @@ class Pattern(GameObject):
 
 		self.sprites_to_remove = []
 		self.objects_to_remove = []
+
+		# For animation
+		self.anim = None
+
+	# For animated scrolling	
+	def move_to(self, y):
+		self.anim = KFAnim( (self.run_time, self.position.y), (self.run_time + 0.3, y))
 
 	def figure_notes(self):
 		note_dict = {}
@@ -284,7 +299,7 @@ class Pattern(GameObject):
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
 		self.info_text = TextObject(editor+' is editing...', font_size=14, color=self.outline_sprite.color.rgb)
-		self.info_text.position = (70, pattern_height)
+		self.info_text.position = (200, pattern_height)
 		self.add(self.info_text)
 
 	def done_editing(self, seq):
@@ -345,6 +360,11 @@ class Pattern(GameObject):
 						self.instrument.note_off(lane)
 		self.last_time = self.now
 
+		# Animate
+		if self.anim is not None:
+			self.position.y = self.anim.eval(self.run_time)
+		self.run_time += kivyClock.frametime
+
 
 
 class PatternButton(GameObject):
@@ -400,13 +420,15 @@ class PatternButton(GameObject):
 			self.events.pop(0)()
 
 
+# Wrapper class so buttons in the scroll view can't be clicked when they go
+# behind the instrument panel at the bottom of the screen
 class PatternScrollButton(PatternButton):
 	def __init__(self, typ, callback):
 		super(PatternScrollButton, self).__init__(typ, callback)
 
 	def on_touch_down(self, event):
-		x, y = event.touch.pos
-		# Check if the click happened below the top of the instrument panel
+		y = event.touch.pos[1]
+		# Check if the click happened above the top of the instrument panel
 		if y > 100:
 			super(PatternScrollButton, self).on_touch_down(event)
 

@@ -92,6 +92,12 @@ class PatternDeleteSprite(ImageSprite):
 		size = (30,30)
 		super(PatternDeleteSprite, self).__init__('delete.png', color, size=size)
 
+class PatternInstrumentIconSprite(ImageSprite):
+	def __init__(self, fname):
+		size = (30,30)
+		color = (73./255, 155./255, 132./255)
+		super(PatternInstrumentIconSprite, self).__init__(fname, size=size, color=color)
+
 class PatternAddSprite(ImageSprite):
 	def __init__(self):
 		size = (30,30)
