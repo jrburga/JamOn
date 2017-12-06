@@ -17,13 +17,17 @@ class PatternList(GameObject):
 		self.patterns = {}
 
 		self.scroll = ScrollView()
-		self.add_btn = PatternButton('add', self.add_btn_clicked)
-		self.add_btn.position = (5, pattern_list_height-80)
-		self.scroll.add(self.add_btn)
+		# self.add_btn = PatternButton('add', self.add_btn_clicked)
+		# self.add_btn.position = (5, pattern_list_height-80)
+		# self.scroll.add(self.add_btn)
 		self.add(self.scroll)
+
+		self.inst_panel = InstrumentPanel()
+		self.add(self.inst_panel)
 
 		self.sprite = PatternListSprite()
 		self.add_graphic(self.sprite)
+
 
 
 	def send_event(self, msg):
@@ -41,7 +45,11 @@ class PatternList(GameObject):
 			self.set_dequeued(msg['id'])
 
 	def add_btn_clicked(self):
-		self.send_event({'event':'add'})
+		pass
+
+		# Create instrument display panel
+
+		# self.send_event({'event':'add'})
 		
 
 	def remove_pattern(self, _id):
@@ -57,7 +65,8 @@ class PatternList(GameObject):
 				p.position.y += pattern_height + spacing
 
 		# Shift add button up
-		self.add_btn.position.y += pattern_height + spacing
+		# self.add_btn.position.y += pattern_height + spacing
+
 
 
 	def add_pattern(self, _id, seq=[], inst='piano'):
@@ -67,7 +76,7 @@ class PatternList(GameObject):
 		self.patterns[_id] = pattern
 
 		# move add button down
-		self.add_btn.position.y -= (pattern_height + spacing)
+		# self.add_btn.position.y -= (pattern_height + spacing)
 
 	def set_queued(self, pattern):
 		self.patterns[pattern].set_queued()
@@ -84,6 +93,27 @@ class PatternList(GameObject):
 	def set_now(self, now):
 		for k in self.patterns:
 			self.patterns[k].set_now(now)
+
+
+class InstrumentPanel(GameObject):
+	def __init__(self):
+		super(InstrumentPanel, self).__init__()
+
+		self.sprite = InstrumentPanelSrite()
+		self.add_graphic(self.sprite)
+
+		self.inst_btns = [PatternButton(inst, self.get_inst_btn_callback(inst)) for inst in ('guitar', 'piano', 'drum', 'vibraphone')]
+		for i, e in enumerate(self.inst_btns):
+			e.position = (70 + i * 70, -20)
+			self.add(e)
+
+
+
+	def get_inst_btn_callback(self, btn):
+		def cb():
+			print btn + ' called!'
+		return cb
+
 
 
 class ScrollView(GameObject):
@@ -166,9 +196,9 @@ class Pattern(GameObject):
 		self.display_midi()
 
 		# Display pattern buttons
-		self.play_btn = PatternButton('play', self.on_play_click)
+		self.play_btn = PatternScrollButton('play', self.on_play_click)
 		self.add(self.play_btn)
-		self.delete_btn = PatternButton('delete', self.on_delete_click)
+		self.delete_btn = PatternScrollButton('delete', self.on_delete_click)
 		self.delete_btn.position.x += 30
 		self.add(self.delete_btn)
 
@@ -334,6 +364,8 @@ class PatternButton(GameObject):
 			self.sprite = PatternAddSprite()
 		elif self.typ == 'delete':
 			self.sprite = PatternDeleteSprite()
+		elif self.typ in ('guitar', 'drum', 'vibraphone', 'piano'):
+			self.sprite = PatternInstrumentSprite(self.typ + '.png')
 
 		self.sprite.position = (5, pattern_height)
 		self.sprite.color.v = 0.5
@@ -345,7 +377,7 @@ class PatternButton(GameObject):
 	def on_touch_down(self, event):
 		x, y = event.touch.pos
 		self.figure_pos()
-		if abs(x - self.x) < 15 and abs(y - self.y) < 15:
+		if abs(x - self.x) < self.sprite.size[0]/2 and abs(y - self.y) < self.sprite.size[1]/2:
 			self.touched = True
 			self.sprite.color.v = 1
 
@@ -358,14 +390,25 @@ class PatternButton(GameObject):
 
 	def figure_pos(self):
 		x, y = self.get_abs_pos()
-		x += 20
-		y += pattern_height + 15
+		x += 5 + self.sprite.size[0]/2
+		y += pattern_height + self.sprite.size[1]/2
 		self.x = x
 		self.y = y
 
 	def on_update(self):
 		while self.events:
 			self.events.pop(0)()
+
+
+class PatternScrollButton(PatternButton):
+	def __init__(self, typ, callback):
+		super(PatternScrollButton, self).__init__(typ, callback)
+
+	def on_touch_down(self, event):
+		x, y = event.touch.pos
+		# Check if the click happened below the top of the instrument panel
+		if y > 100:
+			super(PatternScrollButton, self).on_touch_down(event)
 
 
 

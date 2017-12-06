@@ -39,6 +39,8 @@ class Session(GameObject):
 		self.pattern_list.add_pattern(2)
 		self.pattern_list.add_pattern(3)
 		self.pattern_list.add_pattern(4)
+		self.pattern_list.add_pattern(5)
+		self.pattern_list.add_pattern(6)
 		self.pattern_list.pattern_editing(0, 'Bob')
 
 		# i2player = Window.width/len(self.players)

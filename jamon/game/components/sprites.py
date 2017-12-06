@@ -21,6 +21,8 @@ pattern_now_bar_size = (3, pattern_height)
 
 lane_line_size = (7, track_size[1])
 
+inst_panel_size = (pattern_list_size[0], 100)
+
 
 track_color = (.85, .85, .85)
 now_bar_color = (.13, .54, .13)
@@ -98,6 +100,15 @@ class PatternAddSprite(ImageSprite):
 class PatternNowBarSprite(RectSprite):
 	def __init__(self):
 		super(PatternNowBarSprite, self).__init__(pattern_now_bar_size, pattern_now_bar_color)
+
+class PatternInstrumentSprite(ImageSprite):
+	def __init__(self, fname):
+		size = (48,48)
+		super(PatternInstrumentSprite, self).__init__(fname, size=size)
+
+class InstrumentPanelSrite(RectSprite):
+	def __init__(self):
+		super(InstrumentPanelSrite, self).__init__(inst_panel_size, (0,0,0))
 
 
 
