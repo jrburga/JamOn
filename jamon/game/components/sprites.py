@@ -33,9 +33,7 @@ class GemSprite(RectSprite):
 		super(GemSprite, self).__init__(gem_size, color)
 
 class GradientGemSprite(GradientRectSprite):
-	def __init__(self, size, color_2):
-		r, g, b = color_2
-		color_1 = (r*.5, g*.5, b*.5)
+	def __init__(self, size, color_1, color_2):
 		super(GradientGemSprite, self).__init__( (int(size[0]),int(size[1])), color_1, color_2, dir='vertical')
 
 class TrackSprite(RectOutlineSprite):

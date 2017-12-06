@@ -310,11 +310,9 @@ class Pattern(GameObject):
 				self.note_idx += 1
 				for (onoff, lane) in events:
 					if onoff == 'on':
-						print 'on', time, lane
 						self.instrument.note_on(lane)
 					else:
 						self.instrument.note_off(lane)
-						print 'off', time, lane
 		self.last_time = self.now
 
 
