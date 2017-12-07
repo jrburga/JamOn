@@ -1,12 +1,16 @@
 from game import GameObject
 from random import choice
 from server.client import Client
+from server.store import Store
 
 member_names = ['Rudolf', 'Dasher', 'Prancer', 'Eran', 'Berry', 'Dancer', 'Vixen', 'Donner', 'Cupid']
 
 def _default_callback(message):
 	if message.data['success']:
-		return message.data['result']
+		result = message.data['result']
+		if isinstance(result, dict):
+			return Store(result)
+		return result
 
 class ClientObject(GameObject):
 	'''

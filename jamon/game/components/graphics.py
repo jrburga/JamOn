@@ -126,12 +126,12 @@ class GradientRectSprite(Sprite):
 
 
 class TextSprite(Sprite):
-	def __init__(self, text, pos=(0,0), color=(1,1,1), font_size=20, stretch=(1,1), **text_kwargs):
+	def __init__(self, text, color=(1,1,1), font_size=20, stretch=(1,1), **text_kwargs):
 		text = MarkupLabel(text=text, font_size=font_size, **text_kwargs)
 		text.refresh()
 		# Create rectangle object for the text
 		new_size = (text.size[0]*stretch[0], text.size[1]*stretch[1])
-		rect = Rectangle(size=new_size, pos=pos, texture=text.texture)
+		rect = Rectangle(size=new_size, texture=text.texture)
 		super(TextSprite, self).__init__(rect, color)
 
 class ImageSprite(Sprite):

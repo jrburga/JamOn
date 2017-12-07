@@ -9,13 +9,15 @@ class TextObject(GameObject):
 
 		self.done = False
 		self.text = text
-		self.kwargs = kwargs
+		self.add_graphic(TextSprite(self.text, **kwargs))
+		# self.kwargs = kwargs
 
 
 	def draw(self, stretch):
-		self.stretch = stretch
-		self.sprite = TextSprite(self.text, stretch = stretch, **self.kwargs)
-		self.add_graphic(self.sprite)
+		pass
+		# self.stretch = stretch
+		# self.sprite = TextSprite(self.text, stretch = stretch, **self.kwargs)
+		# self.add_graphic(self.sprite)
 
 	def on_update(self):
 		if self.done:
