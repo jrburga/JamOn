@@ -48,7 +48,6 @@ class GameObject(object):
 		self._widgets = set()
 		self._event_listeners = defaultdict(lambda: [])
 
-
 		self.updating = False
 		self.to_add = []
 
@@ -130,7 +129,9 @@ class GameObject(object):
 
 	def add_game_object(self, game_object):
 		# self.add_widget(game_object)
-		assert game_object._parent == None, 'game object already has parent'
+		# assert game_object._parent == None, 'game object already has parent'
+		if game_object._parent:
+			game_object._parent.remove(game_object)
 		game_object._parent = self
 		self._game_objects.add(game_object)
 		self._graphics.add(game_object._transform)

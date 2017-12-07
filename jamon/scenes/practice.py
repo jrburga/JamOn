@@ -10,7 +10,7 @@ divs = 4
 insts = ['piano', 'vibraphone', 'guitar']*2
 
 class Practice(Scene):
-	def __init__(self, band_members, **kwargs):
+	def __init__(self, **kwargs):
 		super(Practice, self).__init__(**kwargs)
 		# server_obj = self.base_widget.game_state.server_object
 		# print band_members

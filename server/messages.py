@@ -58,6 +58,10 @@ class Close(Message):
 	def __init__(self, data={}):
 		super(Tether, self).__init__('close', data)
 
+class ServerMessage(Message):
+	def __init__(self, data={}):
+		super(ServerMessage, self).__init__('server', data)
+
 class Error(Message):
 	def __init__(self, data={}):
 		super(Error, self).__init__('error', data)

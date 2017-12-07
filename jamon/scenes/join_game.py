@@ -8,8 +8,8 @@ class JoinGame(Scene):
 	def __init__(self, **kwargs):
 		super(JoinGame, self).__init__(**kwargs)
 
-		self.client = self.base_widget.client_obj
-		self.add(self.client)
+		self.client_obj = self.base_widget.client_obj
+		self.add(self.client_obj)
 		print kwargs
 		self.display()
 		self.attempting_connection = False
@@ -46,6 +46,8 @@ class JoinGame(Scene):
 
 		start_new_thread(self._attempt_connection_thread, ())
 
+	# def _get_info_callback(self, message):
+
 	def _attempt_connection_thread(self, *args):
 		"""
 		Actually attempts the connection. Should be called in another thread
@@ -59,11 +61,12 @@ class JoinGame(Scene):
 		# (2b) try to connect with the Guest's connect function 
 		# self.guest.set_host_ip(ip)
 		
-		self.client.connect(ip)
+		self.client_obj.connect(ip)
 
 		# (3) if success, change scene to band scene
 		self.attempting_connection = False
 		print "Connection successful!"
+		self.trigger_event('on_scene_change', scene_name='waiting_room', )
 
 		# self.guest.send_to_band({'yo':True}, host_only=True)
 

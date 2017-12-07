@@ -1,5 +1,8 @@
 from connections import *
+from thread import *
 from client import Client
+
+MAX_CLIENTS = 4
 
 class Server(object):
 	def __init__(self, ip=IP):
@@ -9,6 +12,12 @@ class Server(object):
 		self._sync = {}
 		self._async = {}
 		self._accept_thread = None
+		self._info = {}
+		self._max_clients = MAX_CLIENTS
+		self._clients = 0
+
+
+		self._on_join_callback = lambda conn, res: None
 
 	def _bind(self, port):
 		print 'host binding to (%s, %i)' % (self.ip, port)
@@ -21,47 +30,70 @@ class Server(object):
 			print 'waiting for next connection'
 			conn, addr = self._socket.accept()
 			connection = Connection(conn, addr)
-			self._connect(connection)
-			print 'synced connections', self._sync
-			print 'async connections', self._async
+			accepting = self._connect(connection)
 		print 'host no longer accepting connections'
+		self._accept_thread = None
+
+	def register_on_join(self, callback):
+		self._on_join_callback = callback
 
 	def _connect(self, conn):
 		print 'found connection', conn.id
 		conn.send(Connect({'success': True}))
 		print 'waiting for client to respond'
 		res = conn.recv()[0]
-		print res
 		if res.type == 'join':
-			self._join(conn)
-		if res.type == 'tether':
-			self._tether(conn, res.data['id'])
+			return self._join(conn, res)
+		elif res.type == 'tether':
+			return self._tether(conn, res)
+		elif res.type == 'server':
+			return self._server(conn, res)
 
-	def _join(self, conn):
+	def _server(self, conn, res):
+		conn.send(ServerMessage({'success': True}))
+		return False
+
+	def _join(self, conn, res):
 		is_host = False
 		if self._host_id == None:
 			is_host = True
 			self._host_id = conn.id
 		self._sync[conn.id] = conn
-		t = threading.Thread(target=self._listen, args=(conn, ))
-		t.start()
+		start_new_thread(self._listen, (conn, ))
 		conn.send(Join({'success': True, 'id': conn.id, 'host': is_host}))
+		self._clients += 1
+		self._on_join_callback(conn, res)
+		return True
 
-	def _tether(self, conn, id):
-		conn.id = id
-		self._async[id] = conn
-		t = threading.Thread(target=self._listen_tether, args=(conn, ))
-		t.start()
+	def _tether(self, conn, res):
+		conn.id = res.id
+		self._async[res.id] = conn
+		start_new_thread(self._listen_tether, (conn, ))
 		conn.send(Tether({'success': True}))
+		return True
 
 	def start(self):
-		if self._accept_thread != None: return
 		self._bind(PORT)
-		self._accept_thread = threading.Thread(target=self._accept)
-		self._accept_thread.start()
+		self.start_accepting()
+
+
+	def start_accepting(self):
+		if not self._accept_thread:
+			self._accept_thread = start_new_thread(self._accept, ())
+			self._accept_thread = True
+
+	def stop_accepting(self):
+		ServerClient().connect(PUBLIC)
 		
 	def close(self):
+		print 'closing server'
+		# for conn in self._sync.values():
+		# 	conn.close()
+		# for conn in self._async.values():
+		# 	conn.close()
+
 		self._socket.close()
+		print 'server closed'
 
 	def _post(self, msg, conn):
 		print 'echoing post'
@@ -84,8 +116,7 @@ class Server(object):
 			conn.send(message)
 
 	def _listen(self, connection):
-		listening = True
-		while listening:
+		while not connection.closed:
 			for message in connection.recv():
 				if message.type == 'post':
 					self._post(message, connection)
@@ -93,19 +124,31 @@ class Server(object):
 					self._get(message, connection)
 				else:
 					self._error(message, connection)
+		print connection, 'exiting join'
 
 	def _listen_tether(self, connection):
-		listening = True
-		while listening:
+		while not connection.closed:
 			for message in connection.recv():
 				self._send_all(message, connection)
+
+		print connection, 'exiting tether'
 
 
 
 class ServerClient(Client):
 	def __init__(self, ip=IP):
-		super(OwnClient, self).__init__(ip)
-		self._server_action = 'stop_accepting'
+		super(ServerClient, self).__init__(ip)
+
+	def _server(self, ip, port, timeout):
+		conn = self._connect(self._socket_sync, ip, port, timeout)
+		conn.send(ServerMessage())
+		res = conn.recv().pop(0)
+		if res.data['success']:
+			conn.close()
+			print 'server client successfully closed'
+
+	def connect(self, ip, port=PORT, timeout=TIMEOUT):
+		self._server(ip, port, timeout)
 
 if __name__ == '__main__':
 	server = Server()

@@ -68,7 +68,7 @@ class Session(GameObject):
 		# if event.keycode[1] == 'enter':on
 		# 	self.toggle() 
 		pass
-
+		
 	def toggle(self):
 		if self.paused:
 			self.paused = False

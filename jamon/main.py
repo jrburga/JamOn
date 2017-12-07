@@ -6,6 +6,9 @@ from game.networking import ClientObject
 from scenes import scenes
 import numpy as np
 
+import sys
+import os
+
 from server import Client, Server, PUBLIC
 
 class MainWidget(BaseWidget):
@@ -15,8 +18,7 @@ class MainWidget(BaseWidget):
 		self.audio = Audio(2)
 
 		self.server = Server()
-		self.client = Client()
-		self.client_obj = ClientObject(self.client, username=None)
+		self.client_obj = ClientObject(Client(), username=None)
 		self.band_members = []
 
 		self.scenes = scenes
@@ -78,7 +80,6 @@ class MainWidget(BaseWidget):
 								  		touch=touch))
 
 	def on_scene_change(self, event):
-		print event.__kwargs__
 		self.load_new_scene(**event.__kwargs__)
 	
 	def on_server_request(self, event):
@@ -86,7 +87,7 @@ class MainWidget(BaseWidget):
 			print 'starting server'
 			self.server.start()
 			print 'host connection to server'
-			self.client.connect(PUBLIC)
+			self.client_obj.connect(PUBLIC)
 			print 'host connected to server'
 
 		elif event.server_type == "join_game":
@@ -96,6 +97,9 @@ class MainWidget(BaseWidget):
 		self.scene._on_update()
 		self.audio.on_update()
 
+	def on_close(self):
+		print 'closing'
+		self.server.close()
 
 
 

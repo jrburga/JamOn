@@ -1,5 +1,6 @@
 from connections import *
 from messages import *
+from thread import *
 
 import time
 
@@ -15,6 +16,7 @@ class Client(object):
 		self._messages = []
 		self._is_host = False
 		self._tether_callback = lambda *_: None
+		self._init_info = {}
 
 	def register_tether_callback(self, callback):
 		self._tether_callback = callback
@@ -26,7 +28,7 @@ class Client(object):
 	def _join(self, ip, port, timeout):
 		print 'joining to ip'
 		conn = self._connect(self._socket_sync, ip, port, timeout)
-		conn.send(Join())
+		conn.send(Join(self._init_info))
 		res = conn.recv().pop(0)
 		if res.data['success']:
 			print 'successfully joined'
@@ -44,44 +46,43 @@ class Client(object):
 		res = conn.recv().pop(0)
 		if res.data['success']:
 			print 'successfully tethered'
-			t = threading.Thread(target=self._listen_tether, args=(conn, ))
-			t.start()
+			start_new_thread(self._listen_tether, (conn, ))
 			self._async = conn
 		else:
 			conn.close()
 
 	def _listen_tether(self, connection):
-		listening = True
-		while listening:
+		while not connection.closed:
 			for message in connection.recv():
 				if message.type == 'action':
 					self.recv_action(message)
 
 	def _connect(self, sock, ip, port, timeout):
 		print 'connecting socket to %r' % ((ip, port), )
-		# sock.settimeout(timeout)
+		sock.settimeout(timeout)
 		sock.connect((ip, port))
-		# sock.settimeout(None)
+		sock.settimeout(None)
 		conn = Connection(sock, (ip, port))
 		print 'waiting for response from server'
 		res = conn.recv().pop(0)
 		if res.data['success']:
-			print 'successfully connected'
 			return conn
 		return None
 
-	def connect(self, ip, port=PORT, timeout=10):
+	def connect(self, ip, port=PORT, timeout=TIMEOUT):
 		self._join(ip, port, timeout)
 		self._tether(ip, port, timeout)
+		print 'successfully connected'
 
 
 	def disconnect(self):
-		self._socket_async.close()
-		self._socket_sync.close()
+		if self._sync:
+			self._sync.close()
+		if self._async:
+			self._async.close()
 
 	def recv_action(self, action):
 		if 'success' in action:
-			print action
 			return
 		else:
 			self._tether_callback(action.data)
@@ -89,12 +90,14 @@ class Client(object):
 	def post(self, data={}, callback=lambda *_: None):
 		post = Post(data)
 		self._sync.send(post)
-		# message = self._listen('post')
+		message = self._sync.recv()[0]
+		callback(message)
 
 	def get(self, data={}, callback=lambda *_: None):
 		get = Get(data)
 		self._sync.send(get)
-		# message = self._listen('get')
+		message = self._sync.recv()[0]
+		callback(message)
 
 	def send(self, msg_type, data):
 		'''

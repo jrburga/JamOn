@@ -2,7 +2,6 @@ import sys
 import logging
 import time
 import socket
-import threading
 
 from messages import *
 
@@ -11,7 +10,8 @@ from urllib2 import urlopen
 IP = '0.0.0.0'
 PUBLIC = urlopen('http://ip.42.pl/raw').read()
 PORT = 21385
-MAX_CONNS = 4
+MAX_CONNS = 20
+TIMEOUT = 10
 
 MSG_SIZE = 2**10
 
@@ -20,8 +20,7 @@ class Connection(object):
 		self.conn = connection
 		self.addr = address
 		self.id = id(self)
-		self._empties = 0
-		self._tol = 100
+		self._closed = False
 
 	@property
 	def ip(self):
@@ -30,6 +29,10 @@ class Connection(object):
 	@property
 	def port(self):
 		return self.addr[1]
+
+	@property
+	def closed(self):
+		return self._closed
 
 	def _parse(self, msg_string):
 		return msg_string.replace('}{', '}*{').split('*')
@@ -51,9 +54,6 @@ class Connection(object):
 			for json_str in self._parse(msg_string):
 				messages.append(fromJSON(json_str))
 		else:
-			self._empties += 1
-
-		if self._empties > self._tol:
 			print self, 'we appear to have lost connection'
 			self.close()
 
@@ -61,6 +61,8 @@ class Connection(object):
 
 	def close(self):
 		self.conn.close()
+		self._closed = True
+
 
 	def __repr__(self):
 		return '<Connection:%i - %r>' % (self.id, self.addr)
