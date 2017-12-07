@@ -19,7 +19,6 @@ class MainWidget(BaseWidget):
 
 		self.server = Server()
 		self.client_obj = ClientObject(Client(), username=None)
-		self.band_members = []
 
 		self.scenes = scenes
 		self.scene = None
@@ -100,9 +99,3 @@ class MainWidget(BaseWidget):
 	def on_close(self):
 		print 'closing'
 		self.server.close()
-
-
-
-
-
-

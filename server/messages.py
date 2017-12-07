@@ -7,6 +7,7 @@ def fromJSON(json_string):
 def toJSON(message):
 	return json.dumps(message)
 
+
 class Message(dict):
 	def __init__(self, type, data={}, message_id=None):
 		super(Message, self).__init__()
@@ -25,18 +26,23 @@ class Message(dict):
 	def data(self):
 		return self['data']
 
+class Update(Message):
+	def __init__(self, info_name):
+		super(Update, self).__init__('update', {'info_name': info_name})
+
 class Action(Message):
 	def __init__(self, event, action={}):
 		super(Action, self).__init__('action', {'event_type': event, 'action': action})
 
 
 class Post(Message):
-	def __init__(self, data={}):
-		super(Post, self).__init__('post', data)
+	def __init__(self, info_name, info):
+		super(Post, self).__init__('post', {'info_name': info_name, 
+											'info': info})
 
 class Get(Message):
-	def __init__(self, data={}):
-		super(Get, self).__init__('get', data)
+	def __init__(self, info_name, identifier):
+		super(Get, self).__init__('get', {'info_name': info_name, 'identifier': identifier})
 
 class Connect(Message):
 	def __init__(self, data={}):

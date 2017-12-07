@@ -1,7 +1,7 @@
 from jamon.game.game import Scene, GameObject
 from jamon.game.widgets import *
 from kivy.core.window import Window
-from server.server_parties import PORT
+from server.connections import PORT
 from thread import *
 
 class JoinGame(Scene):

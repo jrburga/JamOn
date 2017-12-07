@@ -1,6 +1,7 @@
 from connections import *
 from thread import *
 from client import Client
+from store import *
 
 MAX_CLIENTS = 4
 
@@ -15,8 +16,7 @@ class Server(object):
 		self._info = {}
 		self._max_clients = MAX_CLIENTS
 		self._clients = 0
-
-
+		self._store = {'band_members': {}}
 		self._on_join_callback = lambda conn, res: None
 
 	def _bind(self, port):
@@ -95,13 +95,40 @@ class Server(object):
 		self._socket.close()
 		print 'server closed'
 
+	def _post_info(self, info_name, info):
+		if info_name not in self._store:
+			return None
+		if 'id' not in info:
+			info['id'] = id(info)
+		self._store[info_name][info['id']] = info
+		return info['id']
+
 	def _post(self, msg, conn):
 		print 'echoing post'
-		conn.send(Post({'success': True, 'message_id': msg.id}))
+		msg.data['success'] = True
+		msg.data['result'] = self._post_info(msg.data['info_name'],
+											 msg.data['info'])
+		msg.data['message_id'] = msg.id
+		conn.send(msg)
+
+	def _get_info(self, info_name, identifier):
+		print info_name
+		print identifier
+		if info_name not in self._store:
+			return None
+		if identifier == None:
+			return self._store[info_name].values()
+		if identifier in self._store[info_name]:
+			return self._store[info_name][identifier]
+		return None
 
 	def _get(self, msg, conn):
-		print 'echoing get'
-		conn.send(Get({'success': True, 'message_id': msg.id}))
+		print 'echoing get', msg
+		msg.data['success'] = True
+		msg.data['result'] = self._get_info(msg.data['info_name'], 
+											msg.data['identifier'])
+		msg.data['message_id'] = msg.id
+		conn.send(msg)
 
 	def _error(self, msg, conn):
 		print 'echoing error'
@@ -149,7 +176,3 @@ class ServerClient(Client):
 
 	def connect(self, ip, port=PORT, timeout=TIMEOUT):
 		self._server(ip, port, timeout)
-
-if __name__ == '__main__':
-	server = Server()
-	server.start()

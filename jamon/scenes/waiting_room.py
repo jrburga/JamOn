@@ -22,14 +22,19 @@ class WaitingRoom(Scene):
 		self.client = self.base_widget.client_obj
 		self.add(self.client)
 		self.is_host = self.client.is_host
-
-		self.band_members = self.base_widget.band_members
+		self.band_members = []
+		self.client.post_info('band_members', self.client.info())
+		self.client.send_action('on_join')
 		self.my_ip = urlopen('http://ip.42.pl/raw').read()
 		self.last_band_member_index = 0
 
 		self.general_display()
 		self.band_display()
 
+	def on_join(self, event):
+		print 'getting band info'
+		self.band_members = self.client.get_info('band_members', None)
+		print self.band_members
 
 	def general_display(self):
 		"""
@@ -98,7 +103,6 @@ class WaitingRoom(Scene):
 
 	def start_game_callback(self):
 		def start_game(button):
-			band_members = [b.info() for b in self.band_members]
 			scene_name = 'practice'
 			inst_set = self.which_instrument_set()
 			self.base_widget.server.stop_accepting()
@@ -133,12 +137,12 @@ class WaitingRoom(Scene):
 
 		# Username label will have height 150 (make text size accordingly?)
 		username_label_bottom = blurb_bottom + 70
-		username_text = "[anchor=left_side][color=8888ff][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num].username
+		username_text = "[anchor=left_side][color=8888ff][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num]['username']
 		username_label = TextObject(text=username_text, 
 									   font_size=80, markup=True, halign='left', valign='bottom',
 									   pos=(blurb_left, username_label_bottom))
 		
-		ip_text = "[anchor=left_side][color=668822][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num].addr_str
+		ip_text = "[anchor=left_side][color=668822][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num]['addr_str']
 
 		ip_label = TextObject(text=ip_text, font_size=50, markup=True, halign='left', valign='bottom',
 								pos = (blurb_left, blurb_bottom + 10))
@@ -154,8 +158,8 @@ class WaitingRoom(Scene):
 		
 		
 	def on_update(self):
-		if self.last_band_member_index + 1 < len(self.band_members):
-			for i in range(self.last_band_member_index + 1, len(self.band_members)):
+		if self.last_band_member_index < len(self.band_members):
+			for i in range(self.last_band_member_index, len(self.band_members)):
 				self.make_user_blurb(i, is_me=False)
 
 		

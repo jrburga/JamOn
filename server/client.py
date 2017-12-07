@@ -1,4 +1,4 @@
-from connections import *
+from connections import *	
 from messages import *
 from thread import *
 
@@ -87,17 +87,17 @@ class Client(object):
 		else:
 			self._tether_callback(action.data)
 
-	def post(self, data={}, callback=lambda *_: None):
-		post = Post(data)
+	def post(self, info_name, info, callback):
+		post = Post(info_name, info)
 		self._sync.send(post)
 		message = self._sync.recv()[0]
-		callback(message)
+		return callback(message)
 
-	def get(self, data={}, callback=lambda *_: None):
-		get = Get(data)
+	def get(self, info_name, identifier, callback):
+		get = Get(info_name, identifier)
 		self._sync.send(get)
 		message = self._sync.recv()[0]
-		callback(message)
+		return callback(message)
 
 	def send(self, msg_type, data):
 		'''
@@ -106,6 +106,7 @@ class Client(object):
 		'''
 		message = Message(msg_type, data)
 		self._async.send(message)
+
 
 if __name__ == '__main__':
 	client = Client()
