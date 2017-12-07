@@ -1,5 +1,5 @@
 from graphics import *
-from kivy.core.window import Window
+from jamon.game.window import Window
 
 gem_texture = Rectangle()
 track_width = Window.width*.4

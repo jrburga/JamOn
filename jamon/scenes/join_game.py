@@ -1,6 +1,6 @@
 from jamon.game.game import Scene, GameObject
 from jamon.game.widgets import *
-from kivy.core.window import Window
+from jamon.game.window import Window
 from server.connections import PORT
 from thread import *
 

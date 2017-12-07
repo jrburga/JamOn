@@ -76,10 +76,15 @@ class Track(GameObject):
 		self.now_bar.color.rgb = now_bar_color if active else (.6, .6, .6)
 		self.active = active
 		if not active:
+			if self.player is not None:
+				self.player.session.IM.metro.stop()
 			self.active_pattern = None
 			# Remove all the gems
 			for lane in self.lanes:
 				lane.refresh()
+		else:
+			if self.player is not None:
+				self.player.session.IM.metro.start()
 
 	def set_active_pattern(self, pattern):
 		self.active_pattern = pattern
