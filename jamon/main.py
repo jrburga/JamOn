@@ -5,6 +5,7 @@ from game.networking import ClientObject
 # from server.server_parties import *
 from scenes import scenes
 import numpy as np
+from kivy.core.window import Window
 
 import sys
 import os
@@ -23,20 +24,10 @@ class MainWidget(BaseWidget):
 		self.scenes = scenes
 		self.scene = None
 
-		start_scene = 'main_menu'
-		args = []
-		kwargs = {}
+		self.start_scene = 'main_menu'
+		self.argv = argv
 
-		if len(argv) > 1:
-			if argv[1] == 'practice':
-				start_scene = 'practice'
-				kwargs = {'band_members': []}
-		
-		
-		if start_scene:
-			self.load_new_scene(start_scene, **kwargs)
-		else:
-			self.load_new_scene(scenes.keys()[0], **kwargs)
+		self.started = False
 
 	def unload_current_scene(self):
 		if self.scene == None: return
@@ -93,9 +84,26 @@ class MainWidget(BaseWidget):
 			self.server = None
 
 	def on_update(self):
+		if not self.started:
+			args = []
+			kwargs = {}
+
+			
+			if len(self.argv) > 1:
+				if self.argv[1] == 'practice':
+					self.start_scene = 'practice'
+					kwargs = {'band_members': []}
+			
+			if self.start_scene:
+				self.load_new_scene(self.start_scene, **kwargs)
+			else:
+				self.load_new_scene(scenes.keys()[0], **kwargs)
+
+			self.started = True
 		self.scene._on_update()
 		self.audio.on_update()
 
 	def on_close(self):
 		print 'closing'
 		self.server.close()
+
