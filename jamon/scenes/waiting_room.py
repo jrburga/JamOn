@@ -14,8 +14,6 @@ from kivy.core.window import Window
 
 
 
-USER_BLURB_SIZE = (800, 150)
-
 class WaitingRoom(Scene):
 	def __init__(self, **kwargs):
 		super(WaitingRoom, self).__init__(**kwargs)
@@ -38,28 +36,54 @@ class WaitingRoom(Scene):
 		"""
 		All of the non-player-specific display will be handled here
 		"""
-		# I apologize for this shitshow below... I'm trying to fix this label thing and I'll have to get to it later -Tim
-		self.waiting_room_label_pos = (100, Window.height - 200)
-		self.waiting_room_label = TextObject(text="[anchor=left_side][color=ff8888][b]Waiting Room[/b][/color][anchor=right_side]", 
-									   font_size=100, markup=True, halign='left', valign='bottom',
-									   pos=self.waiting_room_label_pos)
+		# for start_game, instrument buttons
+		self.button_dist_from_side = Window.width/25.0
+		self.button_dist_from_top = Window.height * 0.3
+		self.button_dist_from_bottom = Window.height/15.0
 
-		self.add_game_object(self.waiting_room_label)
-		self.start_game_button_pos = (Window.width * 0.7, Window.height - 200)
+		# for instrument buttons
+		self.button_width = Window.width / 4.0
+
+
+		# I thinnk we should remove the waiting_room_label cuz why bother keeping it
+		# self.waiting_room_label_pos = (Window.width / 15.0, Window.height * 0.8)
+		# self.waiting_room_label = TextObject(text="[anchor=left_side][color=ff8888][b]Waiting Room[/b][/color][anchor=right_side]", 
+		# 							   font_size=150, markup=True, halign='left', valign='bottom',
+		# 							   pos=self.waiting_room_label_pos)
+
+		# self.add_game_object(self.waiting_room_label)
+
+		self.start_game_size = (Window.width * 0.25, Window.height * 0.1)
+		self.start_game_button_pos = (self.button_dist_from_side, Window.height - self.start_game_size[1] - self.button_dist_from_bottom)
+
 		if self.is_host:
 			# To let host start the game
-			self.start_game_button = Button(text="  Start Game  ", font_size='20sp', markup=True, 
+			self.start_game_button = Button(text=" Let's Jam! ", font_size='50sp', markup=True, 
 											halign='center', valign='top',
 											pos=self.start_game_button_pos,
-											size=(Window.width * 0.25, Window.height * 0.125))
-		print Window.width, Window.height
-		# Todo: callback for start game @jake
+											size=self.start_game_size)
 
 		self.start_game_button.bind(self.start_game_callback())
 		self.add_game_object(self.start_game_button)
 
+		self.the_band_label_pos = (self.button_dist_from_side + Window.width/50.0, Window.height - self.button_dist_from_top)
+		self.the_band_label = TextObject(text="[anchor=left_side][color=ff8888][b]The Band[/b][/color][anchor=right_side]", 
+									   font_size=150, markup=True, halign='left', valign='bottom',
+									   pos=self.the_band_label_pos)
+
+		self.add_game_object(self.the_band_label)
+
 		if self.is_host:
-			# we can choose to do this for all players if we want later but idk if necessary
+			# TODO right align the Instruments label
+			# self.instruments_label_size = (1000, 1000) #overly large so it doesn't constrain the word
+			
+			self.instruments_label_pos = (Window.width - self.button_dist_from_side - self.button_width, \
+											Window.height - self.button_dist_from_top)
+			self.instruments_label = TextObject(text="[color=abcdef][b]Instruments[/b][/color]", 
+										   font_size=100, markup=True, valign='bottom', halign='left', #halign='right',
+										   pos=self.instruments_label_pos)
+
+			self.add_game_object(self.instruments_label)
 			self.make_instrument_buttons()
 
 	def make_instrument_buttons(self):
@@ -67,24 +91,19 @@ class WaitingRoom(Scene):
 		Makes the buttons for the instrument sets
 		"""
 		# Constants
-		button_dist_from_top = 300
-		button_dist_from_bottom = 100
-		dist_between_buttons = 20
-		button_dist_from_leftandright = 50
+		dist_between_buttons = Window.height/50.0
 
 		num_sets = len(INSTRUMENT_SETS)
 		i = 0
-		button_height = (Window.height - (button_dist_from_top + button_dist_from_bottom)) / num_sets
-		button_x = Window.width / 2 + button_dist_from_leftandright
-		button_width = Window.width - button_x - button_dist_from_leftandright
-		button_size = (button_width, button_height)
+		button_height = (Window.height - (self.button_dist_from_top + self.button_dist_from_bottom)) / num_sets - dist_between_buttons
+		button_x = Window.width - self.button_width - self.button_dist_from_side
+		button_size = (self.button_width, button_height)
 
-		ToggleButtonBehavior
 		for i, inst_set in enumerate(INSTRUMENT_SETS):
-			button_y = Window.height - button_dist_from_top - (i+1) * (button_height + dist_between_buttons)
+			button_y = Window.height - self.button_dist_from_top - (i+1) * (button_height + dist_between_buttons)
 			
 			button_pos = (button_x, button_y)
-			button_state = 'down' if (i==0) else 'normal'
+			button_state = 'down' if (i==0) else 'normal' # so the first button defaults as down
 			button_text = "[size=25sp]" + inst_set + "[/size]" + "\n" + "[size=15sp](" + ", ".join(INSTRUMENT_SETS[inst_set].keys()) + ")[/size]"
 			inst_button = ToggleButton(text=button_text, font_size='20sp', markup=True, 
 											halign='center', valign='center', id=inst_set,
@@ -123,35 +142,25 @@ class WaitingRoom(Scene):
 		user_num is the user's index in the list of band_members (Host will always have index 0)
 		is_me is a flag marked True if this user is me
 		"""
-
 		# TODO: Make the is_me flag make the person light up
 
 		# from user_num, compute the offsets (position, size)
-		start_y_top = Window.height - 250
-		size = USER_BLURB_SIZE
-
+		start_y_top = Window.height - self.button_dist_from_top
+		height = (Window.height - (self.button_dist_from_top + self.button_dist_from_bottom)) / 4.0
+		size = Window.width/3.0, height # width should be big enough
 		blurb_bottom = start_y_top - size[1] * (user_num+1)
 		blurb_top = start_y_top - size[1] * user_num
-		blurb_left = 50
+		blurb_left = self.button_dist_from_side
 
-
-		# Username label will have height 150 (make text size accordingly?)
-		username_label_bottom = blurb_bottom + 70
-		username_text = "[anchor=left_side][color=8888ff][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num].username
-		username_label = TextObject(text=username_text, 
-									   font_size=80, markup=True, halign='left', valign='bottom',
-									   pos=(blurb_left, username_label_bottom))
-		
-		ip_text = "[anchor=left_side][color=668822][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num].addr_str
-
-		ip_label = TextObject(text=ip_text, font_size=50, markup=True, halign='left', valign='bottom',
-								pos = (blurb_left, blurb_bottom + 10))
-
-		# username_box = StaticRect(size=USER_BLURB_SIZE, color=(0.3,0.6,0.8), pos=(blurb_left, blurb_bottom))
-		# self.add_graphic(username_box)
-
-		self.add_game_object(ip_label)
+		username_text = "[anchor=left_side][color=8888ff][b][size=80]%s   [/size][/b][/color][anchor=right_side]" % self.band_members[user_num].username
+		ip_text = "[anchor=left_side][color=668822][b][size=50]%s[/size][/b][/color][anchor=right_side]" % self.band_members[user_num].addr_str
+		username_text += ip_text
+		username_label = TextObject(text=username_text, markup=True, halign='left', valign='middle',
+									   pos=(blurb_left, blurb_bottom), size=size)
 		self.add_game_object(username_label)
+
+		# username_box = RectOutlineSprite(size=size, color=(0.3,0.6,0.8), width=2)
+		# username_label.add_graphic(username_box)
 
 		self.last_band_member_index = user_num
 		# self.user_labels.append()

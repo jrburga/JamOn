@@ -4,31 +4,22 @@ from game.common.audio import Audio
 from server.server_parties import *
 from scenes import scenes
 import numpy as np
+from kivy.core.window import Window
 
 class MainWidget(BaseWidget):
 	def __init__(self, argv):
 		super(MainWidget, self).__init__()
-
+		print Window.size
 		self.game_state = GameState()
 		self.audio = Audio(2)
 
 		self.scenes = scenes
 		self.scene = None
 
-		start_scene = 'main_menu'
-		args = []
-		kwargs = {}
+		self.start_scene = 'main_menu'
+		self.argv = argv
 
-		if len(argv) > 1:
-			if argv[1] == 'practice':
-				start_scene = 'practice'
-				kwargs = {'band_members': []}
-		
-		
-		if start_scene:
-			self.load_new_scene(start_scene, **kwargs)
-		else:
-			self.load_new_scene(scenes.keys()[0], **kwargs)
+		self.started = False
 
 	def unload_current_scene(self):
 		if self.game_state.server_object:
@@ -85,9 +76,24 @@ class MainWidget(BaseWidget):
 			self.game_state.server_object = Guest()
 
 	def on_update(self):
+		if not self.started:
+			args = []
+			kwargs = {}
+
+			
+			if len(self.argv) > 1:
+				if self.argv[1] == 'practice':
+					self.start_scene = 'practice'
+					kwargs = {'band_members': []}
+			
+			if self.start_scene:
+				self.load_new_scene(self.start_scene, **kwargs)
+			else:
+				self.load_new_scene(scenes.keys()[0], **kwargs)
+
+			self.started = True
 		self.scene._on_update()
 		self.audio.on_update()
-
 
 class GameState(object):
 	def __init__(self):
