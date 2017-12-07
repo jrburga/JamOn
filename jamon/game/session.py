@@ -58,9 +58,9 @@ class Session(GameObject):
 		self.add(self.IM)
 
 		self.clock.offset = self.seconds-spb
-		print self.clock.offset
+		# print self.clock.offset
 		# self.clock.start()
-		self.IM.metro.start()
+		# self.IM.metro.start()
 		self.paused = True
 		self.start()
 

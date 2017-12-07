@@ -1,7 +1,7 @@
 from jamon.game.game import Scene, GameObject
 from jamon.game.widgets import *
 from jamon.game.components.graphics import *
-from kivy.core.window import Window
+from jamon.game.window import Window
 
 from jamon.game.controller import Keyboard
 

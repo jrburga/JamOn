@@ -1,6 +1,6 @@
 from jamon.game.game import GameObject
 from components.sprites import *
-from kivy.core.window import Window
+from jamon.game.window import Window
 from widgets import Button
 from kivy.core.image import Image
 from text import TextObject

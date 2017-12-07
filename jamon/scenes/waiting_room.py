@@ -10,7 +10,7 @@ from jamon.game.text import TextObject
 from jamon.game.instrument import INSTRUMENT_SETS
 
 from kivy.uix.behaviors.togglebutton import ToggleButtonBehavior
-from kivy.core.window import Window
+from jamon.game.window import Window
 
 
 

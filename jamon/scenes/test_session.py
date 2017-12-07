@@ -2,7 +2,7 @@ from jamon.game.game import Scene, GameObject
 from jamon.game.player import Player
 from jamon.game.session import Session
 
-from server.dummy_parties import ServerObject
+# from server.dummy_parties import ServerObject
 
 # default music settings
 tempo = 120
