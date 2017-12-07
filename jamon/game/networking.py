@@ -1,5 +1,6 @@
 from game import GameObject
 from random import choice
+from server.client import Client
 
 member_names = ['Rudolf', 'Dasher', 'Prancer', 'Eran', 'Berry', 'Dancer', 'Vixen', 'Donner', 'Cupid']
 
@@ -11,9 +12,9 @@ class ClientObject(GameObject):
 	'''
 	Light weight wrapper to interface with the Client
 	'''
-	def __init__(self, client, username=None):
+	def __init__(self, username=None):
 		super(ClientObject, self).__init__()
-		self.client = client
+		self.client = Client()
 		self.username = username if username else choice(member_names)
 		self.band_members = []
 		self.client.register_tether_callback(self.on_action)

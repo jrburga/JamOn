@@ -19,7 +19,7 @@ class MainWidget(BaseWidget):
 		self.audio = Audio(2)
 
 		self.server = Server()
-		self.client_obj = ClientObject(Client(), username=None)
+		self.client_obj = ClientObject(username=None)
 
 		self.scenes = scenes
 		self.scene = None

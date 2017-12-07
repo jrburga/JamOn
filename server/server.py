@@ -16,7 +16,9 @@ class Server(object):
 		self._info = {}
 		self._max_clients = MAX_CLIENTS
 		self._clients = 0
-		self._store = {'band_members': {}}
+		self._store = {'band_members': {},
+					   'actions': {},
+					   'patterns': {}}
 		self._on_join_callback = lambda conn, res: None
 
 	def _bind(self, port):

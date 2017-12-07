@@ -140,10 +140,12 @@ class WaitingRoom(Scene):
 
 	def start_game_callback(self):
 		def start_game(button):
-			msg = {'game_info': [b.info() for b in self.band_members]}
-			self.host.send_to_band(msg, 'host')
+			# msg = {'game_info': [b.info() for b in self.band_members]}
+			# self.host.send_to_band(msg, 'host')
+			print 'starting game'
 			inst_set = self.which_instrument_set()
-			self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'], instrument_set=inst_set)
+			# self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'], instrument_set=inst_set)
+			self.client.send_action('on_scene_change', scene_name='practice', band_members=self.band_members, instrument_set=inst_set)
 		return start_game
 
 	def band_display(self):

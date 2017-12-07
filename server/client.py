@@ -1,6 +1,7 @@
 from connections import *	
 from messages import *
 from thread import *
+from store import *
 
 import time
 
