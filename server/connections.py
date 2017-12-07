@@ -6,7 +6,10 @@ import threading
 
 from messages import *
 
-IP = 'localhost'
+from urllib2 import urlopen
+
+IP = '0.0.0.0'
+PUBLIC = urlopen('http://ip.42.pl/raw').read()
 PORT = 21385
 MAX_CONNS = 4
 

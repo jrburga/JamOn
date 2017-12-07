@@ -26,8 +26,8 @@ class Message(dict):
 		return self['data']
 
 class Action(Message):
-	def __init__(self, data={}):
-		super(Action, self).__init__('action', data)
+	def __init__(self, event, action={}):
+		super(Action, self).__init__('action', {'event_type': event, 'action': action})
 
 
 class Post(Message):

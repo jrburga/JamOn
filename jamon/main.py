@@ -1,16 +1,23 @@
 from game.game import Event
 from game.common.core import *
 from game.common.audio import Audio
-from server.server_parties import *
+from game.networking import ClientObject
+# from server.server_parties import *
 from scenes import scenes
 import numpy as np
+
+from server import Client, Server, PUBLIC
 
 class MainWidget(BaseWidget):
 	def __init__(self, argv):
 		super(MainWidget, self).__init__()
 
-		self.game_state = GameState()
 		self.audio = Audio(2)
+
+		self.server = Server()
+		self.client = Client()
+		self.client_obj = ClientObject(self.client, username=None)
+		self.band_members = []
 
 		self.scenes = scenes
 		self.scene = None
@@ -31,8 +38,6 @@ class MainWidget(BaseWidget):
 			self.load_new_scene(scenes.keys()[0], **kwargs)
 
 	def unload_current_scene(self):
-		if self.game_state.server_object:
-			self.scene.remove(self.game_state.server_object)
 		if self.scene == None: return
 		self.scene.base_widget = None
 		self.canvas.remove(self.scene._transform)
@@ -43,8 +48,6 @@ class MainWidget(BaseWidget):
 	def load_new_scene(self, scene_name, **kwargs):
 		self.unload_current_scene()
 		self.scene = self.scenes[scene_name](base_widget=self, **kwargs)
-		if self.game_state.server_object:
-			self.scene.add(self.game_state.server_object)
 		self.audio.set_generator(self.scene._mixer)
 		self.canvas.add(self.scene._transform)
 		for widget in self.scene.widgets:
@@ -80,21 +83,18 @@ class MainWidget(BaseWidget):
 	
 	def on_server_request(self, event):
 		if event.server_type == "host_game":
-			self.game_state.server_object = Host()
+			print 'starting server'
+			self.server.start()
+			print 'host connection to server'
+			self.client.connect(PUBLIC)
+			print 'host connected to server'
+
 		elif event.server_type == "join_game":
-			self.game_state.server_object = Guest()
+			self.server = None
 
 	def on_update(self):
 		self.scene._on_update()
 		self.audio.on_update()
-
-
-class GameState(object):
-	def __init__(self):
-		self.username = "Guest_" + str(np.random.randint(1000000))
-		self.server_object = None    # Will be a server object of the subclass Host or Guest
-        
-
 
 
 

@@ -19,16 +19,13 @@ USER_BLURB_SIZE = (800, 150)
 class WaitingRoom(Scene):
 	def __init__(self, **kwargs):
 		super(WaitingRoom, self).__init__(**kwargs)
-		self.is_host = kwargs['is_host']
+		self.client = self.base_widget.client_obj
+		self.add(self.client)
+		self.is_host = self.client.is_host
 
-		if self.is_host:
-			self.host = self.base_widget.game_state.server_object
-
-			# Trigger host search for other players
-			self.host.find_other_players()
-
-		self.band_members = self.base_widget.game_state.server_object.band_members
+		self.band_members = self.base_widget.band_members
 		self.my_ip = urlopen('http://ip.42.pl/raw').read()
+		self.last_band_member_index = 0
 
 		self.general_display()
 		self.band_display()
@@ -45,20 +42,17 @@ class WaitingRoom(Scene):
 									   pos=self.waiting_room_label_pos)
 
 		self.add_game_object(self.waiting_room_label)
-		self.start_game_button_pos = (Window.width * 0.7, Window.height - 200)
+		
 		if self.is_host:
 			# To let host start the game
+			self.start_game_button_pos = (Window.width * 0.7, Window.height - 200)
 			self.start_game_button = Button(text="  Start Game  ", font_size='20sp', markup=True, 
 											halign='center', valign='top',
 											pos=self.start_game_button_pos,
 											size=(Window.width * 0.25, Window.height * 0.125))
-		print Window.width, Window.height
-		# Todo: callback for start game @jake
-
-		self.start_game_button.bind(self.start_game_callback())
-		self.add_game_object(self.start_game_button)
-
-		if self.is_host:
+			self.start_game_button.bind(self.start_game_callback())
+			self.add_game_object(self.start_game_button)
+		
 			# we can choose to do this for all players if we want later but idk if necessary
 			self.make_instrument_buttons()
 
@@ -104,10 +98,11 @@ class WaitingRoom(Scene):
 
 	def start_game_callback(self):
 		def start_game(button):
-			msg = {'game_info': [b.info() for b in self.band_members]}
-			self.host.send_to_band(msg, 'host')
+			band_members = [b.info() for b in self.band_members]
+			scene_name = 'practice'
 			inst_set = self.which_instrument_set()
-			self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'], instrument_set=inst_set)
+			self.client.send_action('on_scene_change', band_members=band_members, scene_name=scene_name, instrument_set=inst_set)
+			# self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'], instrument_set=inst_set)
 		return start_game
 
 	def band_display(self):

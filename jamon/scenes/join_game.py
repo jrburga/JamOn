@@ -8,7 +8,8 @@ class JoinGame(Scene):
 	def __init__(self, **kwargs):
 		super(JoinGame, self).__init__(**kwargs)
 
-		self.guest = self.base_widget.game_state.server_object
+		self.client = self.base_widget.client_obj
+		self.add(self.client)
 		print kwargs
 		self.display()
 		self.attempting_connection = False
@@ -56,13 +57,9 @@ class JoinGame(Scene):
 		# TODO
 
 		# (2b) try to connect with the Guest's connect function 
-		self.guest.set_host_ip(ip)
+		# self.guest.set_host_ip(ip)
 		
-		err_code = self.guest.connect_to_host(timeout=10)
-		if err_code != True:
-			self.failure_label.text = "Unable to connect. Please try again"
-			self.attempting_connection = False
-			return
+		self.client.connect(ip)
 
 		# (3) if success, change scene to band scene
 		self.attempting_connection = False

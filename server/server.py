@@ -13,7 +13,7 @@ class Server(object):
 	def _bind(self, port):
 		print 'host binding to (%s, %i)' % (self.ip, port)
 		self._socket.bind((self.ip, port))
-		self._socket.listen(4)
+		self._socket.listen(16)
 
 	def _accept(self):
 		accepting = True
@@ -79,14 +79,8 @@ class Server(object):
 						 'message_id': msg.id}))
 
 	def _send_all(self, message, connection):
-		print message.type, message.type == 'action'
 		if message.type != 'action': return
-		data = message.data.copy()
-		data['success'] = True
-		data['message_id'] = message.id
-		connection.send(Action(data))
-		for conn in [conn for conn_id, conn in self._async.items() 
-								if conn_id != connection.id]:
+		for conn in self._async.values():
 			conn.send(message)
 
 	def _listen(self, connection):

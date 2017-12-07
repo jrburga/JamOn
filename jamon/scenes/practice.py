@@ -33,6 +33,7 @@ class Practice(Scene):
 		if event.keycode[1] == '1':
 			self.trigger_event('on_scene_change', scene_name='perform')
 
-print Practice.scene_events
+# print Practice.scene_events
 def build_scene(**kwargs):
+	print 'building scene', kwargs
 	return Practice(**kwargs)
