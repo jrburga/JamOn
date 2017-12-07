@@ -5,7 +5,7 @@ from thread import *
 import time
 
 class Client(object):
-	def __init__(self, ip=IP):
+	def __init__(self, ip=PUBLIC):
 		# super(Client, self).__init__t__()
 		self.ip = ip
 		self.id = None

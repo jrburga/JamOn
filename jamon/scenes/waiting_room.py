@@ -23,42 +23,36 @@ class WaitingRoom(Scene):
 		self.band_members = []
 		self.client.post_info('band_members', self.client.info())
 		self.client.send_action('on_join')
-		self.my_ip = urlopen('http://ip.42.pl/raw').read()
-		self.last_band_member_index = 0
+		self.next_band_member_index = 0
+
+
+		# REMOVE THIS
+		# if self.is_host:
+		# 	self.host = self.base_widget.game_state.server_object
+
+		# 	# Trigger host search for other players
+		# 	self.host.find_other_players()
+
+		# self.band_members = self.base_widget.game_state.server_object.band_members
+		# self.my_ip = urlopen('http://ip.42.pl/raw').read()
 
 		self.general_display()
 		self.band_display()
 
 	def on_join(self, event):
 		print 'getting band info'
+
 		self.band_members = self.client.get_info('band_members', None)
 		print self.band_members
+		for i in range(self.next_band_member_index, len(self.band_members)):
+			self.make_user_blurb(i, is_me=False)
+
+		self.next_band_member_index = i+1
 
 	def general_display(self):
 		"""
 		All of the non-player-specific display will be handled here
 		"""
-# <<<<<<< HEAD
-		# I apologize for this shitshow below... I'm trying to fix this label thing and I'll have to get to it later -Tim
-		self.waiting_room_label_pos = (100, Window.height - 200)
-		self.waiting_room_label = TextObject(text="[anchor=left_side][color=ff8888][b]Waiting Room[/b][/color][anchor=right_side]", 
-									   font_size=100, markup=True, halign='left', valign='bottom',
-									   pos=self.waiting_room_label_pos)
-
-		self.add_game_object(self.waiting_room_label)
-		
-		if self.is_host:
-			# To let host start the game
-			self.start_game_button_pos = (Window.width * 0.7, Window.height - 200)
-			self.start_game_button = Button(text="  Start Game  ", font_size='20sp', markup=True, 
-											halign='center', valign='top',
-											pos=self.start_game_button_pos,
-											size=(Window.width * 0.25, Window.height * 0.125))
-			self.start_game_button.bind(self.start_game_callback())
-			self.add_game_object(self.start_game_button)
-		
-			# we can choose to do this for all players if we want later but idk if necessary
-# =======
 		# for start_game, instrument buttons
 		self.button_dist_from_side = Window.width/25.0
 		self.button_dist_from_top = Window.height * 0.3
@@ -86,8 +80,8 @@ class WaitingRoom(Scene):
 											pos=self.start_game_button_pos,
 											size=self.start_game_size)
 
-		self.start_game_button.bind(self.start_game_callback())
-		self.add_game_object(self.start_game_button)
+			self.start_game_button.bind(self.start_game_callback())
+			self.add_game_object(self.start_game_button)
 
 		self.the_band_label_pos = (self.button_dist_from_side + Window.width/50.0, Window.height - self.button_dist_from_top)
 		self.the_band_label = TextObject(text="[anchor=left_side][color=ff8888][b]The Band[/b][/color][anchor=right_side]", 
@@ -107,7 +101,6 @@ class WaitingRoom(Scene):
 										   pos=self.instruments_label_pos)
 
 			self.add_game_object(self.instruments_label)
-# >>>>>>> 70f7c970e5ffe9deac7738959bbd4fdfc7cc2d90
 			self.make_instrument_buttons()
 
 	def make_instrument_buttons(self):
@@ -147,11 +140,10 @@ class WaitingRoom(Scene):
 
 	def start_game_callback(self):
 		def start_game(button):
-			scene_name = 'practice'
+			msg = {'game_info': [b.info() for b in self.band_members]}
+			self.host.send_to_band(msg, 'host')
 			inst_set = self.which_instrument_set()
-			self.base_widget.server.stop_accepting()
-			self.client.send_action('on_scene_change', scene_name='practice', instrument_set=inst_set)
-			# self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'], instrument_set=inst_set)
+			self.trigger_event('on_scene_change', scene_name='practice', band_members=msg['game_info'], instrument_set=inst_set)
 		return start_game
 
 	def band_display(self):
@@ -170,6 +162,7 @@ class WaitingRoom(Scene):
 		# TODO: Make the is_me flag make the person light up
 
 		# from user_num, compute the offsets (position, size)
+		print 'making blurb for user', user_num, self.band_members[user_num]
 		start_y_top = Window.height - self.button_dist_from_top
 		height = (Window.height - (self.button_dist_from_top + self.button_dist_from_bottom)) / 4.0
 		size = Window.width/3.0, height # width should be big enough
@@ -177,45 +170,26 @@ class WaitingRoom(Scene):
 		blurb_top = start_y_top - size[1] * user_num
 		blurb_left = self.button_dist_from_side
 
-# <<<<<<< HEAD
-
-		# # Username label will have height 150 (make text size accordingly?)
-		# username_label_bottom = blurb_bottom + 70
-		# username_text = "[anchor=left_side][color=8888ff][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num]['username']
-		# username_label = TextObject(text=username_text, 
-		# 							   font_size=80, markup=True, halign='left', valign='bottom',
-		# 							   pos=(blurb_left, username_label_bottom))
-		
-		# ip_text = "[anchor=left_side][color=668822][b]%s[/b][/color][anchor=right_side]" % self.band_members[user_num]['addr_str']
-
-		# ip_label = TextObject(text=ip_text, font_size=50, markup=True, halign='left', valign='bottom',
-		# 						pos = (blurb_left, blurb_bottom + 10))
-
-		# # username_box = StaticRect(size=USER_BLURB_SIZE, color=(0.3,0.6,0.8), pos=(blurb_left, blurb_bottom))
-		# # self.add_graphic(username_box)
-
-		# self.add_game_object(ip_label)
-# =======
 		username_text = "[anchor=left_side][color=8888ff][b][size=80]%s   [/size][/b][/color][anchor=right_side]" % self.band_members[user_num]['username']
 		ip_text = "[anchor=left_side][color=668822][b][size=50]%s[/size][/b][/color][anchor=right_side]" % self.band_members[user_num]['addr_str']
 		username_text += ip_text
 		username_label = TextObject(text=username_text, markup=True, halign='left', valign='middle',
 									   pos=(blurb_left, blurb_bottom), size=size)
-# >>>>>>> 70f7c970e5ffe9deac7738959bbd4fdfc7cc2d90
 		self.add_game_object(username_label)
 
 		# username_box = RectOutlineSprite(size=size, color=(0.3,0.6,0.8), width=2)
 		# username_label.add_graphic(username_box)
-
-		self.last_band_member_index = user_num
 		# self.user_labels.append()
 		
 		
 	def on_update(self):
-		if self.last_band_member_index < len(self.band_members):
-			for i in range(self.last_band_member_index, len(self.band_members)):
-				self.make_user_blurb(i, is_me=False)
+		pass
+		# REMOVE THIS
+		# Changed it so you don't have to keep looping on this
 
+		# if self.last_band_member_index < len(self.band_members):
+		# 	for i in range(self.last_band_member_index, len(self.band_members)):
+		# 		self.make_user_blurb(i, is_me=False)
 		
 		# TODO: check if new members joined and add them to the view as they join
 
