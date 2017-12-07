@@ -160,7 +160,7 @@ class WaitingRoom(Scene):
 	def on_update(self):
 		if self.last_band_member_index + 1 < len(self.band_members):
 			for i in range(self.last_band_member_index + 1, len(self.band_members)):
-				self.make_user_blurb(user_num, is_me=False)
+				self.make_user_blurb(i, is_me=False)
 		
 		# TODO: check if new members joined and add them to the view as they join
 
