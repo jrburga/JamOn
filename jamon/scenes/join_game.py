@@ -60,7 +60,7 @@ class JoinGame(Scene):
 		# (2b) try to connect with the Guest's connect function 
 		# self.guest.set_host_ip(ip)
 		try:
-			self.client_obj.connect(ip)
+			self.client.connect(ip)
 		except Exception as e:
 			print 'connection unsuccessful'
 			print e
