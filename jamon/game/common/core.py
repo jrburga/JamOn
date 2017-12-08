@@ -17,7 +17,6 @@ from kivy.uix.widget import Widget
 from kivy.clock import Clock
 import traceback
 
-
 class BaseWidget(Widget):
     """Has some common core functionality we want in all
     our apps - handling key up/down, closing the app, and update on every frame.

@@ -26,6 +26,7 @@ class Practice(Scene):
 		# 						  tempo,
 		# 						  i,
 		# 						  inst=insts[i]))
+	def on_load(self):
 		self.add(Session(tempo, bars, divs))
 		self.add_event_listener('on_key_down', self.change_scene)
 

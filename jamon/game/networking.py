@@ -18,10 +18,14 @@ class ClientObject(GameObject):
 	'''
 	def __init__(self, username=None):
 		super(ClientObject, self).__init__()
-		self.client = Client()
+		self._client = Client()
 		self.username = username if username else choice(member_names)
 		self.band_members = []
 		self.client.register_tether_callback(self.on_action)
+
+	@property
+	def client(self):
+		return self._client
 
 	@property 
 	def id(self):
@@ -47,6 +51,17 @@ class ClientObject(GameObject):
 		'''
 		return self.client.post(info_name, info, callback)
 
+	def add_pattern(self, pattern_info, callback=_default_callback):
+		return self.post_info('patterns', pattern_info, callback)
+
+	def add_band_member(self, member_info, callback=_default_callback):
+		return self.post_info('band_members', member_info, callback)
+
+	def join(self, callback=_default_callback):
+		self.post_info('band_members', self.info(), callback)
+		self.send_action('on_join')
+
+
 	def get_info(self, info_name, identifier, callback=_default_callback):
 		return self.client.get(info_name, identifier, callback)
 
@@ -57,7 +72,7 @@ class ClientObject(GameObject):
 		self.client.disconnect()
 
 	def on_action(self, action):
-		# print 'on action called', action
+		print 'on action called', action
 		self.trigger_event(action['event_type'], **action['action'])
 
 	def send_action(self, event_type, **args):

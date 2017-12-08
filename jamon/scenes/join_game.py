@@ -7,12 +7,11 @@ from thread import *
 class JoinGame(Scene):
 	def __init__(self, **kwargs):
 		super(JoinGame, self).__init__(**kwargs)
-
-		self.client_obj = self.base_widget.client_obj
-		self.add(self.client_obj)
 		print kwargs
-		self.display()
 		self.attempting_connection = False
+
+	def on_load(self):
+		self.display()
 
 	def display(self):
 		"""

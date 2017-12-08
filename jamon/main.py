@@ -16,6 +16,7 @@ class MainWidget(BaseWidget):
 	def __init__(self, argv):
 		super(MainWidget, self).__init__()
 
+		# Window.fullscreen = 'auto'
 		self.audio = Audio(2)
 
 		self.server = Server()
@@ -27,10 +28,15 @@ class MainWidget(BaseWidget):
 		self.start_scene = 'main_menu'
 		self.argv = argv
 
+		print argv
+
 		self.started = False
 
 	def unload_current_scene(self):
 		if self.scene == None: return
+		self.scene.on_unload()
+
+		self.scene.remove(self.client_obj)
 		self.scene.base_widget = None
 		self.canvas.remove(self.scene._transform)
 		self.audio.set_generator(None)
@@ -40,10 +46,15 @@ class MainWidget(BaseWidget):
 	def load_new_scene(self, scene_name, **kwargs):
 		self.unload_current_scene()
 		self.scene = self.scenes[scene_name](base_widget=self, **kwargs)
+		self.scene.add(self.client_obj)
+		self.scene.on_load()
+		
 		self.audio.set_generator(self.scene._mixer)
 		self.canvas.add(self.scene._transform)
 		for widget in self.scene.widgets:
 			self.add_widget(widget)
+
+		
 
 	def on_key_down(self, keycode, modifiers):
 		self.scene._handle_event(Event('on_key_down', 

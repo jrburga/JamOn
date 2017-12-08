@@ -29,15 +29,16 @@ class PatternList(GameObject):
 		self.sprite = PatternListSprite()
 		self.add_graphic(self.sprite)
 
-
-
 	def send_event(self, msg):
 		# This is where it will call the server to send the message
+
+		print self.client
 
 		# FOR DEBUGGING PURPOSES
 		if msg['event']=='add':
 			import random
-			_id = random.randint(0, 100000)
+			# _id = random.randint(0, 100000)
+			_id = self.client.post_info()
 			self.create_pattern(_id, msg['inst'])
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])

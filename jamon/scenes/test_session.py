@@ -10,7 +10,8 @@ divs = 4
 class TestSession(Scene):
 	def __init__(self, **kwargs):
 		super(TestSession, self).__init__(**kwargs)
-		self.base_widget.game_state.server_object
+
+	def on_load(self):
 		players = [Player(bars, tempo), 
 				   PlayerRemote(bars, tempo, num=2, inst='drums')]
 		self.add(Session(tempo, bars, divs, players))
