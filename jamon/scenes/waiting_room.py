@@ -30,7 +30,7 @@ class WaitingRoom(Scene):
 	def on_join(self, event):
 		print 'getting band info'
 
-		self.band_members = self.client.get_info('band_members', None)
+		self.band_members = self.client.get_band_members()
 		print self.band_members
 		for i in range(self.next_band_member_index, len(self.band_members)):
 			self.make_user_blurb(i, is_me=False)

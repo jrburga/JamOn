@@ -51,19 +51,26 @@ class ClientObject(GameObject):
 		'''
 		return self.client.post(info_name, info, callback)
 
-	def add_pattern(self, pattern_info, callback=_default_callback):
+	def add_pattern(self, inst, callback=_default_callback):
+		pattern_info = {'inst': inst}
 		return self.post_info('patterns', pattern_info, callback)
 
 	def add_band_member(self, member_info, callback=_default_callback):
 		return self.post_info('band_members', member_info, callback)
 
 	def join(self, callback=_default_callback):
-		self.post_info('band_members', self.info(), callback)
+		member_id = self.post_info('band_members', self.info(), callback)
 		self.send_action('on_join')
-
+		return member_id
 
 	def get_info(self, info_name, identifier, callback=_default_callback):
 		return self.client.get(info_name, identifier, callback)
+
+	def get_band_members(self, callback=_default_callback):
+		return self.get_info('band_members', None, callback)
+
+	def get_pattern(self, identifier, callback=_default_callback):
+		return self.get_info('patterns', identifier, callback)
 
 	def connect(self, ip):
 		self.client.connect(ip)

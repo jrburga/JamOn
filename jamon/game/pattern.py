@@ -17,6 +17,8 @@ class PatternList(GameObject):
 
 		self.patterns = {}
 
+		self.editing_id = None
+
 		self.scroll = ScrollView()
 		# self.add_btn = PatternButton('add', self.add_btn_clicked)
 		# self.add_btn.position = (5, pattern_list_height-80)
@@ -37,8 +39,9 @@ class PatternList(GameObject):
 		# FOR DEBUGGING PURPOSES
 		if msg['event']=='add':
 			import random
-			_id = random.randint(0, 100000)
-			# _id = self.client.post_info()
+			# _id = random.randint(0, 100000)
+			_id = self.client.add_pattern(msg['inst'])
+			# self.client.send_action('on_pattern_create', id=_id, inst=msg['inst'])
 			self.create_pattern(_id, msg['inst'])
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])
