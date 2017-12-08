@@ -9,6 +9,8 @@ class MainMenu(Scene):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)
         print kwargs
+
+    def on_load(self):
         self.make_buttons()
 
     def make_buttons(self):

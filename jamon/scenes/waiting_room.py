@@ -17,24 +17,12 @@ from jamon.game.window import Window
 class WaitingRoom(Scene):
 	def __init__(self, **kwargs):
 		super(WaitingRoom, self).__init__(**kwargs)
-		self.client = self.base_widget.client_obj
-		self.add(self.client)
-		self.is_host = self.client.is_host
 		self.band_members = []
-		self.client.post_info('band_members', self.client.info())
-		self.client.send_action('on_join')
 		self.next_band_member_index = 0
 
-
-		# REMOVE THIS
-		# if self.is_host:
-		# 	self.host = self.base_widget.game_state.server_object
-
-		# 	# Trigger host search for other players
-		# 	self.host.find_other_players()
-
-		# self.band_members = self.base_widget.game_state.server_object.band_members
-		# self.my_ip = urlopen('http://ip.42.pl/raw').read()
+	def on_load(self):
+		self.is_host = self.client.is_host
+		self.client.join()
 
 		self.general_display()
 		self.band_display()

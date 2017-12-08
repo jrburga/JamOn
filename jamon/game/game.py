@@ -52,6 +52,20 @@ class GameObject(object):
 		self.to_add = []
 
 	@property
+	def game_objects(self):
+		return self._game_objects
+
+	@property
+	def client(self):
+		return self.base_widget.client_obj if self.base_widget else None
+
+	@property
+	def base_widget(self):
+		if self._parent:
+			return self._parent.base_widget
+		return None
+
+	@property
 	def widgets(self):
 		widgets = self._widgets.copy()
 		for go in self._game_objects:
@@ -153,7 +167,7 @@ class GameObject(object):
 		self._event_listeners[event].append(callback)
 
 	def trigger_event(self, event_type, **kwargs):
-		assert self._parent != None, 'Game Object needs to be attached to a scene.\nEvent Lost to the void'
+		assert self._parent != None, 'Game Object needs to be attached to a scene. Event Lost to the void'
 		self._parent.trigger_event(event_type, **kwargs)
 
 	def _handle_event(self, event):
@@ -189,12 +203,22 @@ class Scene(GameObject):
 	scene_events = ['on_scene_change', 'on_server_request']
 	def __init__(self, base_widget, **kwargs):
 		super(Scene, self).__init__()
-		self.base_widget = base_widget
+		self._base_widget = base_widget
 		self._events = deque()
 		self._events = []
 
+	def on_load(self):
+		pass
+
+	@property
+	def base_widget(self):
+		return self._base_widget
+
+	@base_widget.setter
+	def base_widget(self, new_base_widget):
+		self._base_widget = new_base_widget
+		
 	def _add_widget(self, widget):
-		return
 		assert self.base_widget, 'Scene needs base widget to attach widget'
 		self.base_widget.add_widget(widget)
 
@@ -217,6 +241,9 @@ class Scene(GameObject):
 		while self._events:
 			self._handle_event(self._events.pop(0))
 		super(Scene, self)._on_update()
+
+	def on_unload(self):
+		pass
 
 	def on_update(self):
 		pass
