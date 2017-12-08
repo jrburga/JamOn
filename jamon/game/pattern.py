@@ -37,8 +37,8 @@ class PatternList(GameObject):
 		# FOR DEBUGGING PURPOSES
 		if msg['event']=='add':
 			import random
-			# _id = random.randint(0, 100000)
-			_id = self.client.post_info()
+			_id = random.randint(0, 100000)
+			# _id = self.client.post_info()
 			self.create_pattern(_id, msg['inst'])
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])
