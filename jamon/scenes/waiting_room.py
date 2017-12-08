@@ -183,18 +183,6 @@ class WaitingRoom(Scene):
 		
 	def on_update(self):
 		pass
-		# REMOVE THIS
-		# Changed it so you don't have to keep looping on this
-
-		# if self.last_band_member_index < len(self.band_members):
-		# 	for i in range(self.last_band_member_index, len(self.band_members)):
-		# 		self.make_user_blurb(i, is_me=False)
-		
-		# TODO: check if new members joined and add them to the view as they join
-
-		# self.waiting_room_label.set_pos((50, Window.height - 200))
-		# self.start_game_button.pos = (Window.width * 0.7, Window.height - 200)
-		
 
 def build_scene(**kwargs):
 	return WaitingRoom(**kwargs)
