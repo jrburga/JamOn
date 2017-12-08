@@ -160,20 +160,23 @@ class WaitingRoom(Scene):
 		blurb_top = start_y_top - size[1] * user_num
 		blurb_left = self.button_dist_from_side
 
-		# username_text = "[anchor=left_side][color=8888ff][b][size=80]%s   [/size][/b][/color][anchor=right_side]" % 
-		username_text = self.band_members[user_num]['username']
-		# ip_text = "[anchor=left_side][color=668822][b][size=10]%s[/size][/b][/color][anchor=right_side]" 
-		ip_text = self.band_members[user_num]['addr_str']
+		username = self.band_members[user_num]['username']
+		username_text = "[anchor=left_side][color=8888ff][b][size=80]%s   [/size][/b][/color][anchor=right_side]" % username
+		
+		ip = self.band_members[user_num]['addr_str']
+		ip_text = "[anchor=left_side][color=668822][b][size=50]%s[/size][/b][/color][anchor=right_side]" % ip
+		# 
 		
 		print username_text
 
 		display_text = '%s : %s' % (username_text, ip_text)
 		username_label = TextObject(text=display_text, font_size=40)
 		pos=(blurb_left, blurb_bottom)
+		username_label.position = pos
 		self.add_game_object(username_label)
 
 		username_box = RectOutlineSprite(size=size, color=(0.3,0.6,0.8), width=2)
-		username_box.position = (100, 100)
+		# username_box.position = (100, 100)
 		username_label.add_graphic(username_box)
 		# self.user_labels.append()
 		
