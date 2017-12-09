@@ -26,7 +26,7 @@ statuses = {
 	2: 'Locked in!',
 }
 
-class Player(Keyboard):
+class Player(GameObject):
 	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
 	def __init__(self, bars, tempo, inst='piano'):
 		super(Player, self).__init__()
@@ -41,6 +41,8 @@ class Player(Keyboard):
 		# self.is_me = is_me
 
 		# self.name = name
+		self.controller = Keyboard(default_keys[0])
+		self.add(self.controller)
 
 		self.active_pattern = None
 
