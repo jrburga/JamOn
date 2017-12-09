@@ -41,8 +41,9 @@ class PatternList(GameObject):
 			import random
 			# _id = random.randint(0, 100000)
 			_id = self.client.add_pattern(msg['inst'])
-			# self.client.send_action('on_pattern_create', id=_id, inst=msg['inst'])
-			self.create_pattern(_id, msg['inst'])
+			creator = {'username': self.client.username, 'id': self.client.id}
+			self.client.send_action('on_pattern_create', id=_id, inst=msg['inst'], creator=creator)
+			# self.create_pattern(_id, msg['inst'])
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])
 		elif msg['event']=='queue':
@@ -51,9 +52,12 @@ class PatternList(GameObject):
 			self.set_dequeued(msg['id'])
 		elif msg['event']=='done_edit':
 			self.pattern_done_editing(msg['id'], msg['seq'])
-	
-	# Called when the user begins creating a new pattern
-	def create_pattern(self, _id, inst):
+
+
+	def on_pattern_create(self, event):
+		_id = event.id
+		inst = event.inst
+		creator = event.creator
 		# Add a patten to the top of the list
 		pattern = Pattern(_id, 0, self.bars, self.tempo, [], inst, self._parent.IM)
 
@@ -67,17 +71,22 @@ class PatternList(GameObject):
 		self.patterns[_id] = pattern
 
 		# Tell pattern it's being edited
-		pattern.editing(is_me=True)
+		print creator['id'] == self.client.id
+		is_me = creator['id'] == self.client.id
+		pattern.editing(is_me=is_me)
 
 		# Add pattern to the screen
 		self.scroll.add(pattern)
 
 		# Give the track the pattern info to update the midi live
-		track = self._parent.player.track
-		track.set_active_pattern(pattern)
+		# We should give the "player" the pattern, 
+		# since they are the ones controlling it
+		if is_me:
+			player = self._parent.player
+			player.set_active_pattern(pattern)
 
-		# Set the instrument to the correct instrument
-		self._parent.player.instrument.set_inst(inst)
+			# Set the instrument to the correct instrument
+			self._parent.player.instrument.set_inst(inst)
 
 	def remove_pattern(self, _id):
 		pattern = self.patterns[_id]
@@ -97,6 +106,7 @@ class PatternList(GameObject):
 
 
 	def add_pattern(self, _id, seq=[], inst='piano'):
+		print 'adding pattern ==================================' 
 		idx = len(self.patterns)
 		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, inst, self._parent.IM)
 		self.scroll.add(pattern)

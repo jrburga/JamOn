@@ -35,13 +35,14 @@ class Player(Keyboard):
 		self.keys = default_keys[0]
 		self.instrument = Instrument(inst)
 
-
 		# Boolean that represents whether this Player object correlates to
 		# the player for this system. I think this won't be needed once we 
 		# make other players use a different controller...
 		# self.is_me = is_me
 
 		# self.name = name
+
+		self.active_pattern = None
 
 		self.note_sequence = []
 		self.seq_ind = 0
@@ -69,6 +70,9 @@ class Player(Keyboard):
 		self.action_buffer = []
 
 		self.add(self.track)
+
+	def set_active_pattern(self, pattern):
+		self.active_pattern = pattern
 
 
 	def start_composing(self):

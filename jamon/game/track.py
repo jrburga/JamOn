@@ -20,7 +20,7 @@ class Track(GameObject):
 
 		# Dictates whether the player is currently editing a track
 		self.set_active(False)
-		self.active_pattern = None
+		self._active_pattern = None
 
 
 		self.drum = percussive
@@ -61,6 +61,17 @@ class Track(GameObject):
 		self.add_graphic(self.now_bar)
 
 	@property
+	def active_pattern(self):
+		return self.player.active_pattern
+
+	@active_pattern.setter
+	def active_pattern(self, active_pattern):
+		if self.player:
+			self.player.active_pattern = active_pattern
+		else:
+			self._active_pattern = active_pattern
+
+	@property
 	def gems(self):
 		gems = []
 		for lane in self.lanes:
@@ -85,9 +96,6 @@ class Track(GameObject):
 		else:
 			if self.player is not None:
 				self.player.session.IM.metro.start()
-
-	def set_active_pattern(self, pattern):
-		self.active_pattern = pattern
 
 	def t2y_conversion(self, time):
 		return self.sprite.height-self.t2y
