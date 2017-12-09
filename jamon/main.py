@@ -16,7 +16,7 @@ class MainWidget(BaseWidget):
 	def __init__(self, argv):
 		super(MainWidget, self).__init__()
 
-		# Window.fullscreen = 'auto'
+		Window.fullscreen = 'auto'
 		self.audio = Audio(2)
 
 		self.server = Server()
