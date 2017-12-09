@@ -97,16 +97,36 @@ class Server(object):
 		self._socket.close()
 		print 'server closed'
 
+	def _delete_info(self, info_name, identifier):
+		if info_name not in self._store:
+			return None
+		elif identifier == None:
+			del self._store[info_name]
+			return None
+		elif identifier in self._store[info_name]:
+			del self._store[info_name][identifier]
+			return identifier
+
+
+	def _delete(self, msg, conn):
+		print 'echoing delete', msg
+		msg.data['success'] = True
+		msg.data['result'] = self._delete_info(msg.data['info_name'],
+											   msg.data['identifier'])
+		msg.data['message_id'] = msg.id
+		conn.send(msg)
+
+
 	def _post_info(self, info_name, info):
 		if info_name not in self._store:
 			return None
-		if 'id' not in info:
+		elif 'id' not in info:
 			info['id'] = id(info)
 		self._store[info_name][info['id']] = info
 		return info['id']
 
 	def _post(self, msg, conn):
-		print 'echoing post'
+		print 'echoing post', msg
 		msg.data['success'] = True
 		msg.data['result'] = self._post_info(msg.data['info_name'],
 											 msg.data['info'])
@@ -114,13 +134,11 @@ class Server(object):
 		conn.send(msg)
 
 	def _get_info(self, info_name, identifier):
-		print info_name
-		print identifier
 		if info_name not in self._store:
 			return None
-		if identifier == None:
+		elif identifier == None:
 			return self._store[info_name].values()
-		if identifier in self._store[info_name]:
+		elif identifier in self._store[info_name]:
 			return self._store[info_name][identifier]
 		return None
 
@@ -151,6 +169,8 @@ class Server(object):
 					self._post(message, connection)
 				elif message.type == 'get':
 					self._get(message, connection)
+				elif message.type == 'delete':
+					self._delete(message, connection)
 				else:
 					self._error(message, connection)
 		print connection, 'exiting join'

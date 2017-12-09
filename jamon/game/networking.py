@@ -58,6 +58,12 @@ class ClientObject(GameObject):
 	def add_band_member(self, member_info, callback=_default_callback):
 		return self.post_info('band_members', member_info, callback)
 
+	def delete_info(self, info_name, identifier, callback=_default_callback):
+		return self.client.delete(info_name, identifier, callback)
+
+	def delete_pattern(self, pattern_id, callback=_default_callback):
+		return self.delete_info('patterns', pattern_id, callback)
+
 	def join(self, callback=_default_callback):
 		member_id = self.post_info('band_members', self.info(), callback)
 		self.send_action('on_join')

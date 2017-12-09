@@ -100,6 +100,12 @@ class Client(object):
 		message = self._sync.recv()[0]
 		return callback(message)
 
+	def delete(self, info_name, identifier, callback):
+		delete = Delete(info_name, identifier)
+		self._sync.send(delete)
+		message = self._sync.recv()[0]
+		return callback(message)
+
 	def send(self, msg_type, data):
 		'''
 		Non blocking. Sends without listening.

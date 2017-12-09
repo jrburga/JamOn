@@ -38,12 +38,7 @@ class PatternList(GameObject):
 
 		# FOR DEBUGGING PURPOSES
 		if msg['event']=='add':
-			import random
-			# _id = random.randint(0, 100000)
-			_id = self.client.add_pattern(msg['inst'])
-			creator = {'username': self.client.username, 'id': self.client.id}
-			self.client.send_action('on_pattern_create', id=_id, inst=msg['inst'], creator=creator)
-			# self.create_pattern(_id, msg['inst'])
+			self.create_pattern(msg['inst'])
 		elif msg['event']=='remove':
 			self.remove_pattern(msg['id'])
 		elif msg['event']=='queue':
@@ -54,41 +49,31 @@ class PatternList(GameObject):
 			self.pattern_done_editing(msg['id'], msg['seq'])
 
 
+	def create_pattern(self, inst):
+		# self.client.send_action('on_pattern_create', id=_id, inst=msg['inst'], creator=creator)
+		_id = self.client.add_pattern(inst)
+		self.client.send_action('on_pattern_create', pattern_id=_id, inst=inst)
+
 	def on_pattern_create(self, event):
-		_id = event.id
+		_id = event.pattern_id
 		inst = event.inst
-		creator = event.creator
-		# Add a patten to the top of the list
-		pattern = Pattern(_id, 0, self.bars, self.tempo, [], inst, self._parent.IM)
-
-		# Shift index of all other patterns down
-		for k in self.patterns:
-			p = self.patterns[k]
-			p.idx += 1
-			p.move_to(p.position.y - pattern_height - spacing)
-
-		# Add pattern to dict
-		self.patterns[_id] = pattern
-
-		# Tell pattern it's being edited
-		print creator['id'] == self.client.id
-		is_me = creator['id'] == self.client.id
-		pattern.editing(is_me=is_me)
-
-		# Add pattern to the screen
-		self.scroll.add(pattern)
-
+		pattern = self.add_pattern(_id, inst=inst)
+		pattern.editing(is_me=True)
 		# Give the track the pattern info to update the midi live
 		# We should give the "player" the pattern, 
 		# since they are the ones controlling it
-		if is_me:
-			player = self._parent.player
-			player.set_active_pattern(pattern)
+		player = self._parent.player
+		player.set_active_pattern(pattern)
 
-			# Set the instrument to the correct instrument
-			self._parent.player.instrument.set_inst(inst)
+		# Set the instrument to the correct instrument
+		self._parent.player.instrument.set_inst(inst)
 
 	def remove_pattern(self, _id):
+		self.client.delete_pattern(_id)
+		self.client.send_action('on_pattern_remove', pattern_id=_id)
+
+	def on_pattern_remove(self, event):
+		_id = event.pattern_id
 		pattern = self.patterns[_id]
 		idx = pattern.idx
 		self.scroll.remove(pattern)
@@ -104,13 +89,22 @@ class PatternList(GameObject):
 		# self.add_btn.position.y += pattern_height + spacing
 
 
-
 	def add_pattern(self, _id, seq=[], inst='piano'):
 		print 'adding pattern ==================================' 
 		idx = len(self.patterns)
-		pattern = Pattern(_id, idx, self.bars, self.tempo, seq, inst, self._parent.IM)
-		self.scroll.add(pattern)
+		# Add a pattern to the top of the list
+		pattern = Pattern(_id, 0, self.bars, self.tempo, seq, inst, self._parent.IM)
+
+		# Shift index of all other patterns down
+		for k in self.patterns:
+			p = self.patterns[k]
+			p.idx += 1
+			p.move_to(p.position.y - pattern_height - spacing)
+
 		self.patterns[_id] = pattern
+		self.scroll.add(pattern)
+
+		return pattern
 
 		# move add button down
 		# self.add_btn.position.y -= (pattern_height + spacing)

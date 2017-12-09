@@ -34,6 +34,10 @@ class Action(Message):
 	def __init__(self, event, action={}):
 		super(Action, self).__init__('action', {'event_type': event, 'action': action})
 
+class Delete(Message):
+	def __init__(self, info_name, identifier):
+		super(Delete, self).__init__('delete', {'info_name': info_name,
+												'identifier': identifier})
 
 class Post(Message):
 	def __init__(self, info_name, info):
@@ -42,7 +46,8 @@ class Post(Message):
 
 class Get(Message):
 	def __init__(self, info_name, identifier):
-		super(Get, self).__init__('get', {'info_name': info_name, 'identifier': identifier})
+		super(Get, self).__init__('get', {'info_name': info_name, 
+										  'identifier': identifier})
 
 class Connect(Message):
 	def __init__(self, data={}):

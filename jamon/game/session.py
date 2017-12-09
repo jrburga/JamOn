@@ -33,16 +33,16 @@ class Session(GameObject):
 		
 
 		########## FOR TESTING ##########
-		test_seq = [(0,0,1), (1,1,2), (2,1,2), (5, 3, 2), (6, 2, 5), (7,0,8)]
-		self.pattern_list.add_pattern(0)
-		self.pattern_list.add_pattern(1,test_seq, 'guitar')
-		# self.IM.add(self.pattern_list.patterns[1].instrument)
-		self.pattern_list.add_pattern(2)
-		self.pattern_list.add_pattern(3)
-		self.pattern_list.add_pattern(4)
-		self.pattern_list.add_pattern(5)
-		self.pattern_list.add_pattern(6)
-		self.pattern_list.pattern_editing(0, 'Bob')
+		# test_seq = [(0,0,1), (1,1,2), (2,1,2), (5, 3, 2), (6, 2, 5), (7,0,8)]
+		# self.pattern_list.add_pattern(0)
+		# self.pattern_list.add_pattern(1,test_seq, 'guitar')
+		# # self.IM.add(self.pattern_list.patterns[1].instrument)
+		# self.pattern_list.add_pattern(2)
+		# self.pattern_list.add_pattern(3)
+		# self.pattern_list.add_pattern(4)
+		# self.pattern_list.add_pattern(5)
+		# self.pattern_list.add_pattern(6)
+		# self.pattern_list.pattern_editing(0, 'Bob')
 
 		# i2player = Window.width/len(self.players)
 		# scale = 1./len(self.players)
