@@ -52,21 +52,28 @@ class PatternList(GameObject):
 	def create_pattern(self, inst):
 		# self.client.send_action('on_pattern_create', id=_id, inst=msg['inst'], creator=creator)
 		_id = self.client.add_pattern(inst)
-		self.client.send_action('on_pattern_create', pattern_id=_id, inst=inst)
+		creator = self.client.info
+		self.client.send_action('on_pattern_create', pattern_id=_id, 
+								 inst=inst, creator=self.client.info)
 
 	def on_pattern_create(self, event):
 		_id = event.pattern_id
 		inst = event.inst
+		creator = event.creator
+		is_me = creator['id']==self.client.id
+		username = creator['username']
+
 		pattern = self.add_pattern(_id, inst=inst)
-		pattern.editing(is_me=True)
+		pattern.editing(editor=username, is_me=is_me)
 		# Give the track the pattern info to update the midi live
 		# We should give the "player" the pattern, 
 		# since they are the ones controlling it
-		player = self._parent.player
-		player.set_active_pattern(pattern)
+		if is_me:
+			player = self._parent.player
+			player.set_active_pattern(pattern)
 
-		# Set the instrument to the correct instrument
-		self._parent.player.instrument.set_inst(inst)
+			# Set the instrument to the correct instrument
+			self._parent.player.instrument.set_inst(inst)
 
 	def remove_pattern(self, _id):
 		self.client.delete_pattern(_id)
@@ -119,7 +126,14 @@ class PatternList(GameObject):
 		self.patterns[pattern].editing(editor)
 
 	def pattern_done_editing(self, pattern, seq):
-		self.patterns[pattern].done_editing(seq)
+		self.client.send_action('on_pattern_done_editing', pattern_id=pattern, seq=seq)
+
+	def on_pattern_done_editing(self, event):
+		print 'done editing'
+		pattern_id = event.pattern_id
+		seq = event.seq
+		print 'sequence', seq
+		self.patterns[pattern_id].done_editing(seq)
 
 	def set_now(self, now):
 		for k in self.patterns:

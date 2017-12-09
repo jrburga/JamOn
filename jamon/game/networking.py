@@ -39,6 +39,7 @@ class ClientObject(GameObject):
 	def addr_str(self):
 		return self.client.ip
 
+	@property
 	def info(self):
 		return {'username': self.username, 
 				'id': self.id, 
@@ -65,7 +66,7 @@ class ClientObject(GameObject):
 		return self.delete_info('patterns', pattern_id, callback)
 
 	def join(self, callback=_default_callback):
-		member_id = self.post_info('band_members', self.info(), callback)
+		member_id = self.post_info('band_members', self.info, callback)
 		self.send_action('on_join')
 		return member_id
 
