@@ -13,10 +13,11 @@ import os
 from server import Client, Server, PUBLIC
 
 class MainWidget(BaseWidget):
-	def __init__(self, argv):
+	def __init__(self, args):
 		super(MainWidget, self).__init__()
 
-		Window.fullscreen = 'auto'
+		if not args.windowed:
+			Window.fullscreen = 'auto'
 		self.audio = Audio(2)
 
 		self.server = Server()
@@ -26,9 +27,7 @@ class MainWidget(BaseWidget):
 		self.scene = None
 
 		self.start_scene = 'main_menu'
-		self.argv = argv
-
-		print argv
+		self.args = args
 
 		self.started = False
 
@@ -98,12 +97,9 @@ class MainWidget(BaseWidget):
 		if not self.started:
 			args = []
 			kwargs = {}
-
-			
-			if len(self.argv) > 1:
-				if self.argv[1] == 'practice':
-					self.start_scene = 'practice'
-					kwargs = {'band_members': []}
+			if self.args.scene == 'practice':
+				self.start_scene = 'practice'
+				kwargs = {'band_members': []}
 			
 			if self.start_scene:
 				self.load_new_scene(self.start_scene, **kwargs)
@@ -111,8 +107,9 @@ class MainWidget(BaseWidget):
 				self.load_new_scene(scenes.keys()[0], **kwargs)
 
 			self.started = True
-		self.scene._on_update()
-		self.audio.on_update()
+		if self.started:
+			self.scene._on_update()
+			self.audio.on_update()
 
 	def on_close(self):
 		print 'closing'
