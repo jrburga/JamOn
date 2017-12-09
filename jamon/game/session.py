@@ -1,5 +1,7 @@
 from game import GameObject
+from track import Track
 from player import Player
+from controller import Keyboard
 from instrument import InstrumentManager
 from pattern import PatternList	
 from kivy.clock import Clock as kivyClock
@@ -7,6 +9,8 @@ from kivy.core.window import Window
 from components.sprites import *
 
 from common.clock import Clock, Scheduler, SimpleTempoMap
+
+num_lanes = 8
 
 class Session(GameObject):
 	def __init__(self, tempo, bars, divs):
@@ -26,7 +30,10 @@ class Session(GameObject):
 		### NEW CODE ###
 		self.pattern_list = PatternList(self.bars, tempo)
 		self.add(self.pattern_list)
-		self.player = Player(bars, tempo, inst='piano')
+		track = Track(num_lanes, bars, tempo)
+		track.position.y = Window.height*0.01
+		controller = Keyboard()
+		self.player = Player(controller, track)
 		self.player.position.x = Window.width - player_size[0] - 20
 		self.add(self.player)
 		self.IM.add(self.player.instrument)
@@ -34,6 +41,8 @@ class Session(GameObject):
 
 		########## FOR TESTING ##########
 		# test_seq = [(0,0,1), (1,1,2), (2,1,2), (5, 3, 2), (6, 2, 5), (7,0,8)]
+		# print self.client.get_band_members()
+		self.virtual_players = []
 		# self.pattern_list.add_pattern(0)
 		# self.pattern_list.add_pattern(1,test_seq, 'guitar')
 		# # self.IM.add(self.pattern_list.patterns[1].instrument)

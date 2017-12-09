@@ -12,20 +12,7 @@ insts = ['piano', 'vibraphone', 'guitar']*2
 class Practice(Scene):
 	def __init__(self, **kwargs):
 		super(Practice, self).__init__(**kwargs)
-		# server_obj = self.base_widget.game_state.server_object
-		# print band_members
-		# players = []
-		# for bm, band_member in band_members.items()
-		# for i, bm in enumerate(band_members):
-		# 	is_me = bm['ip'] == server_obj.ip or (bm['ip'] == '0' and server_obj.is_host)
-		# 	print bm['ip'], server_obj.ip
-		# 	players.append(Player(server_obj,
-		# 						  bm['username'], 
-		# 						  is_me,
-		# 						  bars,
-		# 						  tempo,
-		# 						  i,
-		# 						  inst=insts[i]))
+
 	def on_load(self):
 		self.add(Session(tempo, bars, divs))
 		self.add_event_listener('on_key_down', self.change_scene)

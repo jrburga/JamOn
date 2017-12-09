@@ -1,37 +1,27 @@
 from game import GameObject
 from components.sprites import *
-from quantizer import Quantizer
 from common.gfxutil import KFAnim
 from kivy.graphics.context_instructions import Color
+
+from virtuals.track import VirtualTrack, VirtualGem, VirtualLane
 
 # Should really fix this graphically and not here.
 OFFSET = 2
 
-class Track(GameObject):
+class Track(VirtualTrack):
 	def __init__(self, num_lanes, bars, tempo, percussive=False):
-		super(Track, self).__init__()
-		self.lanes = [Lane() for i in range(num_lanes)]
-		self.now = 0
+		lanes = [Lane(i) for i in range(num_lanes)]
+		super(Track, self).__init__(lanes, bars, tempo, percussive)
 		self.sprite = TrackSprite()
 		self.now_bar = NowBarSprite()
 		self.w, self.h = track_size
 		self.last_y = 0
-		self.num_lanes = num_lanes
 
 		# Dictates whether the player is currently editing a track
 		self.set_active(False)
-		self._active_pattern = None
-
 
 		self.drum = percussive
 		# w, h = self.sprite.size
-
-		self.spb = 60./tempo
-		beats = bars*4
-		self.seconds = self.spb*beats
-
-		# Add quantizer instance for quantization
-		self.quant = Quantizer(self.seconds, bars*8)
 
 		self.t2y = self.h/self.seconds
 		# self.scale.x = 0.5
@@ -61,38 +51,16 @@ class Track(GameObject):
 		self.add_graphic(self.now_bar)
 
 	@property
-	def active_pattern(self):
-		return self.player.active_pattern
-
-	@active_pattern.setter
-	def active_pattern(self, active_pattern):
-		if self.player:
-			self.player.active_pattern = active_pattern
-		else:
-			self._active_pattern = active_pattern
-
-	@property
-	def gems(self):
-		gems = []
-		for lane in self.lanes:
-			gems += lane.gems
-		return gems
-
-	@property
 	def player(self):
 		return self._parent
 
 	def set_active(self, active):
+		super(Track, self).set_active(active)
 		self.sprite.color.rgb = (.3,.8,.7) if active else (.6, .6, .6)
 		self.now_bar.color.rgb = now_bar_color if active else (.6, .6, .6)
-		self.active = active
 		if not active:
 			if self.player is not None:
 				self.player.session.IM.metro.stop()
-			self.active_pattern = None
-			# Remove all the gems
-			for lane in self.lanes:
-				lane.refresh()
 		else:
 			if self.player is not None:
 				self.player.session.IM.metro.start()
@@ -100,50 +68,34 @@ class Track(GameObject):
 	def t2y_conversion(self, time):
 		return self.sprite.height-self.t2y
 
-	# def time2y(self, time):
-	def on_press(self, lane_num):
-		if self.active:
-			self.lanes[lane_num].on_press(self.now)
-
-	def on_release(self, lane_num):
-		if self.active:
-			self.lanes[lane_num].on_release(self.now)
-
 	def time2y(self, t):
 		return self.h-self.t2y*(t)
 
 	def y2time(self, y):
 		return (y+self.h)/(self.t2y*(t%self.seconds))
 
-	def set_now(self, time):
-		for lane in self.lanes:
-			lane.set_now(time)
-		self.now = time
-
-	def on_update(self):
-		
-
+	def on_update(self): 
 		# Display the bar
-		# self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
-
+		self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
 		x, _ = self.now_bar.position
 		y = self.time2y(self.now)
 		self.now_bar.position = (x, y)
-		new_phrase = self.last_y < y
-		self.last_y = y
+		super(Track, self).on_update()
+	# 	new_phrase = self.last_y < y
+	# 	self.last_y = y
 
-		# if not self.player.composing:
-		# 	return
+	# 	# if not self.player.composing:
+	# 	# 	return
 
-		for lane in self.lanes:
-			if new_phrase:
-				lane.new_phrase()
-			lane.on_lane_update()
+	# 	for lane in self.lanes:
+	# 		if new_phrase:
+	# 			lane.new_phrase()
+	# 		lane.on_lane_update()
 
 
-		# Call new_phrase for active pattern
-		if new_phrase and self.active:
-			self.active_pattern.new_phrase()
+	# 	# Call new_phrase for active pattern
+	# 	if new_phrase and self.active:
+	# 		self.active_pattern.new_phrase()
 
 		# if new_phrase:
 		# 	# notes_entered = False
@@ -158,197 +110,9 @@ class Track(GameObject):
 			# 	print "TRACK LOCKED IN"
 			# 	self.player.lock_in_sequence()
 
-
-class Lane(GameObject):
-	COUNT = 0
-	def __init__(self):
-		super(Lane, self).__init__()
-		self.count = Lane.COUNT
-		Lane.COUNT += 1
-		self.sprite = LaneLineSprite()
-		# cx, cy = self.sprite.center
-		# self.sprite.center = (cx)
-		self.active_gem = None
-		self.current_gems = []
-		self.old_gems = []
-		# kind of redundant since all game_objets
-		# owned by a lane will be gems
-		# but maybe not since _game_objects is a set()
-		self.now = 0
-		w, h = lane_size
-		self.add_graphic(self.sprite)
-		
-
-		# Represents how locked in the lane is
-		# 0 - no notes
-		# 1 - still inserting notes
-		# 2 - all locked
-		# Updated at end of every phrase
-		# self.stage = 0
-
-		self.posted_note = False
-
-		# # Draw bar lines
-		# bar_lines = [BarLineSprite(i) for i in range(16)]
-		# for i, bl in enumerate(bar_lines):
-		# 	bl.position = (0, h*(1-i/16.)-bl.size[1])
-		# 	self.add_graphic(bl)
-
-	def on_add(self):
-		if self.count == self.track.num_lanes - 1:
-			secondLine = LaneLineSprite()
-			secondLine.position = (lane_width+5, 0)
-			self.add_graphic(secondLine)
-
-
-	@property
-	def gems(self):
-		return self._game_objects
-
-	@property
-	def track(self):
-		return self._parent
-
-	def on_hit(self):
-		pass
-
-	def on_pass(self):
-		pass
-
-	def on_press(self, time):
-		time_quant = self.track.quant.quantize_note(time)
-
-		# Note will appear on start of next round
-		if time_quant == self.track.seconds:
-			self.posted_note = True
-			self.active_gem = None
-			return
-
-		# check if current gem is already there
-		for gem in self.current_gems:
-			# Don't make a new gem if there is already a gem within
-			# the same beat grid (dictated from Quantizer)
-			if time_quant == gem.time:
-				return
-
-		gem = Gem(time, time_quant, self.track.seconds, float(self.count)/self.track.num_lanes)
-		self.add(gem)
-		gem.set_pos()
-		self.active_gem = gem
-		self.current_gems.append(gem)
-
-		# check if old gem is already there
-		# for gem in self.old_gems:
-		# 	if time_quant == gem.time:
-		# 		self.match_gem(self.active_gem, gem)
-		# 		break
-
-
-	# def match_gem(self, new_gem, old_gem):
-	# 	# print 'matched!'
-	# 	new_gem.matched(old_gem.stage)
-	# 	self.matching_gem = new_gem
-
-	def on_release(self, time):
-		if self.active_gem is None:
-			return
-		self.active_gem.on_release(time)
-
-		# If editing a pattern, update the pattern with the note
-		if self.track.active:
-			pattern = self.track.active_pattern
-			pattern.add_note(self.active_gem.time, self.active_gem.length, self.count) #count==lane num
-
-		self.active_gem = None
-
-	# Totally clear the lane
-	def refresh(self):
-		gems = set(self.gems)
-		for gem in gems:
-			self.remove(gem)
-		self.current_gems = []
-		self.old_gems = []
-		self.active_gem = None
-		self.posted_note = False
-
-
-
-	def remove_old_gems(self):
-		to_remove = []
-		for gem in self.old_gems:
-
-			if gem.position.y > self.track.now_bar.position[1]:
-				# Remove gem entirely
-				to_remove.append(gem)
-
-				# Tell the active pattern to remove the note
-				if self.track.active:
-					self.track.active_pattern.remove_note(gem.time, self.count) #count==lane num
-
-			elif gem.y > self.track.now_bar.position[1]:
-				# Set gem length to right length
-				gem.update_remove_length(self.track.now_bar.position[1])
-
-		for gem in to_remove:
-			self.old_gems.remove(gem)
-			self.remove(gem)
-
-
-	def set_now(self, time):
-		self.now = time
-
-	def new_phrase(self):
-		# stages = [gem.stage for gem in self.current_gems]
-		# self.locked_times = [(gem.time, gem.length) for gem in self.current_gems]
-		# print 'gem stages:', stages
-		# notes_entered = len(stages) > 0
-		# all_locked = all(stage==2 for stage in stages)
-		# if all_locked:
-		# 	print 'all locked'
-		
-		# Remove lingering old gems
-		for gem in self.old_gems:
-			self.remove(gem)
-			# Tell the active pattern to remove the note
-			if self.track.active:
-				self.track.active_pattern.remove_note(gem.time, self.count) #count==lane num
-
-		self.old_gems = self.current_gems
-		self.current_gems = []
-
-		# Release active gem
-		if self.active_gem is not None:
-			self.on_release(self.track.seconds)
-		
-		# Figure new stage
-		# if self.stage == 0:
-		# 	if notes_entered:
-		# 		self.stage = 1
-		# elif self.stage == 1:
-		# 	if not notes_entered:
-		# 		self.stage = 0
-		# 	elif all_locked:
-		# 		self.stage = 2
-
-		# print 'new stage:', self.stage
-
-		# if self.stage == 2:
-		# 	return
-
-		if self.posted_note:
-			# Post note at beginning of loop
-			self.posted_note = False
-			self.on_press(0)
-
-
-	def on_lane_update(self):
-		if self.active_gem is not None and not self.track.drum:
-			self.active_gem.update_length(self.track.now_bar.position[1])
-		self.remove_old_gems()
-		
-class Gem(GameObject):
+class Gem(VirtualGem):
 	def __init__(self, time, time_quant, seconds, lane_ratio):
-		super(Gem, self).__init__()
+		super(Gem, self).__init__(time, time_quant, seconds)
 		self.time = time_quant
 		self.length = 0
 		self.seconds = seconds
@@ -442,3 +206,128 @@ class Gem(GameObject):
 
 	def __str__(self):
 		return '<GEM %0.2f : %0.2f>' % (self.time, self.length)
+
+class Lane(VirtualLane):
+	Gem = Gem
+	def __init__(self, count):
+		super(Lane, self).__init__(count)
+		self.sprite = LaneLineSprite()
+		# cx, cy = self.sprite.center
+		# self.sprite.center = (cx)
+		self.active_gem = None
+		self.current_gems = []
+		self.old_gems = []
+		# kind of redundant since all game_objets
+		# owned by a lane will be gems
+		# but maybe not since _game_objects is a set()
+		self.now = 0
+		w, h = lane_size
+		self.add_graphic(self.sprite)
+		
+
+		# Represents how locked in the lane is
+		# 0 - no notes
+		# 1 - still inserting notes
+		# 2 - all locked
+		# Updated at end of every phrase
+		# self.stage = 0
+
+		self.posted_note = False
+
+		# # Draw bar lines
+		# bar_lines = [BarLineSprite(i) for i in range(16)]
+		# for i, bl in enumerate(bar_lines):
+		# 	bl.position = (0, h*(1-i/16.)-bl.size[1])
+		# 	self.add_graphic(bl)
+
+	def on_add(self):
+		if self.count == self.track.num_lanes - 1:
+			secondLine = LaneLineSprite()
+			secondLine.position = (lane_width+5, 0)
+			self.add_graphic(secondLine)
+
+	def on_press(self, time):
+		super(Lane, self).on_press(time)
+		if self.active_gem:
+			self.active_gem.set_pos()
+
+		# check if old gem is already there
+		# for gem in self.old_gems:
+		# 	if time_quant == gem.time:
+		# 		self.match_gem(self.active_gem, gem)
+		# 		break
+
+
+	# def match_gem(self, new_gem, old_gem):
+	# 	# print 'matched!'
+	# 	new_gem.matched(old_gem.stage)
+	# 	self.matching_gem = new_gem
+
+	def remove_old_gems(self):
+		to_remove = []
+		for gem in self.old_gems:
+
+			if gem.position.y > self.track.now_bar.position[1]:
+				# Remove gem entirely
+				to_remove.append(gem)
+
+				# Tell the active pattern to remove the note
+				if self.track.active:
+					self.track.active_pattern.remove_note(gem.time, self.count) #count==lane num
+
+			elif gem.y > self.track.now_bar.position[1]:
+				# Set gem length to right length
+				gem.update_remove_length(self.track.now_bar.position[1])
+
+		for gem in to_remove:
+			self.old_gems.remove(gem)
+			self.remove(gem)
+
+	def new_phrase(self):
+		# stages = [gem.stage for gem in self.current_gems]
+		# self.locked_times = [(gem.time, gem.length) for gem in self.current_gems]
+		# print 'gem stages:', stages
+		# notes_entered = len(stages) > 0
+		# all_locked = all(stage==2 for stage in stages)
+		# if all_locked:
+		# 	print 'all locked'
+		
+		# Remove lingering old gems
+		for gem in self.old_gems:
+			self.remove(gem)
+			# Tell the active pattern to remove the note
+			if self.track.active:
+				self.track.active_pattern.remove_note(gem.time, self.count) #count==lane num
+
+		self.old_gems = self.current_gems
+		self.current_gems = []
+
+		# Release active gem
+		if self.active_gem is not None:
+			self.on_release(self.track.seconds)
+		
+		# Figure new stage
+		# if self.stage == 0:
+		# 	if notes_entered:
+		# 		self.stage = 1
+		# elif self.stage == 1:
+		# 	if not notes_entered:
+		# 		self.stage = 0
+		# 	elif all_locked:
+		# 		self.stage = 2
+
+		# print 'new stage:', self.stage
+
+		# if self.stage == 2:
+		# 	return
+
+		if self.posted_note:
+			# Post note at beginning of loop
+			self.posted_note = False
+			self.on_press(0)
+
+
+	def on_lane_update(self):
+		if self.active_gem is not None:
+			self.active_gem.update_length(self.track.now_bar.position[1])
+		self.remove_old_gems()

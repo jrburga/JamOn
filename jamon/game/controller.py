@@ -1,39 +1,62 @@
 from game import GameObject
 from collections import defaultdict
 
-class Controller(GameObject):
-	def __init__(self, keys=[]):
-		super(Controller, self).__init__()
-		self.keys = [key for key in keys]
-
-	def key_down(self, key_index):
-		pass
-
-	def key_up(self, key_index):
-		pass
-
-class Keyboard(Controller):
-	'''
-	Directly binds specific keys to actions.
-	'''
-	def __init__(self, keys=[]):
+class Keyboard(GameObject):
+	KEYDOWN = 0
+	KEYUP = 1
+	def __init__(self):
 		super(Keyboard, self).__init__()
-		self.keys = [key for key in keys]
+		self._actions = defaultdict(lambda: {self.KEYDOWN: [],
+											 self.KEYUP: []})
+	@property
+	def bindings(self):
+		return self._actions.keys()
+
+	def bind_keydown(self, keycode, action):
+		self._actions[keycode][self.KEYDOWN].append(action)
+
+	def bind_keyup(self, keycode, action):
+		self._actions[keycode][self.KEYUP].append(action)
 
 	def on_key_down(self, event):
-		key = event.keycode[0]
-		if key in self.keys:
-			index = self.keys.index(key)
-			self._parent.key_down(index)
+		keycode = event.keycode[0]
+		for action in self._actions[keycode][self.KEYDOWN]:
+			action()
 
 	def on_key_up(self, event):
-		key = event.keycode[0]
-		if key in self.keys:
-			index = self.keys.index(key)
-			self._parent.key_up(index)
-		elif key == 32: #spacebar
-			self._parent.space_bar_pressed()
+		keycode = event.keycode[0]
+		for action in self._actions[keycode][self.KEYUP]:
+			action()
 
-class NetworkController(Controller):
-	def __init__(self, network):
-		super(Network, self).__init__()
+class QuickKeyboard(Keyboard):
+	def __init__(self, keycodes, up_cb, down_cb):
+		super(QuickKeyboard, self).__init__()
+		self._down_cb = lambda i: None
+		self._up_cb = lambda i: None
+		for i, key in enumerate(keycodes):
+			self.bind_keydown(key, lambda : self._down_cb(i))
+			self.bind_keyup(key, lambda : self._up_cb(i))
+
+	def set_callbacks(self, down_cb, up_cb):
+		self._down_cb = down_cb
+		self._up_cb = up_cb
+
+class VirtualController(GameObject):
+	def __init__(self, vid):
+		super(VirtualController, self).__init__()
+		self.vid = vid
+
+	def on_vkey_down(self, event):
+		vkey = event.vkey
+		vid = event.vid
+		if vid != self.id: return
+		for action in self._actions[vkey][self.KEYDOWN]:
+			action()
+
+	def on_vkey_up(self, event):
+		key = event.vkey
+		vid = event.vid
+		if vid != self.id: return
+		for action in self._actions[vkey][self.KEYUP]:
+			action()
+

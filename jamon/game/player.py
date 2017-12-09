@@ -1,8 +1,6 @@
 from game import GameObject
 
-from controller import Keyboard
 from instrument import Instrument
-from track import Track
 from components.sprites import *
 
 from text import TextObject
@@ -10,50 +8,85 @@ from text import TextObject
 
 from kivy.core.window import Window
 
-num_lanes = 8
-default_keys = [
-	['a', 's', 'd', 'f', 'g', 'h', 'j', 'k'], 
-	['a', 's', 'd', 'f', 'q', 'w', 'e', 'r'],
-	['j', 'k', 'l', ';', 'u', 'i', 'o', 'p']
-]
-
 # assert([len(dk) == num_lanes for dk in default_keys])
-
-default_keys = [[ord(k) for k in dk] for dk in default_keys]
 
 statuses = {
 	1: 'Create a Pattern!',
 	2: 'Locked in!',
 }
 
-class Player(GameObject):
-	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
-	def __init__(self, bars, tempo, inst='piano'):
-		super(Player, self).__init__()
-		# self.server_obj = server_obj
-		# self.keys = default_keys[0] if is_me else []
-		self.keys = default_keys[0]
-		self.instrument = Instrument(inst)
+default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
 
-		# Boolean that represents whether this Player object correlates to
-		# the player for this system. I think this won't be needed once we 
-		# make other players use a different controller...
-		# self.is_me = is_me
+default_keycodes = [ord(k) for k in default_keys]
 
-		# self.name = name
-		self.controller = Keyboard(default_keys[0])
-		self.add(self.controller)
+class Editor(GameObject):
+	def __init__(self, controller):
+		super(Editor, self).__init__()
+		self.controller = controller
+		self.add(controller)
 
 		self.active_pattern = None
+		self.note_sequence = []
+
+		self.composing = False
+
+	def start_composing(self):
+		if self.composing:
+			return
+		self.composing = True
+
+	def stop_composing(self):
+		if not self.composing:
+			return
+		self.composing = False
+		# if self.is_me:
+		# 	self.set_status(2)
+
+	def set_active_pattern(self, pattern):
+		self.active_pattern = pattern
+
+	def lock_in_sequence(self):
+		print 'locking in sequence'
+
+		# set note_sequence
+		if self.is_me:
+			print 'locking in sequence'
+			notes = {}
+			for i, lane in enumerate(self.track.lanes):
+				# print 'locked:', lane.locked_times
+				for (time, length) in lane.locked_times:
+					end_time = time + length
+					if time not in notes:
+						notes[time] = []
+					notes[time].append( (i, 'on') )
+					if end_time not in notes:
+						notes[end_time] = []
+					notes[end_time].append( (i, 'off') )
+			# sort the note sequence
+			for k in sorted(notes.iterkeys()):
+				self.note_sequence.append( (k, notes[k]) )
+		print self.note_sequence
+
+class Player(Editor):
+	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
+	def __init__(self, controller, track, inst='piano'):
+		super(Player, self).__init__(controller)
+		self.instrument = Instrument(inst)
+
+		for i, keycode in enumerate(default_keycodes):
+			print i, keycode
+			self.controller.bind_keydown(keycode, self.key_down_cb(i))
+			self.controller.bind_keyup(keycode, self.key_up_cb(i))
+
+		self.controller.bind_keydown(32, self.space_bar_pressed)
 
 		self.note_sequence = []
 		self.seq_ind = 0
 		self.last_time = 0
 
-		perc = True if inst=='drums' else False
-		self.track = Track(num_lanes, bars, tempo, percussive=perc)
-		# self.track.position.x = 5
-		self.track.position.y = Window.height*0.01
+		self.track = track
+		self.add(self.track)
+		# self.track.position.x = 
 
 		# self.num = num
 		self.time = 0
@@ -63,38 +96,13 @@ class Player(GameObject):
 
 		self.status = 0
 		self.status_sprite = None
-
-		self.composing = False
 		# if num == 0:
-		self.start_composing()
-
-
 		self.action_buffer = []
-
-		self.add(self.track)
-
-	def set_active_pattern(self, pattern):
-		self.active_pattern = pattern
-
-
-	def start_composing(self):
-		if self.composing:
-			return
-		self.composing = True
-		# if self.is_me:
-		# 	self.set_status(1)
-
-	def stop_composing(self):
-		if not self.composing:
-			return
-		self.composing = False
-		# if self.is_me:
-		# 	self.set_status(2)
+		self.start_composing()
 
 	def space_bar_pressed(self):
 		if self.track.active:
-			print 'locking in'
-			self.track.active_pattern.lock_in()
+			self.active_pattern.lock_in()
 			self.track.set_active(False)
 
 
@@ -108,47 +116,25 @@ class Player(GameObject):
 		else:
 			self.status_sprite = None
 
+	def key_down_cb(self, lane_num):
+		def cb():
+			self.key_down(lane_num)
+		return cb
+
+	def key_up_cb(self, lane_num):
+		def cb():
+			self.key_up(lane_num)
+		return cb
+
 	def key_down(self, lane_num):
 		if self.composing:
 			self.track.on_press(lane_num)
-			# msg = {'action': {'event': 'server_note_on',
-			# 		'action': {
-			# 			'lane_num': lane_num, 
-			# 	   		'time': self.time}
-			# 	  }}
-			# self.server_obj.send_to_band(msg)
 		self.instrument.note_on(lane_num)
 
 	def key_up(self, lane_num):
-		if lane_num == num_lanes:
-			return
-
 		if self.composing:
 			self.track.on_release(lane_num)
-			# msg = {'action': {'event': 'server_note_off',
-			# 		'action': {
-			# 		   'lane_num': lane_num,
-			# 		   'time': self.time
-			# 	   	}
-			# 	  }}
-			# self.server_obj.send_to_band(msg)
 		self.instrument.note_off(lane_num)
-
-
-	# def server_note_on(self, event):
-	# 	# print 'event triggered'
-	# 	if self.composing and not self.is_me:
-	# 		action = event.action
-	# 		self.track.lanes[action['lane_num']].on_press(action['time'])
-	# 		self.action_buffer.append(action)
-	# 		self.instrument.note_on(action['lane_num'])
-
-	# def server_note_off(self, event):
-	# 	if self.composing and not self.is_me:
-	# 		action = event.action
-	# 		self.track.lanes[action['lane_num']].on_release(action['time'])
-	# 		self.action_buffer.append(action)
-	# 		self.instrument.note_off(action['lane_num'])
 
 	def set_now(self, time):
 		self.track.set_now(time)
@@ -179,64 +165,20 @@ class Player(GameObject):
 	def session(self):
 		return self._parent
 
-	def lock_in_sequence(self):
 
-		# set note_sequence
-		if self.is_me:
-			print 'locking in sequence'
-			notes = {}
-			for i, lane in enumerate(self.track.lanes):
-				# print 'locked:', lane.locked_times
-				for (time, length) in lane.locked_times:
-					end_time = time + length
-					if time not in notes:
-						notes[time] = []
-					notes[time].append( (i, 'on') )
-					if end_time not in notes:
-						notes[end_time] = []
-					notes[end_time].append( (i, 'off') )
-			# sort the note sequence
-			for k in sorted(notes.iterkeys()):
-				self.note_sequence.append( (k, notes[k]) )
-		print self.note_sequence
-
-		# 
-		
-		if self.is_me and self.composing:
-			msg = {'action': {'event': 'on_lock_in', 
-							  	'action': {
-							  		'sequence': self.note_sequence
-							  		}}}
-			# self.trigger_event('on_lock_in')
-			self.server_obj.send_to_band(msg)
-		# else:
-		# 	self.trigger_event('on_lock_in')
-
-# class PlayerRemote(Player):
-# 	def __init__(self, name, is_me, bars, tempo, num=0, inst='piano'):
-# 		super(PlayerRemote, self).__init__(name, is_me, bars, tempo, num, inst)
-# 		self.keys = []
-
-# 	# overwrite these
-# 	def on_key_down(self, event):
-# 		pass
-
-# 	def on_key_up(self, event):
-# 		pass
-
-# 	def on_msg_recieve(self, event):
-
-# 		print event
+class VirtualPlayer(Editor):
+	def __init__(self, vcontroller, vtrack):
+		super(VirtualPlayer, self).__init__()
 
 
-class PlayerNameText(TextObject):
-	def __init__(self, name, me):
-		color = (.3, .6, .3) if me else (.4, .4, .4)
-		super(PlayerNameText, self).__init__(name, color=color, pos=(20,player_size[1]*.95))
+# class PlayerNameText(TextObject):
+# 	def __init__(self, name, me):
+# 		color = (.3, .6, .3) if me else (.4, .4, .4)
+# 		super(PlayerNameText, self).__init__(name, color=color, pos=(20,player_size[1]*.95))
 
-class PlayerStatusText(TextObject):
-	def __init__(self, status):
-		color = (.3, .6, .3)
-		super(PlayerStatusText, self).__init__(status, color=color, pos=(120,player_size[1]*.95))
+# class PlayerStatusText(TextObject):
+# 	def __init__(self, status):
+# 		color = (.3, .6, .3)
+# 		super(PlayerStatusText, self).__init__(status, color=color, pos=(120,player_size[1]*.95))
 
 
