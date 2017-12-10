@@ -10,9 +10,9 @@ from components.sprites import *
 
 from common.clock import Clock, Scheduler, SimpleTempoMap
 
-num_lanes = 8
+num_lanes = 10
 
-default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
+default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';']
 lockin_key = ' '
 
 default_keycodes = [ord(k) for k in default_keys]
