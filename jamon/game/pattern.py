@@ -32,10 +32,6 @@ class PatternList(GameObject):
 		self.add_graphic(self.sprite)
 
 	def send_event(self, msg):
-		# This is where it will call the server to send the message
-
-		print self.client
-
 		# FOR DEBUGGING PURPOSES
 		if msg['event']=='add':
 			self.create_pattern(msg['inst'])
@@ -76,13 +72,6 @@ class PatternList(GameObject):
 
 			# Set the instrument to the correct instrument
 			self._parent.player.instrument.set_inst(inst)
-		# else:
-		# 	print 'other player wants to edit'
-		# 	print self._parent.vplayers
-		# 	vplayers = [vplayer for vplayer in self._parent.vplayers if vplayer.id == _id]
-		# 	print vplayers
-		# 	for vplayer in vplayers:
-		# 		vplayer.set_active_pattern(pattern)
 
 		for vplayer in filter(lambda p: p.id == creator['id'], self._parent.vplayers):
 			vplayer.track.set_active(True)
@@ -110,7 +99,6 @@ class PatternList(GameObject):
 
 
 	def add_pattern(self, _id, seq=[], inst='piano'):
-		print 'adding pattern ==================================' 
 		idx = len(self.patterns)
 		# Add a pattern to the top of the list
 		pattern = Pattern(_id, 0, self.bars, self.tempo, seq, inst, self._parent.IM)
@@ -150,10 +138,8 @@ class PatternList(GameObject):
 		self.client.send_action('on_pattern_done_editing', pattern_id=pattern, seq=seq)
 
 	def on_pattern_done_editing(self, event):
-		print 'done editing'
 		pattern_id = event.pattern_id
 		seq = event.seq
-		print 'sequence', seq
 		self.patterns[pattern_id].done_editing(seq)
 
 	def set_now(self, now):
@@ -186,7 +172,6 @@ class InstrumentPanel(GameObject):
 	def get_inst_btn_callback(self, idx):
 		def cb():
 			btn = self.inst_btns[idx]
-			print btn.typ + ' called!'
 			track = self._parent._parent.player.track
 			if not track.active:
 				track.set_active(True)
@@ -345,7 +330,7 @@ class Pattern(GameObject):
 
 	def remove_note(self, start, lane):
 		if (start, lane) not in self.old_notes:
-			print 'something went wrong... (Pattern.remove_note)'
+			print 'the set of notes i have', self.old_notes
 			return
 		note = self.old_notes[ (start, lane) ]
 		self.remove(note)

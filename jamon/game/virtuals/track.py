@@ -21,6 +21,9 @@ class VirtualGem(GameObject):
 	def set_pos_and_size(self):
 		pass
 
+	def __repr__(self):
+		return '<GEM: %.02f, %.02f>' % (self.time, self.length)
+
 class VirtualLane(GameObject):
 	Gem = VirtualGem
 	def __init__(self, count):
@@ -61,13 +64,11 @@ class VirtualLane(GameObject):
 		self.active_gem = gem
 
 	def on_release(self, time):
-		print 'on release is getting called'
 		if self.active_gem is None:
 			return
 		self.active_gem.on_release(time)
 
 		if self.track.active:
-			print 'adding note to pattern'
 			pattern = self.track.active_pattern
 			pattern.add_note(self.active_gem.time, self.active_gem.length, self.count)
 
@@ -86,10 +87,7 @@ class VirtualLane(GameObject):
 	def set_now(self, time):
 		self.now = time
 
-
 	def new_phrase(self):
-
-		#remove lingering old gems
 		for gem in self.old_gems:
 			self.remove(gem)
 			if self.track.active:
@@ -109,7 +107,7 @@ class VirtualLane(GameObject):
 	def remove_old_gems(self):
 		to_remove = []
 		for gem in self.old_gems:
-			if gem.time  > self.now:
+			if gem.time < self.now:
 				to_remove.append(gem)
 
 				if self.track.active:
