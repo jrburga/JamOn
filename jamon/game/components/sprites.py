@@ -34,9 +34,10 @@ class GemSprite(RectSprite):
 	def __init__(self, color):
 		super(GemSprite, self).__init__(gem_size, color)
 
-class GradientGemSprite(GradientRectSprite):
+class GradientGemSprite(ImageSprite):
 	def __init__(self, size, color_1, color_2):
-		super(GradientGemSprite, self).__init__( (int(size[0]),int(size[1])), color_1, color_2, dir='vertical')
+		super(GradientGemSprite, self).__init__('gradient.png', color_2, size=size)
+		# super(GradientGemSprite, self).__init__( (int(size[0]),int(size[1])), color_1, color_2, dir='vertical')
 
 class TrackSprite(RectOutlineSprite):
 	def __init__(self):
