@@ -13,8 +13,10 @@ class VirtualGem(GameObject):
 		return self._parent
 
 	def on_release(self, time):
-		self.length = time-self.time
-		self.lane.track.quant.quantize_gem(self)
+		
+		if self.lane:
+			self.length = time-self.time
+			self.lane.track.quant.quantize_gem(self)
 
 class VirtualLane(GameObject):
 	Gem = VirtualGem
