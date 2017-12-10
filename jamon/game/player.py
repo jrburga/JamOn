@@ -70,12 +70,11 @@ class VirtualPlayer(GameObject):
 		return cb
 
 	def key_down(self, lane_num):
-		if self.composing:
-			self.track.on_press(lane_num)
+		self.track.on_press(lane_num)
 
 	def key_up(self, lane_num):
-		if self.composing:
-			self.track.on_release(lane_num)
+		print 'key up is getting called'
+		self.track.on_release(lane_num)
 
 	def set_active_pattern(self, pattern):
 		self.active_pattern = pattern

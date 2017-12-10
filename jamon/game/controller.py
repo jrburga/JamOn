@@ -33,7 +33,7 @@ class VirtualController(GameObject):
 		vkey = event.vkey
 		vid = event.vid
 		if vid != self.vid: return
-		print 'executing vkey down', vkey, vid
+		# print 'executing vkey down', vkey, vid
 		for action in self._actions[vkey][self.KEYDOWN]:
 			action()
 

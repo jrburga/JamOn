@@ -2,7 +2,7 @@ from jamon.game.game import GameObject
 from jamon.game.quantizer import Quantizer
 
 class VirtualGem(GameObject):
-	def __init__(self, time, time_quant, seconds):
+	def __init__(self, time, time_quant, seconds, lane_ratio=None):
 		super(VirtualGem, self).__init__()
 		self.time = time_quant
 		self.length = 0
@@ -17,6 +17,9 @@ class VirtualGem(GameObject):
 		if self.lane:
 			self.length = time-self.time
 			self.lane.track.quant.quantize_gem(self)
+
+	def set_pos_and_size(self):
+		pass
 
 class VirtualLane(GameObject):
 	Gem = VirtualGem
@@ -58,11 +61,13 @@ class VirtualLane(GameObject):
 		self.active_gem = gem
 
 	def on_release(self, time):
+		print 'on release is getting called'
 		if self.active_gem is None:
 			return
 		self.active_gem.on_release(time)
 
 		if self.track.active:
+			print 'adding note to pattern'
 			pattern = self.track.active_pattern
 			pattern.add_note(self.active_gem.time, self.active_gem.length, self.count)
 

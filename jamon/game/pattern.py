@@ -63,6 +63,8 @@ class PatternList(GameObject):
 		is_me = creator['id']==self.client.id
 		username = creator['username']
 
+
+
 		pattern = self.add_pattern(_id, inst=inst)
 		pattern.editing(editor=username, is_me=is_me)
 		# Give the track the pattern info to update the midi live
@@ -74,13 +76,17 @@ class PatternList(GameObject):
 
 			# Set the instrument to the correct instrument
 			self._parent.player.instrument.set_inst(inst)
-		else:
-			print 'other player wants to edit'
-			print self._parent.vplayers
-			vplayers = [vplayer for vplayer in self._parent.vplayers if vplayer.id == _id]
-			print vplayers
-			for vplayer in vplayers:
-				vplayer.set_active_pattern(pattern)
+		# else:
+		# 	print 'other player wants to edit'
+		# 	print self._parent.vplayers
+		# 	vplayers = [vplayer for vplayer in self._parent.vplayers if vplayer.id == _id]
+		# 	print vplayers
+		# 	for vplayer in vplayers:
+		# 		vplayer.set_active_pattern(pattern)
+
+		for vplayer in filter(lambda p: p.id == creator['id'], self._parent.vplayers):
+			vplayer.track.set_active(True)
+			vplayer.set_active_pattern(pattern)
 
 	def remove_pattern(self, _id):
 		self.client.delete_pattern(_id)
