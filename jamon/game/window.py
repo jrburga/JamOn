@@ -12,15 +12,15 @@ elif plat == 'Darwin':
 
 	# import AppKit
 	# screen = AppKit.NSScreen.screens()[0]
-	# w = int(screen.frame().size.width)
-	# h = int(screen.frame().size.height)
+	# w = int(screen.frame().size.w)
+	# h = int(screen.frame().size.h)
 	# print w,h
 
 	import subprocess
 	import re
 	results = str(subprocess.Popen(['system_profiler SPDisplaysDataType'],stdout=subprocess.PIPE, shell=True).communicate()[0])
 	res = re.search('Resolution: \d* x \d*', results).group(0).split(' ')
-	width, height = int(res[1]), int(res[3])
+	w, h = int(res[1]), int(res[3])
 	
 else:
 	raise UnsupportedSystemException
@@ -28,8 +28,8 @@ else:
 
 class Window:
 
-	width = width
-	height = height
+	width = w
+	height = h
 
 
 class UnsupportedSystemException(Exception):
