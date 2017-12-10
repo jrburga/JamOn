@@ -284,31 +284,3 @@ class Track(VirtualTrack):
 		y = self.time2y(self.now)
 		self.now_bar.position = (x, y)
 		super(Track, self).on_update()
-	# 	new_phrase = self.last_y < y
-	# 	self.last_y = y
-
-	# 	# if not self.player.composing:
-	# 	# 	return
-
-	# 	for lane in self.lanes:
-	# 		if new_phrase:
-	# 			lane.new_phrase()
-	# 		lane.on_lane_update()
-
-
-	# 	# Call new_phrase for active pattern
-	# 	if new_phrase and self.active:
-	# 		self.active_pattern.new_phrase()
-
-		# if new_phrase:
-		# 	# notes_entered = False
-		# 	all_locked = True
-		# 	for lane in self.lanes:
-		# 		stage = lane.stage
-		# 		notes_entered = notes_entered or stage > 0
-		# 		if stage > 0:
-		# 			all_locked = all_locked and stage == 2
-
-			# if notes_entered and all_locked:
-			# 	print "TRACK LOCKED IN"
-			# 	self.player.lock_in_sequence()
