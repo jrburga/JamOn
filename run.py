@@ -1,7 +1,8 @@
 import sys
 from server.store import Store
-from jamon.main import *
+
 from kivy.core.window import Window
+from jamon.game.window import Window as GameWindow
 
 defaults = {
 	'windowed': False,
@@ -27,4 +28,8 @@ def parse_args(argv):
 
 if __name__ == '__main__':
 	args = parse_args(sys.argv)
+	if args.windowed:
+		GameWindow.width=Window.width
+		GameWindow.height=Window.height
+	from jamon.main import *
 	run(MainWidget, args)
