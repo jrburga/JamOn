@@ -3,12 +3,14 @@ from jamon.game.widgets import *
 from jamon.game.window import Window
 from server.connections import PORT
 from thread import *
+from urllib2 import urlopen
 
 class JoinGame(Scene):
 	def __init__(self, **kwargs):
 		super(JoinGame, self).__init__(**kwargs)
 		print kwargs
 		self.attempting_connection = False
+		
 
 	def on_load(self):
 		self.display()
@@ -17,7 +19,9 @@ class JoinGame(Scene):
 		"""
 		Builds the graphics for the scene
 		"""
-
+		self.ip_default = self.base_widget.args.ip
+		if self.ip_default == 'local':
+			self.ip_default = urlopen('http://ip.42.pl/raw').read()
 		self.ip_label = Label(text="[anchor=left_side][color=ff8888]Enter the IP of the host below[/color][anchor=right_side]", 
 						   font_size='20sp', markup=True, halign='center', valign='top',
 						   pos=(Window.width * 0.5, Window.height * 0.4),
@@ -26,7 +30,7 @@ class JoinGame(Scene):
 			                pos=(Window.width * 0.5, Window.height * 0.8),
 			                text_size=(Window.width, Window.height))
 
-		self.text_box = TextBox(pos=(Window.width * 0.25, Window.height * 0.4), multiline=False,
+		self.text_box = TextBox(pos=(Window.width * 0.25, Window.height * 0.4), multiline=False, text=self.ip_default,
 								on_text_validate=self.attempt_connection, size=(Window.width * 0.5, Window.height * 0.1))
 		
 		self.add_game_object(self.text_box)

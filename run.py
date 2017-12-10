@@ -6,7 +6,8 @@ from jamon.game.window import Window as GameWindow
 
 defaults = {
 	'windowed': False,
-	'scene': None
+	'scene': None,
+	'ip': ''
 }
 
 values = {
