@@ -15,9 +15,9 @@ statuses = {
 	2: 'Locked in!',
 }
 
-class Editor(GameObject):
+class VirtualPlayer(GameObject):
 	def __init__(self, controller, track):
-		super(Editor, self).__init__()
+		super(VirtualPlayer, self).__init__()
 
 		self.controller = controller
 		self.add(controller)		
@@ -116,7 +116,7 @@ class Editor(GameObject):
 		return self._parent
 
 
-class Player(Editor):
+class Player(VirtualPlayer):
 	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
 	def __init__(self, controller, track, inst='piano'):
 		super(Player, self).__init__(controller, track)
@@ -162,10 +162,6 @@ class Player(Editor):
 							self.instrument.note_off(lane)
 					self.seq_ind  += 1
 
-
-class VirtualPlayer(Editor):
-	def __init__(self, vcontroller, vtrack):
-		super(VirtualPlayer, self).__init__(vcontroller, vtrack)
 
 # class PlayerNameText(TextObject):
 # 	def __init__(self, name, me):

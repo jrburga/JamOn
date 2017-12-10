@@ -124,9 +124,17 @@ class PatternList(GameObject):
 		# self.add_btn.position.y -= (pattern_height + spacing)
 
 	def set_queued(self, pattern):
+		self.client.send_action('on_set_queue', pattern=pattern)
+
+	def on_set_queue(self, event):
+		pattern = event.pattern
 		self.patterns[pattern].set_queued()
 
 	def set_dequeued(self, pattern):
+		self.client.send_action('on_set_dequeued', pattern=pattern)
+
+	def on_set_dequeued(self, event):
+		pattern = event.pattern
 		self.patterns[pattern].set_dequeued()
 
 	def pattern_editing(self, pattern, editor):
