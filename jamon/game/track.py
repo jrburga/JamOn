@@ -24,13 +24,7 @@ class Gem(VirtualGem):
 		self.last_time = time
 		self.anim = KFAnim( (0,0.8), (seconds,.3))
 
-	@property
-	def lane(self):
-		return self._parent
 
-	def on_release(self, time):
-		self.length = time-self.time
-		self.lane.track.quant.quantize_gem(self)
 
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
