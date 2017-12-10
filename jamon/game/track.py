@@ -39,14 +39,6 @@ class Gem(VirtualGem):
 			self.sprite = GradientGemSprite(self.sprite.size, self.color, self.sprite.color.rgb)
 			self.add_graphic(self.sprite)
 
-	# Called when the gem has been matched -- increase stage count and change color
-	# def matched(self, prev_stage):
-	# 	self.stage = min(2, prev_stage + 1)
-	# 	color = self.color_stages[self.stage]
-	# 	self.remove_graphic(self.sprite)
-	# 	self.sprite = GemSprite(color)
-	# 	self.add_graphic(self.sprite)
-
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
 	def set_pos_and_size(self):
@@ -91,33 +83,15 @@ class Lane(VirtualLane):
 	def __init__(self, count):
 		super(Lane, self).__init__(count)
 		self.sprite = LaneLineSprite()
-		# cx, cy = self.sprite.center
-		# self.sprite.center = (cx)
-		self.active_gem = None
 		self.current_gems = []
 		self.old_gems = []
-		# kind of redundant since all game_objets
-		# owned by a lane will be gems
-		# but maybe not since _game_objects is a set()
 		self.now = 0
 		w, h = lane_size
 		self.add_graphic(self.sprite)
 		
 
-		# Represents how locked in the lane is
-		# 0 - no notes
-		# 1 - still inserting notes
-		# 2 - all locked
-		# Updated at end of every phrase
-		# self.stage = 0
-
 		self.posted_note = False
 
-		# # Draw bar lines
-		# bar_lines = [BarLineSprite(i) for i in range(16)]
-		# for i, bl in enumerate(bar_lines):
-		# 	bl.position = (0, h*(1-i/16.)-bl.size[1])
-		# 	self.add_graphic(bl)
 
 	def on_add(self):
 		if self.count == self.track.num_lanes - 1:
@@ -129,18 +103,6 @@ class Lane(VirtualLane):
 		super(Lane, self).on_press(time)
 		if self.active_gem:
 			self.active_gem.set_pos()
-
-		# check if old gem is already there
-		# for gem in self.old_gems:
-		# 	if time_quant == gem.time:
-		# 		self.match_gem(self.active_gem, gem)
-		# 		break
-
-
-	# def match_gem(self, new_gem, old_gem):
-	# 	# print 'matched!'
-	# 	new_gem.matched(old_gem.stage)
-	# 	self.matching_gem = new_gem
 
 	def remove_old_gems(self):
 		to_remove = []
@@ -163,14 +125,6 @@ class Lane(VirtualLane):
 			self.remove(gem)
 
 	def new_phrase(self):
-		# stages = [gem.stage for gem in self.current_gems]
-		# self.locked_times = [(gem.time, gem.length) for gem in self.current_gems]
-		# print 'gem stages:', stages
-		# notes_entered = len(stages) > 0
-		# all_locked = all(stage==2 for stage in stages)
-		# if all_locked:
-		# 	print 'all locked'
-		
 		# Remove lingering old gems
 		for gem in self.old_gems:
 			self.remove(gem)
@@ -185,20 +139,6 @@ class Lane(VirtualLane):
 		if self.active_gem is not None:
 			self.on_release(self.track.seconds)
 		
-		# Figure new stage
-		# if self.stage == 0:
-		# 	if notes_entered:
-		# 		self.stage = 1
-		# elif self.stage == 1:
-		# 	if not notes_entered:
-		# 		self.stage = 0
-		# 	elif all_locked:
-		# 		self.stage = 2
-
-		# print 'new stage:', self.stage
-
-		# if self.stage == 2:
-		# 	return
 
 		if self.posted_note:
 			# Post note at beginning of loop
