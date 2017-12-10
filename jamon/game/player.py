@@ -23,7 +23,7 @@ class Editor(GameObject):
 		self.add(controller)		
 
 		self.controller.bind_notes(self.key_down_cb, self.key_up_cb)
-		self.controller.bind_lock_in(self.space_bar_pressed)
+		self.controller.bind_lock_in(self.lock_in)
 
 		self.track = track
 		self.add(track)
@@ -37,6 +37,11 @@ class Editor(GameObject):
 		self.status = 0
 
 		self.composing = False
+
+	def lock_in(self):
+		if self.track.active:
+			self.active_pattern.lock_in()
+			self.track.set_active(False)
 
 	@property
 	def id(self):
@@ -121,20 +126,15 @@ class Player(Editor):
 		self.action_buffer = []
 		self.start_composing()
 
-	def space_bar_pressed(self):
-		if self.track.active:
-			self.active_pattern.lock_in()
-			self.track.set_active(False)
-
-	def set_status(self, status):
-		self.status = status
-		if self.status_sprite is not None:
-			self.remove(self.status_sprite)
-		if status in statuses:
-			self.status_sprite = PlayerStatusText(statuses[status])
-			self.add(self.status_sprite)
-		else:
-			self.status_sprite = None
+	# def set_status(self, status):
+	# 	self.status = status
+	# 	if self.status_sprite is not None:
+	# 		self.remove(self.status_sprite)
+	# 	if status in statuses:
+	# 		self.status_sprite = PlayerStatusText(statuses[status])
+	# 		self.add(self.status_sprite)
+	# 	else:
+	# 		self.status_sprite = None
 
 	def key_down(self, lane_num):
 		super(Player, self).key_down(lane_num)
