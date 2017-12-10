@@ -29,13 +29,14 @@ class Keyboard(GameObject):
 			action()
 
 class QuickKeyboard(Keyboard):
-	def __init__(self, keycodes, up_cb, down_cb):
+	def __init__(self, keycodes):
 		super(QuickKeyboard, self).__init__()
-		self._down_cb = lambda i: None
-		self._up_cb = lambda i: None
-		for i, key in enumerate(keycodes):
+		self.keycodes = keycodes
+
+	def bind_callbacks(self, up_cb, down_cb):
+		for i, key in enumerate(self.keycodes):
 			self.bind_keydown(key, lambda : self._down_cb(i))
-			self.bind_keyup(key, lambda : self._up_cb(i))
+			self.bind_keyup(key, lambda : self._up_cb(i))			
 
 	def set_callbacks(self, down_cb, up_cb):
 		self._down_cb = down_cb

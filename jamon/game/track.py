@@ -8,114 +8,9 @@ from virtuals.track import VirtualTrack, VirtualGem, VirtualLane
 # Should really fix this graphically and not here.
 OFFSET = 2
 
-class Track(VirtualTrack):
-	def __init__(self, num_lanes, bars, tempo, percussive=False):
-		lanes = [Lane(i) for i in range(num_lanes)]
-		super(Track, self).__init__(lanes, bars, tempo, percussive)
-		self.sprite = TrackSprite()
-		self.now_bar = NowBarSprite()
-		self.w, self.h = track_size
-		self.last_y = 0
-
-		# Dictates whether the player is currently editing a track
-		self.set_active(False)
-
-		self.drum = percussive
-		# w, h = self.sprite.size
-
-		self.t2y = self.h/self.seconds
-		# self.scale.x = 0.5
-		# self.position = ((Window.width-self.w)/2, 0)
-
-		# Draw bar lines
-		bar_lines = [BarLineSprite(i) for i in range(16)]
-		for i, bl in enumerate(bar_lines):
-			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
-			self.add_graphic(bl)
-
-		i2lane = self.w/num_lanes
-		for i, lane in enumerate(self.lanes):
-			lane.position.x = i*i2lane+OFFSET
-			lane.scale.x = 1. / (num_lanes+1)
-
-		self.tempo = tempo
-		self.bars = bars
-
-		self.num_lanes = num_lanes
-
-		# self.t2y_ratio = 
-
-		self.add_graphic(self.sprite)
-		self.add(*self.lanes)
-
-		self.add_graphic(self.now_bar)
-
-	@property
-	def player(self):
-		return self._parent
-
-	def set_active(self, active):
-		super(Track, self).set_active(active)
-		self.sprite.color.rgb = (.3,.8,.7) if active else (.6, .6, .6)
-		self.now_bar.color.rgb = now_bar_color if active else (.6, .6, .6)
-		if not active:
-			if self.player is not None:
-				self.player.session.IM.metro.stop()
-		else:
-			if self.player is not None:
-				self.player.session.IM.metro.start()
-
-	def t2y_conversion(self, time):
-		return self.sprite.height-self.t2y
-
-	def time2y(self, t):
-		return self.h-self.t2y*(t)
-
-	def y2time(self, y):
-		return (y+self.h)/(self.t2y*(t%self.seconds))
-
-	def on_update(self): 
-		# Display the bar
-		self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
-		x, _ = self.now_bar.position
-		y = self.time2y(self.now)
-		self.now_bar.position = (x, y)
-		super(Track, self).on_update()
-	# 	new_phrase = self.last_y < y
-	# 	self.last_y = y
-
-	# 	# if not self.player.composing:
-	# 	# 	return
-
-	# 	for lane in self.lanes:
-	# 		if new_phrase:
-	# 			lane.new_phrase()
-	# 		lane.on_lane_update()
-
-
-	# 	# Call new_phrase for active pattern
-	# 	if new_phrase and self.active:
-	# 		self.active_pattern.new_phrase()
-
-		# if new_phrase:
-		# 	# notes_entered = False
-		# 	all_locked = True
-		# 	for lane in self.lanes:
-		# 		stage = lane.stage
-		# 		notes_entered = notes_entered or stage > 0
-		# 		if stage > 0:
-		# 			all_locked = all_locked and stage == 2
-
-			# if notes_entered and all_locked:
-			# 	print "TRACK LOCKED IN"
-			# 	self.player.lock_in_sequence()
-
 class Gem(VirtualGem):
 	def __init__(self, time, time_quant, seconds, lane_ratio):
 		super(Gem, self).__init__(time, time_quant, seconds)
-		self.time = time_quant
-		self.length = 0
-		self.seconds = seconds
 		# self.color_stages = ((.8, .3, .4), (.85, .75, .1), (.2, .8, .4))
 		self.color = Color(0.3+0.7*lane_ratio, 0.8, 1, mode='hsv').rgb
 		self.sprite = GemSprite(self.color)
@@ -129,31 +24,13 @@ class Gem(VirtualGem):
 		self.last_time = time
 		self.anim = KFAnim( (0,0.8), (seconds,.3))
 
-		
-		
-	@property
-	def lane(self):
-		return self._parent
-
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
 		self.position = (0, self.y-self.sprite.size[1])
 		# print self.position.y
 
-	def on_hit(self, *args):
-		pass
-
-	def on_miss(self, *args):
-		pass
-
 	def on_release(self, time):
-		self.length = time-self.time
-		# Quantize gem
-		if self.lane.track.drum:
-			self.lane.track.quant.quantize_drum_gem(self)
-		else:
-			self.lane.track.quant.quantize_gem(self)
-
+		super(Gem, self).on_release(time)
 		# Draw gradient gem
 		if not self.lane.track.drum:
 			self.remove_graphic(self.sprite)
@@ -161,12 +38,12 @@ class Gem(VirtualGem):
 			self.add_graphic(self.sprite)
 
 	# Called when the gem has been matched -- increase stage count and change color
-	def matched(self, prev_stage):
-		self.stage = min(2, prev_stage + 1)
-		color = self.color_stages[self.stage]
-		self.remove_graphic(self.sprite)
-		self.sprite = GemSprite(color)
-		self.add_graphic(self.sprite)
+	# def matched(self, prev_stage):
+	# 	self.stage = min(2, prev_stage + 1)
+	# 	color = self.color_stages[self.stage]
+	# 	self.remove_graphic(self.sprite)
+	# 	self.sprite = GemSprite(color)
+	# 	self.add_graphic(self.sprite)
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
@@ -193,7 +70,7 @@ class Gem(VirtualGem):
 		self.sprite.texture.size = (size_x, self.total_height - self.y + y)
 
 	def on_update(self):
-		# Fade color
+		# Fade Color
 		now = self.lane.now
 		dt = now - self.last_time % self.seconds
 		if now < self.last_time % self.seconds:
@@ -331,3 +208,105 @@ class Lane(VirtualLane):
 		if self.active_gem is not None:
 			self.active_gem.update_length(self.track.now_bar.position[1])
 		self.remove_old_gems()
+
+class Track(VirtualTrack):
+	Lane = Lane
+	def __init__(self, num_lanes, bars, tempo, percussive=False):
+		super(Track, self).__init__(num_lanes, bars, tempo, percussive)
+		self.sprite = TrackSprite()
+		self.now_bar = NowBarSprite()
+		self.w, self.h = track_size
+		self.last_y = 0
+
+		# Dictates whether the player is currently editing a track
+		self.set_active(False)
+
+		self.drum = percussive
+		# w, h = self.sprite.size
+
+		self.t2y = self.h/self.seconds
+		# self.scale.x = 0.5
+		# self.position = ((Window.width-self.w)/2, 0)
+
+		# Draw bar lines
+		bar_lines = [BarLineSprite(i) for i in range(16)]
+		for i, bl in enumerate(bar_lines):
+			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
+			self.add_graphic(bl)
+
+		i2lane = self.w/num_lanes
+		for i, lane in enumerate(self.lanes):
+			lane.position.x = i*i2lane+OFFSET
+			lane.scale.x = 1. / (num_lanes+1)
+
+		self.tempo = tempo
+		self.bars = bars
+
+		self.num_lanes = num_lanes
+
+		# self.t2y_ratio = 
+
+		self.add_graphic(self.sprite)
+		self.add(*self.lanes)
+
+		self.add_graphic(self.now_bar)
+
+	@property
+	def player(self):
+		return self._parent
+
+	def set_active(self, active):
+		super(Track, self).set_active(active)
+		self.sprite.color.rgb = (.3,.8,.7) if active else (.6, .6, .6)
+		self.now_bar.color.rgb = now_bar_color if active else (.6, .6, .6)
+		if not active:
+			if self.player is not None:
+				self.player.session.IM.metro.stop()
+		else:
+			if self.player is not None:
+				self.player.session.IM.metro.start()
+
+	def t2y_conversion(self, time):
+		return self.sprite.height-self.t2y
+
+	def time2y(self, t):
+		return self.h-self.t2y*(t)
+
+	def y2time(self, y):
+		return (y+self.h)/(self.t2y*(t%self.seconds))
+
+	def on_update(self): 
+		# Display the bar
+		self.now_bar.color.rgb = (.13, .54, .13) if self.player.composing else (.7, .7, .7)
+		x, _ = self.now_bar.position
+		y = self.time2y(self.now)
+		self.now_bar.position = (x, y)
+		super(Track, self).on_update()
+	# 	new_phrase = self.last_y < y
+	# 	self.last_y = y
+
+	# 	# if not self.player.composing:
+	# 	# 	return
+
+	# 	for lane in self.lanes:
+	# 		if new_phrase:
+	# 			lane.new_phrase()
+	# 		lane.on_lane_update()
+
+
+	# 	# Call new_phrase for active pattern
+	# 	if new_phrase and self.active:
+	# 		self.active_pattern.new_phrase()
+
+		# if new_phrase:
+		# 	# notes_entered = False
+		# 	all_locked = True
+		# 	for lane in self.lanes:
+		# 		stage = lane.stage
+		# 		notes_entered = notes_entered or stage > 0
+		# 		if stage > 0:
+		# 			all_locked = all_locked and stage == 2
+
+			# if notes_entered and all_locked:
+			# 	print "TRACK LOCKED IN"
+			# 	self.player.lock_in_sequence()

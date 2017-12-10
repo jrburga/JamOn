@@ -1,5 +1,5 @@
 from game import GameObject
-from track import Track
+from track import *
 from player import Player
 from controller import Keyboard
 from instrument import InstrumentManager
@@ -42,7 +42,8 @@ class Session(GameObject):
 		########## FOR TESTING ##########
 		# test_seq = [(0,0,1), (1,1,2), (2,1,2), (5, 3, 2), (6, 2, 5), (7,0,8)]
 		# print self.client.get_band_members()
-		self.virtual_players = []
+		
+		# vtrack = VirtualTrack()
 		# self.pattern_list.add_pattern(0)
 		# self.pattern_list.add_pattern(1,test_seq, 'guitar')
 		# # self.IM.add(self.pattern_list.patterns[1].instrument)

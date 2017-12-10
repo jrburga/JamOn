@@ -27,6 +27,11 @@ class Editor(GameObject):
 
 		self.active_pattern = None
 		self.note_sequence = []
+		self.seq_ind = 0
+
+		self.time = 0
+		self.last_time = 0
+		self.status = 0
 
 		self.composing = False
 
@@ -42,8 +47,20 @@ class Editor(GameObject):
 		# if self.is_me:
 		# 	self.set_status(2)
 
+	def key_down(self, lane_num):
+		if self.composing:
+			self.track.on_press(lane_num)
+
+	def key_up(self, lane_num):
+		if self.composing:
+			self.track.on_release(lane_num)
+
 	def set_active_pattern(self, pattern):
 		self.active_pattern = pattern
+
+	def set_now(self, time):
+		self.track.set_now(time)
+		self.time = time
 
 	def lock_in_sequence(self):
 		print 'locking in sequence'
@@ -67,6 +84,12 @@ class Editor(GameObject):
 				self.note_sequence.append( (k, notes[k]) )
 		print self.note_sequence
 
+	def on_update(self):
+		if self.time < self.last_time:
+			self.seq_ind = 0
+		self.last_time = self.time
+
+
 class Player(Editor):
 	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
 	def __init__(self, controller, track, inst='piano'):
@@ -80,23 +103,9 @@ class Player(Editor):
 
 		self.controller.bind_keydown(32, self.space_bar_pressed)
 
-		self.note_sequence = []
-		self.seq_ind = 0
-		self.last_time = 0
-
 		self.track = track
 		self.add(self.track)
-		# self.track.position.x = 
-
-		# self.num = num
-		self.time = 0
-
-		# self.add_graphic(PlayerOutlineSprite(is_me))
-		# self.add(PlayerNameText(name, is_me))
-
-		self.status = 0
 		self.status_sprite = None
-		# if num == 0:
 		self.action_buffer = []
 		self.start_composing()
 
@@ -127,24 +136,17 @@ class Player(Editor):
 		return cb
 
 	def key_down(self, lane_num):
-		if self.composing:
-			self.track.on_press(lane_num)
+		super(Player, self).key_down(lane_num)
 		self.instrument.note_on(lane_num)
 
 	def key_up(self, lane_num):
-		if self.composing:
-			self.track.on_release(lane_num)
+		super(Player, self).key_up(lane_num)
 		self.instrument.note_off(lane_num)
 
-	def set_now(self, time):
-		self.track.set_now(time)
-		self.time = time
 
 	def on_update(self):
+		super(Player, self).on_update()
 		# Play notes if not composing
-		if self.time < self.last_time:
-			self.seq_ind = 0
-
 		if not self.composing and len(self.note_sequence) > 0:
 			if self.seq_ind < len(self.note_sequence):
 				next_time, notes = self.note_sequence[self.seq_ind]
@@ -166,7 +168,7 @@ class Player(Editor):
 		return self._parent
 
 
-class VirtualPlayer(Editor):
+class VirtualPlayer(Player):
 	def __init__(self, vcontroller, vtrack):
 		super(VirtualPlayer, self).__init__()
 
