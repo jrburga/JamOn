@@ -15,15 +15,18 @@ statuses = {
 	2: 'Locked in!',
 }
 
-default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
-
-default_keycodes = [ord(k) for k in default_keys]
-
 class Editor(GameObject):
-	def __init__(self, controller):
+	def __init__(self, controller, track):
 		super(Editor, self).__init__()
+
 		self.controller = controller
-		self.add(controller)
+		self.add(controller)		
+
+		self.controller.bind_notes(self.key_down_cb, self.key_up_cb)
+		self.controller.bind_lock_in(self.space_bar_pressed)
+
+		self.track = track
+		self.add(track)
 
 		self.active_pattern = None
 		self.note_sequence = []
@@ -34,6 +37,10 @@ class Editor(GameObject):
 		self.status = 0
 
 		self.composing = False
+
+	@property
+	def id(self):
+		return self.controller.vid if self.controller else None
 
 	def start_composing(self):
 		if self.composing:
@@ -46,6 +53,16 @@ class Editor(GameObject):
 		self.composing = False
 		# if self.is_me:
 		# 	self.set_status(2)
+
+	def key_down_cb(self, lane_num):
+		def cb():
+			self.key_down(lane_num)
+		return cb
+
+	def key_up_cb(self, lane_num):
+		def cb():
+			self.key_up(lane_num)
+		return cb
 
 	def key_down(self, lane_num):
 		if self.composing:
@@ -89,22 +106,17 @@ class Editor(GameObject):
 			self.seq_ind = 0
 		self.last_time = self.time
 
+	@property
+	def session(self):
+		return self._parent
+
 
 class Player(Editor):
 	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
 	def __init__(self, controller, track, inst='piano'):
-		super(Player, self).__init__(controller)
+		super(Player, self).__init__(controller, track)
 		self.instrument = Instrument(inst)
 
-		for i, keycode in enumerate(default_keycodes):
-			print i, keycode
-			self.controller.bind_keydown(keycode, self.key_down_cb(i))
-			self.controller.bind_keyup(keycode, self.key_up_cb(i))
-
-		self.controller.bind_keydown(32, self.space_bar_pressed)
-
-		self.track = track
-		self.add(self.track)
 		self.status_sprite = None
 		self.action_buffer = []
 		self.start_composing()
@@ -113,7 +125,6 @@ class Player(Editor):
 		if self.track.active:
 			self.active_pattern.lock_in()
 			self.track.set_active(False)
-
 
 	def set_status(self, status):
 		self.status = status
@@ -124,16 +135,6 @@ class Player(Editor):
 			self.add(self.status_sprite)
 		else:
 			self.status_sprite = None
-
-	def key_down_cb(self, lane_num):
-		def cb():
-			self.key_down(lane_num)
-		return cb
-
-	def key_up_cb(self, lane_num):
-		def cb():
-			self.key_up(lane_num)
-		return cb
 
 	def key_down(self, lane_num):
 		super(Player, self).key_down(lane_num)
@@ -161,17 +162,10 @@ class Player(Editor):
 							self.instrument.note_off(lane)
 					self.seq_ind  += 1
 
-		self.last_time = self.time
 
-	@property
-	def session(self):
-		return self._parent
-
-
-class VirtualPlayer(Player):
+class VirtualPlayer(Editor):
 	def __init__(self, vcontroller, vtrack):
-		super(VirtualPlayer, self).__init__()
-
+		super(VirtualPlayer, self).__init__(vcontroller, vtrack)
 
 # class PlayerNameText(TextObject):
 # 	def __init__(self, name, me):

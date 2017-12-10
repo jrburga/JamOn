@@ -41,19 +41,20 @@ class MainWidget(BaseWidget):
 		self.audio.set_generator(None)
 		for widget in self.scene.widgets:
 			self.remove_widget(widget)
+		self.scene = None
 
 	def load_new_scene(self, scene_name, **kwargs):
 		self.unload_current_scene()
-		self.scene = self.scenes[scene_name](base_widget=self, **kwargs)
-		self.scene.add(self.client_obj)
-		self.scene.on_load()
+		scene = self.scenes[scene_name](base_widget=self, **kwargs)
+		scene.add(self.client_obj)
+		scene.on_load()
 		
-		self.audio.set_generator(self.scene._mixer)
-		self.canvas.add(self.scene._transform)
-		for widget in self.scene.widgets:
+		self.audio.set_generator(scene._mixer)
+		self.canvas.add(scene._transform)
+		for widget in scene.widgets:
 			self.add_widget(widget)
 
-		
+		self.scene = scene
 
 	def on_key_down(self, keycode, modifiers):
 		self.scene._handle_event(Event('on_key_down', 
@@ -107,7 +108,7 @@ class MainWidget(BaseWidget):
 				self.load_new_scene(scenes.keys()[0], **kwargs)
 
 			self.started = True
-		if self.started:
+		if self.scene and self.started:
 			self.scene._on_update()
 			self.audio.on_update()
 

@@ -14,7 +14,15 @@ class Practice(Scene):
 		super(Practice, self).__init__(**kwargs)
 
 	def on_load(self):
-		self.add(Session(tempo, bars, divs))
+		band_members = self.client.get_band_members()
+		print 'band_members', band_members
+		print '============'
+		other_members = []
+		for band_member in band_members:
+			if band_member['id'] == self.client.id:
+				continue
+			other_members.append(band_member)
+		self.add(Session(other_members, tempo, bars, divs))
 		self.add_event_listener('on_key_down', self.change_scene)
 
 	def change_scene(self, s, event):

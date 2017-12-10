@@ -86,7 +86,6 @@ class ClientObject(GameObject):
 		self.client.disconnect()
 
 	def on_action(self, action):
-		print 'on action called', action
 		self.trigger_event(action['event_type'], **action['action'])
 
 	def send_action(self, event_type, **args):

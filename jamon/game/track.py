@@ -207,7 +207,7 @@ class Lane(VirtualLane):
 	def on_lane_update(self):
 		if self.active_gem is not None:
 			self.active_gem.update_length(self.track.now_bar.position[1])
-		self.remove_old_gems()
+		super(Lane, self).on_lane_update()
 
 class Track(VirtualTrack):
 	Lane = Lane

@@ -3,8 +3,6 @@ from jamon.game.widgets import *
 from jamon.game.components.graphics import *
 from jamon.game.window import Window
 
-from jamon.game.controller import Keyboard
-
 class MainMenu(Scene):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)

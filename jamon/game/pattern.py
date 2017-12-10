@@ -74,6 +74,13 @@ class PatternList(GameObject):
 
 			# Set the instrument to the correct instrument
 			self._parent.player.instrument.set_inst(inst)
+		else:
+			print 'other player wants to edit'
+			print self._parent.vplayers
+			vplayers = [vplayer for vplayer in self._parent.vplayers if vplayer.id == _id]
+			print vplayers
+			for vplayer in vplayers:
+				vplayer.set_active_pattern(pattern)
 
 	def remove_pattern(self, _id):
 		self.client.delete_pattern(_id)

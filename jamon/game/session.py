@@ -1,7 +1,7 @@
 from game import GameObject
 from track import *
-from player import Player
-from controller import Keyboard
+from player import Player, VirtualPlayer
+from controller import InstrumentKeyboard, InstrumentController
 from instrument import InstrumentManager
 from pattern import PatternList	
 from kivy.clock import Clock as kivyClock
@@ -12,8 +12,14 @@ from common.clock import Clock, Scheduler, SimpleTempoMap
 
 num_lanes = 8
 
+default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
+lockin_key = ' '
+
+default_keycodes = [ord(k) for k in default_keys]
+lock_in_keycode = ord(lockin_key)
+
 class Session(GameObject):
-	def __init__(self, tempo, bars, divs):
+	def __init__(self, other_members, tempo, bars, divs):
 		super(Session, self).__init__()
 		self.tempo = tempo
 		self.bars = bars
@@ -26,53 +32,38 @@ class Session(GameObject):
 		self.sched = Scheduler(self.clock, self.temp_map)
 		# self.players = players
 		self.IM = InstrumentManager(self.sched)
+		self.add(self.IM)
 
 		### NEW CODE ###
-		self.pattern_list = PatternList(self.bars, tempo)
+		self.pattern_list = PatternList(self.bars, self.tempo)
 		self.add(self.pattern_list)
-		track = Track(num_lanes, bars, tempo)
+
+		track = Track(num_lanes, self.bars, self.tempo)
 		track.position.y = Window.height*0.01
-		controller = Keyboard()
+		controller = InstrumentKeyboard(default_keycodes, 
+										lock_in_keycode)
 		self.player = Player(controller, track)
 		self.player.position.x = Window.width - player_size[0] - 20
 		self.add(self.player)
+		self.vplayers = []
+		self.add_band_members(other_members)
 		self.IM.add(self.player.instrument)
-		
-
-		########## FOR TESTING ##########
-		# test_seq = [(0,0,1), (1,1,2), (2,1,2), (5, 3, 2), (6, 2, 5), (7,0,8)]
-		# print self.client.get_band_members()
-		
-		# vtrack = VirtualTrack()
-		# self.pattern_list.add_pattern(0)
-		# self.pattern_list.add_pattern(1,test_seq, 'guitar')
-		# # self.IM.add(self.pattern_list.patterns[1].instrument)
-		# self.pattern_list.add_pattern(2)
-		# self.pattern_list.add_pattern(3)
-		# self.pattern_list.add_pattern(4)
-		# self.pattern_list.add_pattern(5)
-		# self.pattern_list.add_pattern(6)
-		# self.pattern_list.pattern_editing(0, 'Bob')
-
-		# i2player = Window.width/len(self.players)
-		# scale = 1./len(self.players)
-		# for i, player in enumerate(self.players):
-		# 	player.position.x = i2player*i+80
-		# 	player.scale.x = scale
-		# 	self.IM.add(player.instrument)
-		# 	continue
-		# self.current_player = 0
-		# self.num_players = len(self.players)
-
-		# self.add(*self.players)
-		self.add(self.IM)
 
 		self.clock.offset = self.seconds-spb
-		# print self.clock.offset
-		# self.clock.start()
-		# self.IM.metro.start()
+
 		self.paused = True
 		self.start()
+
+	def add_band_members(self, other_members):
+		print 'getting band_members'
+		print '===================='
+		print other_members
+		for other_member in other_members:
+			vcontroller = InstrumentController(8, other_member['id'])
+			vtrack = VirtualTrack(num_lanes, self.bars, self.tempo)
+			vplayer = VirtualPlayer(vcontroller, vtrack)
+			self.vplayers.append(vplayer)
+			self.add(vplayer)
 
 	def on_key_down(self, event):
 		# if event.keycode[1] == 'enter':on
@@ -108,5 +99,8 @@ class Session(GameObject):
 	def on_update(self):
 		self.sched.on_update()
 		# for player in self.players:
-		self.player.set_now(self.clock.get_time()%self.seconds)
+		now = self.clock.get_time()%self.seconds
+		for vplayer in self.vplayers:
+			vplayer.set_now(now)
+		self.player.set_now(now)
 		self.pattern_list.set_now(self.clock.get_time()%self.seconds)
