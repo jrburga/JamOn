@@ -345,8 +345,10 @@ class Pattern(GameObject):
 	def lock_in(self):
 		# Create seq list from old notes
 		self.seq = []
-		for k in self.old_notes:
-			note = self.old_notes[k]
+		notes = self.notes if self.notes else self.old_notes
+		# print notes
+		for k in notes:
+			note = notes[k]
 			self.seq.append( (note.lane, note.start, note.length) )
 
 		# Queue the pattern
@@ -454,13 +456,26 @@ class Pattern(GameObject):
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
 		self.figure_notes()
-		# Draw new notes
+
+		# Remove old notes from screen
 		for k in self.notes:
-			if k not in self.old_notes:
-				self.remove(self.notes[k])
+			self.remove(self.notes[k])
 		for k in self.old_notes:
-			if self.old_notes[k]._parent is None:
-				self.add(self.old_notes[k])
+			if self.old_notes[k]._parent is not None:
+				self.remove(self.old_notes[k])
+		self.notes = {}
+		self.old_notes = {}
+
+		# Draw new notes
+		for (lane, start, length) in seq:
+			note = PatternNote(lane, start, length, self.seconds, self.num_lanes)
+			self.notes[ (start, lane) ] = note
+			self.add(note)
+
+
+
+
+			
 		self.set_queued()
 
 	def time2x(self, t):
