@@ -127,9 +127,8 @@ class VirtualTrack(GameObject):
 	Lane = VirtualLane
 	def __init__(self, num_lanes, bars, tempo, percussive=False):
 		super(VirtualTrack, self).__init__()
-		self.lanes = [self.Lane(i) for i in range(num_lanes)]
 		self.num_lanes = num_lanes
-		self.add(*self.lanes)
+		self.lanes = [self.Lane(i) for i in range(num_lanes)]
 
 		self.spb = 60./tempo
 		beats = bars*4
@@ -142,6 +141,12 @@ class VirtualTrack(GameObject):
 		self.active = False
 		# Add quantizer instance for quantization
 		self.quant = Quantizer(self.seconds, bars*8)
+
+	def update_lanes(self, num_lanes):
+		self.remove(*self.lanes)
+		self.num_lanes = num_lanes
+		self.lanes = [self.Lane(i) for i in range(num_lanes)]
+		self.add(*self.lanes)
 
 	@property
 	def editor(self):
@@ -166,11 +171,11 @@ class VirtualTrack(GameObject):
 		return gems
 
 	def on_press(self, lane_num):
-		if self.active:
+		if self.active and lane_num < len(self.lanes):
 			self.lanes[lane_num].on_press(self.now)
 
 	def on_release(self, lane_num):
-		if self.active:
+		if self.active and lane_num < len(self.lanes):
 			self.lanes[lane_num].on_release(self.now)
 
 	def set_now(self, time):

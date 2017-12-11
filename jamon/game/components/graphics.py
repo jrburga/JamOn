@@ -45,7 +45,8 @@ class Graphics(InstructionGroup):
 
 	def remove(self, sprite):
 		super(Graphics, self).remove(sprite)
-		self._objects.remove(sprite)
+		if sprite in self._objects:
+			self._objects.remove(sprite)
 
 	def on_update(self, dt):
 		kill_list = set()

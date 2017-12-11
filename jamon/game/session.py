@@ -12,18 +12,20 @@ from common.clock import Clock, Scheduler, SimpleTempoMap
 
 num_lanes = 8
 
-default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
+default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i']
 lockin_key = ' '
+MAX_NOTES = 16
 
 default_keycodes = [ord(k) for k in default_keys]
 lock_in_keycode = ord(lockin_key)
 
 class Session(GameObject):
-	def __init__(self, other_members, tempo, bars, divs):
+	def __init__(self, other_members, tempo, bars, divs, inst_set):
 		super(Session, self).__init__()
 		self.tempo = tempo
 		self.bars = bars
 		self.divs = divs
+		self.inst_set = inst_set
 		spb = 60./tempo
 		beats = bars*4
 		self.seconds = spb*beats
@@ -35,14 +37,14 @@ class Session(GameObject):
 		self.add(self.IM)
 
 		### NEW CODE ###
-		self.pattern_list = PatternList(self.bars, self.tempo)
+		self.pattern_list = PatternList(self.bars, self.tempo, self.inst_set)
 		self.add(self.pattern_list)
 
 		track = Track(num_lanes, self.bars, self.tempo)
 		track.position.y = Window.height * 0.025
 		controller = InstrumentKeyboard(default_keycodes, 
 										lock_in_keycode)
-		self.player = Player(controller, track)
+		self.player = Player(controller, track, inst_set)
 		self.player.position.x = Window.width - player_size[0] - 20
 		self.add(self.player)
 		self.vplayers = []
@@ -59,7 +61,7 @@ class Session(GameObject):
 		print '===================='
 		print other_members
 		for other_member in other_members:
-			vcontroller = InstrumentController(8, other_member['id'])
+			vcontroller = InstrumentController(16, other_member['id'])
 			vtrack = VirtualTrack(num_lanes, self.bars, self.tempo)
 			vplayer = VirtualPlayer(vcontroller, vtrack)
 			self.vplayers.append(vplayer)

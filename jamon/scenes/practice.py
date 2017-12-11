@@ -7,11 +7,12 @@ tempo = 120
 bars = 4
 divs = 4
 
-insts = ['piano', 'vibraphone', 'guitar']*2
-
 class Practice(Scene):
 	def __init__(self, **kwargs):
 		super(Practice, self).__init__(**kwargs)
+		self.inst_set = kwargs['instrument_set']
+
+
 
 	def on_load(self):
 		band_members = self.client.get_band_members()
@@ -22,7 +23,7 @@ class Practice(Scene):
 			if band_member['id'] == self.client.id:
 				continue
 			other_members.append(band_member)
-		self.add(Session(other_members, tempo, bars, divs))
+		self.add(Session(other_members, tempo, bars, divs, self.inst_set))
 		self.add_event_listener('on_key_down', self.change_scene)
 
 	def change_scene(self, s, event):
