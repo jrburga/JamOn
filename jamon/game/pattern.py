@@ -430,7 +430,7 @@ class Pattern(GameObject):
 			self.set_active()
 			return
 		self.state = 1
-		self.outline_sprite.color.rgb = YELLOW + (0.6,)
+		self.outline_sprite.color.rgb = YELLOW + (0.2,)
 
 	def set_dequeued(self):
 		if self.state == 1: #formerly queued (never played)
