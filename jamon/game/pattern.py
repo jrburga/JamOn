@@ -559,13 +559,26 @@ class VolumeSlider(GameObject):
 
 		self.position = (120, pattern_height+5)
 
-	def on_touch_move(self, event):
+		self.editing = False
+
+	def on_touch_down(self, event):
 		tx, ty = event.touch.pos
 		x, y = self.get_abs_pos()
 		if y <= ty <= y + volume_slider_size[1]:
-			self.volume = min(1, max((tx - x - 5) / (volume_slider_size[0]-10), 0))
-			self.volume_graphic.set_volume(self.volume)
-			self.callback(self.volume)
+			if x <= tx <= x + volume_slider_size[0]:
+				self.editing = True
+				self.on_touch_move(event)
+
+	def on_touch_move(self, event):
+		if not self.editing:
+			return
+		tx, ty = event.touch.pos
+		x, y = self.get_abs_pos()
+		self.volume = min(1, max((tx - x - 5) / (volume_slider_size[0]-10), 0))
+		self.volume_graphic.set_volume(self.volume)
+		self.callback(self.volume)
+	def on_touch_up(self, event):
+		self.editing = False
 
 
 

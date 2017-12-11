@@ -3,7 +3,7 @@ from random import choice
 from server.client import Client
 from server.store import Store
 
-member_names = ['Rudolf', 'Dasher', 'Prancer', 'Eran', 'Berry', 'Dancer', 'Vixen', 'Donner', 'Cupid']
+member_names = ['Rudolph', 'Dasher', 'Prancer', 'Eran', 'Barry', 'Dancer', 'Vixen', 'Donner', 'Cupid']
 
 def _default_callback(message):
 	if message.data['success']:
