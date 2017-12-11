@@ -23,7 +23,7 @@ pattern_now_bar_size = (3, pattern_height)
 
 lane_line_size = (7, track_size[1])
 
-inst_panel_size = (pattern_list_size[0], 100)
+inst_panel_size = (pattern_list_size[0], Window.height * 0.1)
 volume_slider_size = (pattern_size[0]*0.1, 20)
 
 
