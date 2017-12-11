@@ -25,11 +25,11 @@ class Practice(Scene):
 				continue
 			other_members.append(band_member)
 		self.add(Session(other_members, tempo, bars, divs, self.inst_set))
-		self.add_event_listener('on_key_down', self.change_scene)
+	# 	self.add_event_listener('on_key_down', self.change_scene)
 
-	def change_scene(self, s, event):
-		if event.keycode[1] == '1':
-			self.trigger_event('on_scene_change', scene_name='perform')
+	# def change_scene(self, s, event):
+	# 	if event.keycode[1] == '1':
+	# 		self.trigger_event('on_scene_change', scene_name='perform')
 
 # print Practice.scene_events
 def build_scene(**kwargs):

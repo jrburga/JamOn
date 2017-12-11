@@ -547,7 +547,7 @@ class Pattern(GameObject):
 		self.instrument.set_mute(self.state < 2)
 
 		# Play the notes
-		if self.note_idx < len(self.note_events):
+		if self.note_idx < len(self.note_events) and self.note_idx >= 0:
 			time, events = self.note_events[self.note_idx]
 			if self.now > time:
 				self.note_idx += 1
