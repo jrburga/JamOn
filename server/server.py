@@ -155,6 +155,7 @@ class Server(object):
 	def _send_all(self, message, connection):
 		if message.type != 'action': return
 		for conn in self._async.values():
+			print 'sending to conn', conn
 			conn.send(message)
 
 	def _listen(self, connection):

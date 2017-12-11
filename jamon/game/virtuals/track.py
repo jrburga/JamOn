@@ -202,5 +202,5 @@ class VirtualTrack(GameObject):
 				lane.new_phrase()
 			lane.on_lane_update()
 
-		if new_phrase and self.active:
+		if new_phrase and self.active and self.active_pattern:
 			self.active_pattern.new_phrase()
