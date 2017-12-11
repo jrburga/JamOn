@@ -27,8 +27,8 @@ inst_panel_size = (pattern_list_size[0], 100)
 
 track_color = DARK_GRAY
 now_bar_color = (.13, .54, .13)
-lane_color = (.3, .3, .3)
-dark_lane_color = (0.5, 0.5, 0.5)
+lane_color = (.9, .9, .9)
+dark_lane_color = (0.85, 0.85, 0.85)
 pattern_now_bar_color = (.6, .3, .5)
 # gem_texture = Image('path/to/image.png').texture
 
@@ -48,8 +48,8 @@ class TrackSprite(RectOutlineSprite):
 
 class LaneSprite(RectSprite):
 	def __init__(self, ind):
-		color = lane_color if (ind % 2) == 0 else dark_lane_color
-		super(LaneSprite, self).__init__(lane_size, lane_color)
+		color = lane_color if ((ind % 2) == 0) else dark_lane_color
+		super(LaneSprite, self).__init__(lane_size, color)
 
 class NowBarSprite(RectSprite):
 	def __init__(self):
@@ -57,13 +57,13 @@ class NowBarSprite(RectSprite):
 
 class BarLineSprite(RectSprite):
 	def __init__(self, ind):
-		color = DARK_GRAY
-		size = bar_line_size if (ind % 4) != 0 else downbeat_bar_line_size
+		color = DARKER_GRAY
+		size = bar_line_size if ((ind % 4) != 0) else downbeat_bar_line_size
 		super(BarLineSprite, self).__init__(size, color)
 
 class LaneLineSprite(RectSprite):
 	def __init__(self):
-		color = DARK_GRAY
+		color = DARKER_GRAY
 		super(LaneLineSprite, self).__init__(lane_line_size, color)
 
 class PlayerOutlineSprite(RectOutlineSprite):
@@ -76,10 +76,10 @@ class PatternListSprite(RectOutlineSprite):
 		color = (66./255, 220./255, 86./255)
 		super(PatternListSprite, self).__init__(pattern_list_size, color)
 
-class PatternOutlineSprite(RectOutlineSprite):
+class PatternOutlineSprite(RectSprite):
 	def __init__(self):
-		color = (.4,.7,1)
-		super(PatternOutlineSprite, self).__init__(pattern_size, color, width=1)
+		color = YELLOW
+		super(PatternOutlineSprite, self).__init__(pattern_size, color)
 
 class PatternNoteSprite(RectSprite):
 	def __init__(self, size):

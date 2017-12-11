@@ -175,14 +175,6 @@ class Track(VirtualTrack):
 		# self.scale.x = 0.5
 		# self.position = ((Window.width-self.w)/2, 0)
 
-		# Draw bar lines
-		bar_lines = [BarLineSprite(i) for i in range(16)]
-		for i, bl in enumerate(bar_lines):
-			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
-			self.add_graphic(bl)
-
-		self.update_lanes(num_lanes)
-
 		self.tempo = tempo
 		self.bars = bars
 
@@ -191,17 +183,31 @@ class Track(VirtualTrack):
 		# self.t2y_ratio = 
 		self.add(*self.lanes)
 		self.add_graphic(self.sprite)
-		
+
+		# Draw bar lines
+		self.bar_lines = [BarLineSprite(i) for i in range(16)]
+		for i, bl in enumerate(self.bar_lines):
+			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
+			self.add_graphic(bl)
+
+		self.update_lanes(num_lanes)
+
 		self.add_graphic(self.now_bar)
 
 	def update_lanes(self, num_lanes):
 		super(Track, self).update_lanes(num_lanes)
+		self.remove_graphic(self.now_bar)
+		for bar in self.bar_lines:
+			self.remove_graphic(bar)
 		self.remove_graphic(self.sprite)
 		i2lane = self.w/num_lanes
 		for i, lane in enumerate(self.lanes):
 			lane.position.x = i*i2lane+OFFSET
 			lane.scale.x = 1. / (num_lanes)
 		self.add_graphic(self.sprite)
+		for bar in self.bar_lines:
+			self.add_graphic(bar)
+		self.add_graphic(self.now_bar)
 
 
 	@property

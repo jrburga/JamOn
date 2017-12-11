@@ -412,8 +412,7 @@ class Pattern(GameObject):
 			self.set_active()
 			return
 		self.state = 1
-		self.outline_sprite.color.v = 1
-	 	self.outline_sprite.color.h = 0.7
+		self.outline_sprite.color.rgb = YELLOW + (0.6,)
 
 	def set_dequeued(self):
 		if self.state == 1: #formerly queued (never played)
@@ -425,19 +424,16 @@ class Pattern(GameObject):
 
 	def set_active(self):
 		self.state = 2
-	 	self.outline_sprite.color.v = 1
-	 	self.outline_sprite.color.h = 0.9
+	 	self.outline_sprite.color.rgb = GREEN + (0.6,)
 
 	def set_inactive(self):
 	 	self.state = 0
-	 	self.outline_sprite.color.v = 0.5
-	 	self.outline_sprite.color.h = 0.55
+	 	self.outline_sprite.color.rgba = (0,0,0,0)
 
 	def editing(self, editor='', is_me=False):
 		self.locked = not is_me
 		self.is_editing = True
-		self.outline_sprite.color.v = 1
-		self.outline_sprite.color.h = 0
+		self.outline_sprite.color.rgb = BLUE + (0.6,)
 
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)

@@ -31,7 +31,7 @@ class MainMenu(Scene):
             go.trigger_event('on_server_request', server_type='host_game')
             go.trigger_event('on_scene_change', scene_name='waiting_room', is_host=True)
 
-        host_game_button = Button(pos=(left_x, y), background_color=BLUE + (1.0,),
+        host_game_button = Button(pos=(left_x, y), background_color=BLUE + (1.0,),# background_down=DARK_BLUE + (1.0,),
                                   size=(BUTTON_WIDTH, BUTTON_HEIGHT), background_normal='',
                                   text="[size=150]Host[/size]", markup=True)
         host_game_button.bind(host_game_cb)
@@ -42,7 +42,7 @@ class MainMenu(Scene):
 
         join_game_button = Button(pos=(right_x, y), 
                                   size=(BUTTON_WIDTH, BUTTON_HEIGHT), background_color=GREEN + (1.0,),
-                                  text="[size=150]Join[/size]",  background_normal='', 
+                                  text="[size=150]Join[/size]",  background_normal='', # background_down=DARK_GREEN + (1.0,),
                                   markup=True)
         join_game_button.bind(join_game_cb)
 
