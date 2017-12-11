@@ -72,7 +72,7 @@ class WaitingRoom(Scene):
 			self.add_game_object(self.start_game_button)
 
 		self.the_band_label_pos = (self.button_dist_from_side + Window.width/50.0, Window.height - self.button_dist_from_top)
-		self.the_band_label = TextObject(text="[anchor=left_side][color=ff8888][b]The Band[/b][/color][anchor=right_side]", 
+		self.the_band_label = TextObject(text="[anchor=left_side][color=000000][b]The Band[/b][/color][anchor=right_side]", 
 									   font_size=150, markup=True, halign='left', valign='bottom',
 									   pos=self.the_band_label_pos)
 
@@ -84,7 +84,7 @@ class WaitingRoom(Scene):
 			
 			self.instruments_label_pos = (Window.width - self.button_dist_from_side - self.button_width, \
 											Window.height - self.button_dist_from_top)
-			self.instruments_label = TextObject(text="[color=abcdef][b]Instruments[/b][/color]", 
+			self.instruments_label = TextObject(text="[color=000000][b]Choose your\ninstruments[/b][/color]", 
 										   font_size=100, markup=True, valign='bottom', halign='left', #halign='right',
 										   pos=self.instruments_label_pos)
 
@@ -96,6 +96,7 @@ class WaitingRoom(Scene):
 		Makes the buttons for the instrument sets
 		"""
 		# Constants
+		button_colors = [RED, GREEN, invert_color(BLUE), invert_color(GREEN), invert_color(RED), BLUE]
 		dist_between_buttons = Window.height/50.0
 
 		num_sets = len(INSTRUMENT_SETS)
@@ -110,8 +111,8 @@ class WaitingRoom(Scene):
 			button_pos = (button_x, button_y)
 			button_state = 'down' if (i==0) else 'normal' # so the first button defaults as down
 			button_text = "[size=25sp]" + inst_set + "[/size]" + "\n" + "[size=15sp](" + ", ".join(INSTRUMENT_SETS[inst_set].keys()) + ")[/size]"
-			inst_button = ToggleButton(text=button_text, font_size='20sp', markup=True, 
-											halign='center', valign='center', id=inst_set,
+			inst_button = ToggleButton(text=button_text, font_size='20sp', markup=True, background_color = button_colors[i] + (1.0,),
+											halign='center', valign='center', id=inst_set, background_normal='',
 											pos=button_pos, group='inst_sets', state=button_state,
 											size=button_size)
 			self.add_game_object(inst_button)
@@ -158,13 +159,13 @@ class WaitingRoom(Scene):
 		size = Window.width/3.0, height # width should be big enough
 		blurb_bottom = start_y_top - size[1] * (user_num+1)
 		blurb_top = start_y_top - size[1] * user_num
-		blurb_left = self.button_dist_from_side
+		blurb_left = self.button_dist_from_side + 5
 
 		username = self.band_members[user_num]['username']
-		username_text = "[anchor=left_side][color=8888ff][b][size=80]%s   [/size][/b][/color][anchor=right_side]" % username
+		username_text = "[anchor=left_side][color=000000][b][size=80]%s[/size][/b][/color][anchor=right_side]" % username
 		
 		ip = self.band_members[user_num]['addr_str']
-		ip_text = "[anchor=left_side][color=668822][b][size=50]%s[/size][/b][/color][anchor=right_side]" % ip
+		ip_text = "[anchor=left_side][color=444444][b][size=50]%s[/size][/b][/color][anchor=right_side]" % ip
 		# 
 		
 		print username_text
@@ -176,8 +177,9 @@ class WaitingRoom(Scene):
 		self.add_game_object(username_label)
 
 		username_box = RectOutlineSprite(size=size, color=(0.3,0.6,0.8), width=2)
+
 		# username_box.position = (100, 100)
-		username_label.add_graphic(username_box)
+		# username_label.add_graphic(username_box)
 		# self.user_labels.append()
 		
 		

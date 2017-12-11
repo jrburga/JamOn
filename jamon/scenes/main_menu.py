@@ -4,11 +4,13 @@ from jamon.game.components.graphics import *
 from jamon.game.text import TextObject
 from jamon.game.window import Window
 from kivy.graphics import Color
+import time
 
 class MainMenu(Scene):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)
         print kwargs
+        self.start_time = time.time()
 
     def on_load(self):
         self.make_buttons()
@@ -66,6 +68,10 @@ class MainMenu(Scene):
         self.add_game_object(host_game_button)
         self.add_game_object(join_game_button)
         # self.add_game_object(change_username_button)
+
+    def on_update(self):
+        
+        pass
 
 def build_scene(**kwargs):
     return MainMenu(**kwargs)
