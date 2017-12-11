@@ -86,7 +86,7 @@ class PatternOutlineSprite(RectSprite):
 
 class PatternNoteSprite(RectSprite):
 	def __init__(self, size):
-		color = (0.4, 1, 0.7)
+		color = invert_color(BLUE)
 		super(PatternNoteSprite, self).__init__(size, color)
 
 class PatternPlaySprite(ImageSprite):

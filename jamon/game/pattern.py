@@ -417,21 +417,30 @@ class Pattern(GameObject):
 		self.state = 1
 		self.outline_sprite.color.rgb = YELLOW + (0.2,)
 
+		for note in self.notes.values():
+			note.sprite.color.rgb = invert_color(YELLOW)
+
 	def set_dequeued(self):
 		if self.state == 1: #formerly queued (never played)
 			self.set_inactive()
 			return
 		self.state = 3
-	 	self.outline_sprite.color.v = 0.5
-	 	self.outline_sprite.color.h = 0.7
+	 	self.outline_sprite.color.rgb = RED
+		for note in self.notes.values():
+	 		note.sprite.color.rgb = invert_color(RED)
 
 	def set_active(self):
 		self.state = 2
 	 	self.outline_sprite.color.rgb = GREEN + (0.6,)
+	 	
+		for note in self.notes.values():
+			note.sprite.color.rgb = invert_color(GREEN)
 
 	def set_inactive(self):
 	 	self.state = 0
-	 	self.outline_sprite.color.rgba = (0,0,0,0)
+	 	self.outline_sprite.color.rgba = (0,0,0,0.3)
+		for note in self.notes.values():
+			note.sprite.color.rgb = invert_color((0,0,0))
 
 	def editing(self, editor='', is_me=False):
 		self.locked = not is_me

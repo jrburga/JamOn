@@ -26,6 +26,25 @@ DARK_BLUE = tuple([0.7 * x for x in [0.729411765, 0.882352941, 1.0]])
 GRAY 	= (0.9, 0.9, 0.9)
 DARK_GRAY = (.75, .75, .75)
 DARKER_GRAY = (0.6, 0.6, 0.6)
+
+def hilo(color):
+	a, b, c = color
+	if c < b: b, c = c, b
+	if b < a: a, b = b, a
+	if c < b: b, c = c, b
+	return a + c
+
+def invert_color(color):
+	k = hilo(color)
+	return tuple(list(tuple(k - u for u in color)))
+
+# def invert_color(color):
+# 	brightness = color[0] **2 + color[1] ** 2 + color[2] ** 2
+
+# 	color[1]
+# 	return tuple([1 - c for c in list(color)])
+
+
 class Transform(InstructionGroup):
 	def __init__(self, graphics):
 		super(Transform, self).__init__()
@@ -129,16 +148,16 @@ class GradientRectSprite(Sprite):
 	def __init__(self, size, color_1, color_2, dir='vertical'):
 		  texture = Texture.create(size=size, colorfmt="rgb")
 		  if dir=='vertical':
-		  	p_size = size[1]
-		  	width = size[0]
-		  	buf = []
-		  	for x in range(p_size):
-		  		for _ in range(width):
-		  			for i in range(3):
-		  				buf.append(int(color_1[i]*255-x*(color_1[i]-color_2[i])*255/p_size))
-		  	buf = b''.join(map(chr, buf))
-		  	texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
-		  	super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
+			p_size = size[1]
+			width = size[0]
+			buf = []
+			for x in range(p_size):
+				for _ in range(width):
+					for i in range(3):
+						buf.append(int(color_1[i]*255-x*(color_1[i]-color_2[i])*255/p_size))
+			buf = b''.join(map(chr, buf))
+			texture.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
+			super(GradientRectSprite, self).__init__(Rectangle(texture=texture, size=size), (1,1,1))
 
 
 class TextSprite(Sprite):
