@@ -349,7 +349,6 @@ class Pattern(GameObject):
 
 	def remove_note(self, start, lane):
 		if (start, lane) not in self.old_notes:
-			print 'the set of notes i have', self.old_notes
 			return
 		note = self.old_notes[ (start, lane) ]
 		self.remove(note)
@@ -365,7 +364,6 @@ class Pattern(GameObject):
 		# Create seq list from old notes
 		self.seq = []
 		notes = self.notes if self.notes else self.old_notes
-		# print notes
 		for k in notes:
 			note = notes[k]
 			self.seq.append( (note.lane, note.start, note.length) )
@@ -394,19 +392,6 @@ class Pattern(GameObject):
 		self.note_events = []
 		for time in sorted(note_dict.iterkeys()):
 			self.note_events.append( (time, note_dict[time]) )
-
-
-	# Creates note_sprites list and displays sprites based on self.seq
-	# def display_midi(self):
-	# 	self.note_sprites = {}
-	# 	for (lane, start, length) in self.seq:
-	# 		size_x = pattern_size[0] / self.seconds * length
-	# 		size_y = pattern_size[1] / self.num_lanes - 2
-	# 		sprite = PatternNoteSprite( (size_x, size_y) )
-	# 		sprite.position = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
-	# 		self.note_sprites[(lane, start)] = sprite
-	# 		self.add_graphic(sprite)
-
 
 	def on_play_click(self):
 		if self.is_editing:

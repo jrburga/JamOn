@@ -57,9 +57,6 @@ class Session(GameObject):
 		self.start()
 
 	def add_band_members(self, other_members):
-		print 'getting band_members'
-		print '===================='
-		print other_members
 		for other_member in other_members:
 			vcontroller = InstrumentController(16, other_member['id'])
 			vtrack = VirtualTrack(num_lanes, self.bars, self.tempo)

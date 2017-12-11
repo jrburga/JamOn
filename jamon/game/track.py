@@ -27,7 +27,6 @@ class Gem(VirtualGem):
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
 		self.position = (0, self.y-self.sprite.size[1])
-		# print self.position.y
 
 	def on_release(self, time):
 		super(Gem, self).on_release(time)
@@ -45,9 +44,7 @@ class Gem(VirtualGem):
 		size_x, size_y = self.sprite.texture.size
 		self.sprite.texture.size = (size_x, top_y - bot_y)
 		self.position = (0, bot_y)
-
-		print 'gem size:', self.time, self.length
-
+		
 	def get_height(self):
 		return self.sprite.texture.size[1]
 
