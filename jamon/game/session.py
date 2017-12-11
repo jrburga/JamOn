@@ -10,10 +10,11 @@ from components.sprites import *
 
 from common.clock import Clock, Scheduler, SimpleTempoMap
 
-num_lanes = 10
+num_lanes = 8
 
-default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';']
+default_keys = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i']
 lockin_key = ' '
+MAX_NOTES = 16
 
 default_keycodes = [ord(k) for k in default_keys]
 lock_in_keycode = ord(lockin_key)
@@ -59,7 +60,7 @@ class Session(GameObject):
 		print '===================='
 		print other_members
 		for other_member in other_members:
-			vcontroller = InstrumentController(8, other_member['id'])
+			vcontroller = InstrumentController(16, other_member['id'])
 			vtrack = VirtualTrack(num_lanes, self.bars, self.tempo)
 			vplayer = VirtualPlayer(vcontroller, vtrack)
 			self.vplayers.append(vplayer)

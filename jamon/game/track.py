@@ -176,10 +176,7 @@ class Track(VirtualTrack):
 			bl.position = (0, self.h*(1-i/16.)-bl.size[1])
 			self.add_graphic(bl)
 
-		i2lane = self.w/num_lanes
-		for i, lane in enumerate(self.lanes):
-			lane.position.x = i*i2lane+OFFSET
-			lane.scale.x = 1. / (num_lanes+1)
+		self.update_lanes(num_lanes)
 
 		self.tempo = tempo
 		self.bars = bars
@@ -187,11 +184,20 @@ class Track(VirtualTrack):
 		self.num_lanes = num_lanes
 
 		# self.t2y_ratio = 
-
-		self.add_graphic(self.sprite)
 		self.add(*self.lanes)
-
+		self.add_graphic(self.sprite)
+		
 		self.add_graphic(self.now_bar)
+
+	def update_lanes(self, num_lanes):
+		super(Track, self).update_lanes(num_lanes)
+		self.remove_graphic(self.sprite)
+		i2lane = self.w/num_lanes
+		for i, lane in enumerate(self.lanes):
+			lane.position.x = i*i2lane+OFFSET
+			lane.scale.x = 1. / (num_lanes)
+		self.add_graphic(self.sprite)
+
 
 	@property
 	def player(self):

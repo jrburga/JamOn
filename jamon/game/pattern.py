@@ -71,7 +71,7 @@ class PatternList(GameObject):
 			player.set_active_pattern(pattern)
 
 			# Set the instrument to the correct instrument
-			self._parent.player.instrument.set_inst(inst)
+			self._parent.player.set_inst(inst)
 
 		for vplayer in filter(lambda p: p.id == creator['id'], self._parent.vplayers):
 			vplayer.track.set_active(True)

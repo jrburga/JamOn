@@ -73,7 +73,6 @@ class VirtualPlayer(GameObject):
 		self.track.on_press(lane_num)
 
 	def key_up(self, lane_num):
-		print 'key up is getting called'
 		self.track.on_release(lane_num)
 
 	def set_active_pattern(self, pattern):
@@ -83,27 +82,25 @@ class VirtualPlayer(GameObject):
 		self.track.set_now(time)
 		self.time = time
 
-	def lock_in_sequence(self):
-		print 'locking in sequence'
+	# def lock_in_sequence(self):
 
-		# set note_sequence
-		if self.is_me:
-			print 'locking in sequence'
-			notes = {}
-			for i, lane in enumerate(self.track.lanes):
-				# print 'locked:', lane.locked_times
-				for (time, length) in lane.locked_times:
-					end_time = time + length
-					if time not in notes:
-						notes[time] = []
-					notes[time].append( (i, 'on') )
-					if end_time not in notes:
-						notes[end_time] = []
-					notes[end_time].append( (i, 'off') )
-			# sort the note sequence
-			for k in sorted(notes.iterkeys()):
-				self.note_sequence.append( (k, notes[k]) )
-		print self.note_sequence
+	# 	# set note_sequence
+	# 	if self.is_me:
+	# 		notes = {}
+	# 		for i, lane in enumerate(self.track.lanes):
+	# 			# print 'locked:', lane.locked_times
+	# 			for (time, length) in lane.locked_times:
+	# 				end_time = time + length
+	# 				if time not in notes:
+	# 					notes[time] = []
+	# 				notes[time].append( (i, 'on') )
+	# 				if end_time not in notes:
+	# 					notes[end_time] = []
+	# 				notes[end_time].append( (i, 'off') )
+	# 		# sort the note sequence
+	# 		for k in sorted(notes.iterkeys()):
+	# 			self.note_sequence.append( (k, notes[k]) )
+	# 	print self.note_sequence
 
 	def on_update(self):
 		if self.time < self.last_time:
@@ -125,24 +122,23 @@ class Player(VirtualPlayer):
 		self.action_buffer = []
 		self.start_composing()
 
-	# def set_status(self, status):
-	# 	self.status = status
-	# 	if self.status_sprite is not None:
-	# 		self.remove(self.status_sprite)
-	# 	if status in statuses:
-	# 		self.status_sprite = PlayerStatusText(statuses[status])
-	# 		self.add(self.status_sprite)
-	# 	else:
-	# 		self.status_sprite = None
+	@property
+	def num_notes(self):
+		return len(self.instrument.notes)
 
 	def key_down(self, lane_num):
-		super(Player, self).key_down(lane_num)
-		self.instrument.note_on(lane_num)
+		if lane_num < self.num_notes:
+			super(Player, self).key_down(lane_num)
+			self.instrument.note_on(lane_num)
 
 	def key_up(self, lane_num):
-		super(Player, self).key_up(lane_num)
-		self.instrument.note_off(lane_num)
+		if lane_num < self.num_notes:
+			super(Player, self).key_up(lane_num)
+			self.instrument.note_off(lane_num)
 
+	def set_inst(self, inst):
+		self.instrument.set_inst(inst)
+		self.track.update_lanes(self.num_notes)
 
 	def on_update(self):
 		super(Player, self).on_update()
@@ -160,16 +156,3 @@ class Player(VirtualPlayer):
 							# print "NOTE OFF", lane
 							self.instrument.note_off(lane)
 					self.seq_ind  += 1
-
-
-# class PlayerNameText(TextObject):
-# 	def __init__(self, name, me):
-# 		color = (.3, .6, .3) if me else (.4, .4, .4)
-# 		super(PlayerNameText, self).__init__(name, color=color, pos=(20,player_size[1]*.95))
-
-# class PlayerStatusText(TextObject):
-# 	def __init__(self, status):
-# 		color = (.3, .6, .3)
-# 		super(PlayerStatusText, self).__init__(status, color=color, pos=(120,player_size[1]*.95))
-
-
