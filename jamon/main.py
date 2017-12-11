@@ -2,6 +2,8 @@ from game.game import Event
 from game.common.core import *
 from game.common.audio import Audio
 from game.networking import ClientObject
+from kivy.graphics.context_instructions import Color
+from game.components.graphics import *
 # from server.server_parties import *
 from scenes import scenes
 import numpy as np
@@ -30,6 +32,8 @@ class MainWidget(BaseWidget):
 		self.args = args
 
 		self.started = False
+
+		self.canvas.add(RectSprite(size=(Window.width * 5,Window.height * 5), color=GRAY  ))
 
 	def unload_current_scene(self):
 		if self.scene == None: return

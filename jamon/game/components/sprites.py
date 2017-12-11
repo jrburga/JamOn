@@ -2,14 +2,15 @@ from graphics import *
 from jamon.game.window import Window
 
 gem_texture = Rectangle()
-track_width = Window.width*.4
+track_width = Window.width * .35
 lane_width = track_width
 now_bar_width = 5
-track_size = (track_width, Window.height-10)
-lane_size = (lane_width, Window.height-10)
+track_size = (track_width, Window.height * 0.9)
+lane_size = (lane_width, Window.height * 0.9)
 now_bar_size = (track_width, now_bar_width)
 gem_size = (lane_width, now_bar_width)
-bar_line_size = (track_width, 2)
+bar_line_size = (track_width, 3)
+downbeat_bar_line_size = (track_width, 5)
 
 player_size = (track_width+10, Window.height-10)
 
@@ -24,9 +25,10 @@ lane_line_size = (7, track_size[1])
 inst_panel_size = (pattern_list_size[0], 100)
 
 
-track_color = (.85, .85, .85)
+track_color = DARK_GRAY
 now_bar_color = (.13, .54, .13)
 lane_color = (.3, .3, .3)
+dark_lane_color = (0.5, 0.5, 0.5)
 pattern_now_bar_color = (.6, .3, .5)
 # gem_texture = Image('path/to/image.png').texture
 
@@ -41,11 +43,12 @@ class GradientGemSprite(ImageSprite):
 
 class TrackSprite(RectOutlineSprite):
 	def __init__(self):
-		super(TrackSprite, self).__init__(track_size, track_color)
+		super(TrackSprite, self).__init__(track_size, track_color, width=4)
 		# self.center = (Window.width/2, Window.height/2)
 
-class LaneSprite(RectOutlineSprite):
-	def __init__(self):
+class LaneSprite(RectSprite):
+	def __init__(self, ind):
+		color = lane_color if (ind % 2) == 0 else dark_lane_color
 		super(LaneSprite, self).__init__(lane_size, lane_color)
 
 class NowBarSprite(RectSprite):
@@ -54,11 +57,13 @@ class NowBarSprite(RectSprite):
 
 class BarLineSprite(RectSprite):
 	def __init__(self, ind):
-		color = (1,1,1) if ind % 4 == 0 else (.5, .5, .5)
-		super(BarLineSprite, self).__init__(bar_line_size, color)
+		color = DARK_GRAY
+		size = bar_line_size if (ind % 4) != 0 else downbeat_bar_line_size
+		super(BarLineSprite, self).__init__(size, color)
+
 class LaneLineSprite(RectSprite):
 	def __init__(self):
-		color = (.5, .5, .5)
+		color = DARK_GRAY
 		super(LaneLineSprite, self).__init__(lane_line_size, color)
 
 class PlayerOutlineSprite(RectOutlineSprite):

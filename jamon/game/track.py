@@ -24,8 +24,6 @@ class Gem(VirtualGem):
 		self.last_time = time
 		self.anim = KFAnim( (0,0.8), (seconds,.3))
 
-
-
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
 		self.position = (0, self.y-self.sprite.size[1])
@@ -91,6 +89,8 @@ class Lane(VirtualLane):
 	def __init__(self, count):
 		super(Lane, self).__init__(count)
 		self.sprite = LaneLineSprite()
+		print count
+		self.background_sprite = LaneSprite(count)
 		# cx, cy = self.sprite.center
 		# self.sprite.center = (cx)
 		self.active_gem = None
@@ -101,6 +101,8 @@ class Lane(VirtualLane):
 		# but maybe not since _game_objects is a set()
 		self.now = 0
 		w, h = lane_size
+		# self.
+		self.add_graphic(self.background_sprite)
 		self.add_graphic(self.sprite)
 		
 

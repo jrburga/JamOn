@@ -39,7 +39,7 @@ class Session(GameObject):
 		self.add(self.pattern_list)
 
 		track = Track(num_lanes, self.bars, self.tempo)
-		track.position.y = Window.height*0.01
+		track.position.y = Window.height * 0.025
 		controller = InstrumentKeyboard(default_keycodes, 
 										lock_in_keycode)
 		self.player = Player(controller, track)

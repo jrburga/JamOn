@@ -11,6 +11,16 @@ from jamon.game.common.gfxutil import KFAnim
 
 from kivy.properties import BooleanProperty
 
+
+# PASTEL COLORSET
+RED 	= tuple([0.8 * x for x in [1.0, 0.701960784, 0.729411765]])
+ORANGE 	= tuple([0.8 * x for x in [1.0, 0.823529412, 0.701960784]])
+YELLOW 	= tuple([0.8 * x for x in [1.0, 0.97254902, 0.701960784]])
+GREEN  	= tuple([0.8 * x for x in [0.729411765, 1.0, 0.701960784]])
+BLUE 	= tuple([0.9 * x for x in [0.729411765, 0.882352941, 1.0]])
+GRAY 	= (0.9, 0.9, 0.9)
+DARK_GRAY = (.75, .75, .75)
+
 class Transform(InstructionGroup):
 	def __init__(self, graphics):
 		super(Transform, self).__init__()
