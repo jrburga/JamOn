@@ -86,6 +86,9 @@ class PatternList(GameObject):
 		_id = event.pattern_id
 		pattern = self.patterns[_id]
 		idx = pattern.idx
+		# Make sure to stop playing the notes in the pattern
+		pattern.shut_off()
+
 		self.scroll.remove(pattern)
 		del self.patterns[_id]
 
@@ -323,6 +326,10 @@ class Pattern(GameObject):
 		# For animation
 		self.anim = None
 
+	# All noted playing are stopped
+	def shut_off(self):
+		for i in range(self.num_lanes):
+			self.instrument.note_off(i)
 
 	# Callback for volume slider
 	def on_volume_change(self, volume):
@@ -478,17 +485,22 @@ class Pattern(GameObject):
 		self.notes = {}
 		self.old_notes = {}
 
+		self.note_idx = 0
+
 		# Draw new notes
 		for (lane, start, length) in seq:
 			note = PatternNote(lane, start, length, self.seconds, self.num_lanes)
 			self.notes[ (start, lane) ] = note
 			self.add(note)
 
+			# Set the note index to the right spot
+			if self.now > start:
+				self.note_idx += 1
 
+		self.note_idx = min(self.note_idx, len(self.notes)-1)
 
+		self.set_active()
 
-			
-		self.set_queued()
 
 	def time2x(self, t):
 		return pattern_size[0]*t/self.seconds
@@ -515,6 +527,14 @@ class Pattern(GameObject):
 
 		# See if new bar happened
 		if self.now < self.last_time:
+			# Make sure events at end happen
+			if self.note_events:
+				time, events = self.note_events[-1]
+				for (onoff, lane) in events:
+					if onoff == 'off':
+							self.instrument.note_off(lane)
+
+			# Reset index pointer
 			self.note_idx = 0
 
 			#Queue-dequeue

@@ -35,7 +35,7 @@ class InstrumentManager(GameObject):
 		self.synth.noteoff(*args)
 
 
-TEMPOS = {'ROCK':110, 'ELECTRO':128, 'JAZZ':125}
+TEMPOS = {'ROCK':120, 'ELECTRO':120, 'JAZZ':120}
 
 INSTRUMENT_SETS = OrderedDict([
 				('ROCK', {'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
