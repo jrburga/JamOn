@@ -82,26 +82,6 @@ class VirtualPlayer(GameObject):
 		self.track.set_now(time)
 		self.time = time
 
-	# def lock_in_sequence(self):
-
-	# 	# set note_sequence
-	# 	if self.is_me:
-	# 		notes = {}
-	# 		for i, lane in enumerate(self.track.lanes):
-	# 			# print 'locked:', lane.locked_times
-	# 			for (time, length) in lane.locked_times:
-	# 				end_time = time + length
-	# 				if time not in notes:
-	# 					notes[time] = []
-	# 				notes[time].append( (i, 'on') )
-	# 				if end_time not in notes:
-	# 					notes[end_time] = []
-	# 				notes[end_time].append( (i, 'off') )
-	# 		# sort the note sequence
-	# 		for k in sorted(notes.iterkeys()):
-	# 			self.note_sequence.append( (k, notes[k]) )
-	# 	print self.note_sequence
-
 	def on_update(self):
 		if self.time < self.last_time:
 			self.seq_ind = 0
@@ -130,13 +110,13 @@ class Player(VirtualPlayer):
 		return len(self.instrument.notes)
 
 	def key_down(self, lane_num):
+		super(Player, self).key_down(lane_num)
 		if lane_num < self.num_notes:
-			super(Player, self).key_down(lane_num)
 			self.instrument.note_on(lane_num)
 
 	def key_up(self, lane_num):
+		super(Player, self).key_up(lane_num)
 		if lane_num < self.num_notes:
-			super(Player, self).key_up(lane_num)
 			self.instrument.note_off(lane_num)
 
 	def set_inst(self, inst, inst_set=None):

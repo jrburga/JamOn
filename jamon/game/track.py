@@ -27,15 +27,13 @@ class Gem(VirtualGem):
 	def set_pos(self):
 		self.y = self.lane.track.time2y(self.time)
 		self.position = (0, self.y-self.sprite.size[1])
-		# print self.position.y
 
 	def on_release(self, time):
 		super(Gem, self).on_release(time)
 		# Draw gradient gem
-		if not self.lane.track.drum:
-			self.remove_graphic(self.sprite)
-			self.sprite = GradientGemSprite(self.sprite.size, self.color, self.sprite.color.rgb)
-			self.add_graphic(self.sprite)
+		self.remove_graphic(self.sprite)
+		self.sprite = GradientGemSprite(self.sprite.size, self.color, self.sprite.color.rgb)
+		self.add_graphic(self.sprite)
 
 	# Function called to render gem based on it's
 	# self.time and self.length parameters.
@@ -45,8 +43,6 @@ class Gem(VirtualGem):
 		size_x, size_y = self.sprite.texture.size
 		self.sprite.texture.size = (size_x, top_y - bot_y)
 		self.position = (0, bot_y)
-
-		print 'gem size:', self.time, self.length
 
 	def get_height(self):
 		return self.sprite.texture.size[1]
@@ -83,7 +79,6 @@ class Lane(VirtualLane):
 	def __init__(self, count):
 		super(Lane, self).__init__(count)
 		self.sprite = LaneLineSprite()
-		print count
 		self.background_sprite = LaneSprite(count)
 		# cx, cy = self.sprite.center
 		# self.sprite.center = (cx)

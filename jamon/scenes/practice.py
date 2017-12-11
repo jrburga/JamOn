@@ -17,8 +17,6 @@ class Practice(Scene):
 	def on_load(self):
 		tempo = TEMPOS[self.inst_set]
 		band_members = self.client.get_band_members()
-		print 'band_members', band_members
-		print '============'
 		other_members = []
 		for band_member in band_members:
 			if band_member['id'] == self.client.id:
@@ -33,5 +31,4 @@ class Practice(Scene):
 
 # print Practice.scene_events
 def build_scene(**kwargs):
-	print 'building scene', kwargs
 	return Practice(**kwargs)

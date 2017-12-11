@@ -89,11 +89,6 @@ class Server(object):
 		
 	def close(self):
 		print 'closing server'
-		# for conn in self._sync.values():
-		# 	conn.close()
-		# for conn in self._async.values():
-		# 	conn.close()
-
 		self._socket.close()
 		print 'server closed'
 
