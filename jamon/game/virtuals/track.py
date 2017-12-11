@@ -129,6 +129,7 @@ class VirtualTrack(GameObject):
 		super(VirtualTrack, self).__init__()
 		self.num_lanes = num_lanes
 		self.lanes = [self.Lane(i) for i in range(num_lanes)]
+		self.add(*self.lanes)
 
 		self.spb = 60./tempo
 		beats = bars*4

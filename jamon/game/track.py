@@ -46,6 +46,8 @@ class Gem(VirtualGem):
 		self.sprite.texture.size = (size_x, top_y - bot_y)
 		self.position = (0, bot_y)
 
+		print 'gem size:', self.time, self.length
+
 	def get_height(self):
 		return self.sprite.texture.size[1]
 

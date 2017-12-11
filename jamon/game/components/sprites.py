@@ -1,5 +1,6 @@
 from graphics import *
 from jamon.game.window import Window
+from kivy.graphics import Color
 
 gem_texture = Rectangle()
 track_width = Window.width * .35
@@ -16,13 +17,15 @@ player_size = (track_width+10, Window.height-10)
 
 pattern_list_height = Window.height
 pattern_list_size=(Window.width - track_width-35, pattern_list_height)
-pattern_height = 50
+pattern_height = Window.height * 0.1
 pattern_size = (pattern_list_size[0] - 10, pattern_height)
 pattern_now_bar_size = (3, pattern_height)
 
 lane_line_size = (7, track_size[1])
 
 inst_panel_size = (pattern_list_size[0], 100)
+volume_slider_size = (pattern_size[0]*0.1, 20)
+
 
 
 track_color = DARK_GRAY
@@ -121,6 +124,28 @@ class PatternInstrumentSprite(ImageSprite):
 class InstrumentPanelSrite(RectSprite):
 	def __init__(self):
 		super(InstrumentPanelSrite, self).__init__(inst_panel_size, (0,0,0))
+
+class VolumeOutlineSprite(RectOutlineSprite):
+	def __init__(self):
+		color = Color(0,.6,1, mode='hsv').rgb
+		super(VolumeOutlineSprite, self).__init__(volume_slider_size, color, width=1)
+
+class VolumeInsideSprite(RectSprite):
+	def __init__(self, volume):
+		color =  Color(0,.8,1, mode='hsv').rgb
+		w, h = volume_slider_size
+		w -= 10
+		w = int(w * volume)
+		h -= 10
+		super(VolumeInsideSprite, self).__init__((w,h), color)
+
+	def set_volume(self, volume):
+		w, h = volume_slider_size
+		w -= 10
+		w = int(w * volume)
+		h -= 10
+		self.texture.size = (w, h)
+
 
 
 

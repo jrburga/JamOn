@@ -35,19 +35,38 @@ class InstrumentManager(GameObject):
 		self.synth.noteoff(*args)
 
 
+TEMPOS = {'ROCK':120, 'ELECTRO':120, 'JAZZ':120}
 
 INSTRUMENT_SETS = OrderedDict([
 				('ROCK', {'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
 					'vibraphone': ( (  0, 11), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
 					'guitar': ( (  0, 24), [48, 50, 52, 53, 55, 57, 59, 60, 62, 64] ),
-					'drum': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
+					'drum': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] ),
+					'bass': ( (  0, 33), [33, 35, 36, 38, 40, 41, 43, 45, 47, 48] )
 				}), 
-				('ROCK2', {
-					'bass': ( (  0, 33), [36, 38, 40, 41, 43, 45, 47, 48] ),
-					'vibraphone': ( (  0, 11), [60, 62, 64, 65, 67, 69, 71, 72] ),
-					'guitar': ( (  0, 24), [48, 50, 52, 53, 55, 57, 59, 60] ),
-					'drum': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
-				})])
+				('ELECTRO', {
+					'synth': ( (  0, 80), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
+					'trumpet': ( (  0, 62), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
+					'drum': ( (128, 24), [35, 38, 42, 46, 41, 43, 51, 49] ),
+					'bass': ( (  0, 38), [33, 35, 36, 38, 40, 41, 43, 45, 47, 48] )
+				}),
+				('JAZZ', {
+					'bass': ( (  0, 32), [36, 38, 40, 41, 43, 45, 47, 48] ),
+					'trumpet': ( (  0, 56), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
+					'sax': ( (  0, 65), [60, 62, 64, 65, 67, 69, 71, 72, 74, 76] ),
+					'drum': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] ),
+					'piano': ( (0,0), [(60,64,67,69),
+									(62,65,69,72),
+									(64,67,71,74),
+									(65,69,72,76),
+									(55,65,67,71,74),
+									(67,69,72,76),
+									(69,71,74,77),
+									(60,64,67,71),
+									(60,64,66,69),
+									])
+				})
+			])
 
 class Instrument(object):
 	
@@ -60,6 +79,9 @@ class Instrument(object):
 		self.manager = None
 		self.mute = False
 
+	def set_volume(self, vol):
+		self.vel = int(vol * 100)
+
 	def set_inst(self, inst, inst_set=None):
 		if inst_set is None:
 			inst_set = self.inst_set
@@ -71,8 +93,11 @@ class Instrument(object):
 		if self.manager is None:
 			print "instrument not added to manager"
 			raise Exception
-		pitch = self.notes[lane]
-		self.manager.noteon(self.channel, pitch, self.vel if not self.mute else 0)
+		pitches = self.notes[lane]
+		if type(pitches) != tuple:
+			pitches = [pitches]
+		for pitch in pitches:
+			self.manager.noteon(self.channel, pitch, self.vel if not self.mute else 0)
 
 
 	def note_off(self, lane):
@@ -80,8 +105,11 @@ class Instrument(object):
 		if self.manager is None:
 			print "instrument not added to manager"
 			raise Exception
-		pitch = self.notes[lane]
-		self.manager.noteoff(self.channel, pitch)
+		pitches = self.notes[lane]
+		if type(pitches) != tuple:
+			pitches = [pitches]
+		for pitch in pitches:
+			self.manager.noteoff(self.channel, pitch)
 
 	def set_mute(self, mute):
 		self.mute = mute
