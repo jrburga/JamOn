@@ -79,6 +79,9 @@ class Instrument(object):
 		self.manager = None
 		self.mute = False
 
+	def set_volume(self, vol):
+		self.vel = int(vol * 100)
+
 	def set_inst(self, inst, inst_set=None):
 		if inst_set is None:
 			inst_set = self.inst_set

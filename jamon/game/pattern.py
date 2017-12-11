@@ -241,7 +241,7 @@ class PatternNote(GameObject):
 		self.position.xy = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
 
 
-spacing = Window.height * 0.05
+spacing = 50
 
 class Pattern(GameObject):
 
@@ -303,6 +303,11 @@ class Pattern(GameObject):
 		inst_sprite.position = (80,pattern_height+1)
 		self.add_graphic(inst_sprite)
 
+		# Display volume slider
+		self.volume = 1
+		self.vol_slider = VolumeSlider(self.volume, self.on_volume_change)
+		self.add(self.vol_slider)
+
 
 		# STATE: 0: muted, 1: queued, 2: playing, 4: de-queued
 		self.state = 0
@@ -317,6 +322,12 @@ class Pattern(GameObject):
 
 		# For animation
 		self.anim = None
+
+
+	# Callback for volume slider
+	def on_volume_change(self, volume):
+		self.volume = volume
+		self.instrument.set_volume(volume)
 
 	# For animated scrolling	
 	def move_to(self, y):
@@ -445,7 +456,7 @@ class Pattern(GameObject):
 			self.info_text = TextObject(editor+' is editing...', font_size=14, color=self.outline_sprite.color.rgb)
 		else:
 			self.info_text = TextObject('You are editing...', font_size=14, color=self.outline_sprite.color.rgb)
-		self.info_text.position = (200, pattern_height)
+		self.info_text.position = (300, pattern_height)
 		self.add(self.info_text)
 
 	def done_editing(self, seq):
@@ -533,10 +544,29 @@ class Pattern(GameObject):
 		self.run_time += kivyClock.frametime
 
 class VolumeSlider(GameObject):
-	def __init__(self):
+	def __init__(self, volume, callback):
 		super(VolumeSlider, self).__init__()
+		self.volume = volume
+		self.callback = callback
 
-		self.outline_sprite = None
+		self.outline_sprite = VolumeOutlineSprite()
+		self.add_graphic(self.outline_sprite)
+
+		self.volume_graphic = VolumeInsideSprite(volume)
+		self.volume_graphic.position = (5, 5)
+		self.add_graphic(self.volume_graphic)
+
+
+		self.position = (120, pattern_height+5)
+
+	def on_touch_move(self, event):
+		tx, ty = event.touch.pos
+		x, y = self.get_abs_pos()
+		if y <= ty <= y + volume_slider_size[1]:
+			self.volume = min(1, max((tx - x - 5) / (volume_slider_size[0]-10), 0))
+			self.volume_graphic.set_volume(self.volume)
+			self.callback(self.volume)
+
 
 
 class PatternButton(GameObject):
