@@ -56,6 +56,7 @@ class Client(object):
 		while not connection.closed:
 			for message in connection.recv():
 				if message.type == 'action':
+					# print 'receiving action', message
 					self.recv_action(message)
 
 	def _connect(self, sock, ip, port, timeout):
