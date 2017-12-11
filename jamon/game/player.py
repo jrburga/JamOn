@@ -1,6 +1,6 @@
 from game import GameObject
 
-from instrument import Instrument
+from instrument import *
 from components.sprites import *
 
 from text import TextObject
@@ -114,8 +114,11 @@ class VirtualPlayer(GameObject):
 
 class Player(VirtualPlayer):
 	# def __init__(self, server_obj, name, is_me, bars, tempo, num=0, inst='piano'):
-	def __init__(self, controller, track, inst='piano'):
+	def __init__(self, controller, track, inst_set):
 		super(Player, self).__init__(controller, track)
+		print inst_set
+		inst = INSTRUMENT_SETS[inst_set].keys()[0]
+
 		self.instrument = Instrument(inst)
 
 		self.status_sprite = None
@@ -136,8 +139,8 @@ class Player(VirtualPlayer):
 			super(Player, self).key_up(lane_num)
 			self.instrument.note_off(lane_num)
 
-	def set_inst(self, inst):
-		self.instrument.set_inst(inst)
+	def set_inst(self, inst, inst_set=None):
+		self.instrument.set_inst(inst, inst_set)
 		self.track.update_lanes(self.num_notes)
 
 	def on_update(self):

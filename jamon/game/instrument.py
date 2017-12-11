@@ -43,7 +43,7 @@ INSTRUMENT_SETS = OrderedDict([
 					'drum': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
 				}), 
 				('ROCK2', {
-					'piano': ( (  0, 0), [60, 62, 64, 65, 67, 69, 71, 72] ),
+					'bass': ( (  0, 33), [36, 38, 40, 41, 43, 45, 47, 48] ),
 					'vibraphone': ( (  0, 11), [60, 62, 64, 65, 67, 69, 71, 72] ),
 					'guitar': ( (  0, 24), [48, 50, 52, 53, 55, 57, 59, 60] ),
 					'drum': ( (128, 0), [35, 38, 42, 46, 41, 43, 51, 49] )
@@ -53,14 +53,17 @@ class Instrument(object):
 	
 	def __init__(self, inst, inst_set='ROCK'):
 		super(Instrument, self).__init__()
+		print 'creating instrument:', inst, inst_set
 		(self.patch, self.notes) = INSTRUMENT_SETS[inst_set][inst]
 		self.vel = 75
 		self.inst_set = inst_set
 		self.manager = None
 		self.mute = False
 
-	def set_inst(self, inst):
-		(self.patch, self.notes) = INSTRUMENT_SETS[self.inst_set][inst]
+	def set_inst(self, inst, inst_set=None):
+		if inst_set is None:
+			inst_set = self.inst_set
+		(self.patch, self.notes) = INSTRUMENT_SETS[inst_set][inst]
 		self.manager.program(self)
 
 	def note_on(self, lane):
