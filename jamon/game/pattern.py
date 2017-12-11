@@ -450,9 +450,9 @@ class Pattern(GameObject):
 		if self.info_text is not None:
 			self.objects_to_remove.append(self.info_text)
 		if not is_me:
-			self.info_text = TextObject(editor+' is editing...', font_size=14, color=self.outline_sprite.color.rgb)
+			self.info_text = TextObject(editor+' is editing...', font_size=28, color=(0,0,0))
 		else:
-			self.info_text = TextObject('You are editing...', font_size=14, color=self.outline_sprite.color.rgb)
+			self.info_text = TextObject('You are editing...', font_size=28, color=(0,0,0))
 		self.info_text.position = (300, pattern_height)
 		self.add(self.info_text)
 
