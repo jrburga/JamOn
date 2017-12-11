@@ -241,7 +241,7 @@ class PatternNote(GameObject):
 		self.position.xy = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
 
 
-spacing = 50
+spacing = Window.height * 0.05
 
 class Pattern(GameObject):
 
@@ -300,7 +300,7 @@ class Pattern(GameObject):
 
 		# Display instrument icon
 		inst_sprite = PatternInstrumentIconSprite(inst + '.png')
-		inst_sprite.position = (80,52)
+		inst_sprite.position = (80,pattern_height+1)
 		self.add_graphic(inst_sprite)
 
 
@@ -532,6 +532,11 @@ class Pattern(GameObject):
 			self.position.y = self.anim.eval(self.run_time)
 		self.run_time += kivyClock.frametime
 
+class VolumeSlider(GameObject):
+	def __init__(self):
+		super(VolumeSlider, self).__init__()
+
+		self.outline_sprite = None
 
 
 class PatternButton(GameObject):
