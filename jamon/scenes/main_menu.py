@@ -1,6 +1,7 @@
 from jamon.game.game import Scene, GameObject
 from jamon.game.widgets import *
 from jamon.game.components.graphics import *
+from jamon.game.text import TextObject
 from jamon.game.window import Window
 from kivy.graphics import Color
 
@@ -11,6 +12,14 @@ class MainMenu(Scene):
 
     def on_load(self):
         self.make_buttons()
+        self.make_header()
+
+    def make_header(self):
+        header_str = "[anchor=left][size=200][b][i]Jam On![/i][/b][/size][anchor=right]"
+        header = TextObject(header_str, markup=True, color=(0,0,0), halign='center', 
+                            valign='bottom', size=(Window.width * 0.8, Window.height/4.0))
+        header.position = (Window.width * 0.1, 0.75 * Window.height)
+        self.add_game_object(header)
 
     def make_buttons(self):
         BUTTON_WIDTH = Window.width * 0.45
