@@ -1,9 +1,9 @@
 from jamon.game.game import Scene, GameObject
 from jamon.game.player import Player
 from jamon.game.session import Session
+from jamon.game.instrument import *
 
 # default music settings
-tempo = 120
 bars = 4
 divs = 4
 
@@ -15,6 +15,7 @@ class Practice(Scene):
 
 
 	def on_load(self):
+		tempo = TEMPOS[self.inst_set]
 		band_members = self.client.get_band_members()
 		print 'band_members', band_members
 		print '============'
