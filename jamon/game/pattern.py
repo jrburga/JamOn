@@ -238,8 +238,8 @@ class PatternNote(GameObject):
 
 		size_x = pattern_size[0] / self.seconds * length
 		size_y = pattern_size[1] / self.num_lanes - 2
-		sprite = PatternNoteSprite( (size_x, size_y) )
-		self.add_graphic(sprite)
+		self.sprite = PatternNoteSprite( (size_x, size_y) )
+		self.add_graphic(self.sprite)
 
 		self.position.xy = (start * pattern_size[0] / self.seconds, lane * pattern_size[1] / self.num_lanes)
 
