@@ -123,7 +123,7 @@ class PatternInstrumentSprite(ImageSprite):
 
 class InstrumentPanelSrite(RectSprite):
 	def __init__(self):
-		super(InstrumentPanelSrite, self).__init__(inst_panel_size, (0,0,0))
+		super(InstrumentPanelSrite, self).__init__(inst_panel_size, GRAY)
 
 class VolumeOutlineSprite(RectOutlineSprite):
 	def __init__(self):

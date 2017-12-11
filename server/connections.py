@@ -8,7 +8,10 @@ from messages import *
 from urllib2 import urlopen
 
 IP = '0.0.0.0'
-PUBLIC = urlopen('http://ip.42.pl/raw').read()
+try:
+	PUBLIC = urlopen('http://ip.42.pl/raw').read()
+except:
+	PUBLIC = '0.0.0.0'
 PORT = 21385
 MAX_CONNS = 20
 TIMEOUT = 10
