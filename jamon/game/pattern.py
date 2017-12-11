@@ -160,7 +160,7 @@ class InstrumentPanel(GameObject):
 		self.add_graphic(self.sprite)
 		self.inst_btns = [PatternButton(inst, self.get_inst_btn_callback(i)) for i, inst in enumerate(self.insts)]
 		for i, e in enumerate(self.inst_btns):
-			e.position = (70 + i * 70, -70)
+			e.position = (70 + i * 70, - inst_panel_size[1]*0.9)
 			self.add(e)
 
 		self.active_idx = None
