@@ -144,6 +144,8 @@ class WaitingRoom(Scene):
 		for i, player in enumerate(self.band_members):
 			self.make_user_blurb(i, is_me=(i==0))
 			# TODO: Confirm that i==0 thing with the group
+		
+		# rect = RectOutlineSprite(size=size, color=(0.3,0.6,0.8), width=2)
 
 	def make_user_blurb(self, user_num, is_me=False):
 		"""
@@ -162,15 +164,16 @@ class WaitingRoom(Scene):
 		blurb_left = self.button_dist_from_side + 5
 
 		username = self.band_members[user_num]['username']
-		username_text = "[anchor=left_side][color=000000][b][size=80]%s[/size][/b][/color][anchor=right_side]" % username
+		
+		username_text = "[anchor=left_side][color=cf6a5f][b][size=80]%s[/size][/b][/color][anchor=right_side]" % username
 		
 		ip = self.band_members[user_num]['addr_str']
-		ip_text = "[anchor=left_side][color=444444][b][size=50]%s[/size][/b][/color][anchor=right_side]" % ip
+		ip_text = "[anchor=left_side][color=6acf5f][b][size=50]%s[/size][/b][/color][anchor=right_side]" % ip
 		# 
 		
 		print username_text
 
-		display_text = '%s : %s' % (username_text, ip_text)
+		display_text = '%s  %s' % (username_text, ip_text)
 		username_label = TextObject(text=display_text, font_size=40)
 		pos=(blurb_left, blurb_bottom)
 		username_label.position = pos
